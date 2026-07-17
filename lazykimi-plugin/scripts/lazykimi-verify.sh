@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # lazykimi-verify.sh — Master verification runner
 #
-# Runs the smoke gate plus the 10 v001 regression scripts and emits a bounded
-# JSON summary. Exit 0 only when ALL_PASS is true; exit 1 otherwise.
+# Runs the smoke gate plus the 10 v001 and 3 v002 regression scripts and emits
+# a bounded JSON summary. Exit 0 only when ALL_PASS is true; exit 1 otherwise.
 #
 # Usage: bash scripts/lazykimi-verify.sh
 # Works from lazykimi-plugin/ (it cds into the plugin root).
@@ -30,6 +30,9 @@ CHECK_NAMES=(
   "cli_build"
   "cli_doctor"
   "ssrf"
+  "v002_plugin_manifest"
+  "v002_mcp_paths"
+  "v002_hooks_inline"
 )
 CHECK_SCRIPTS=(
   "v001-package-boundary-regression.sh"
@@ -42,6 +45,9 @@ CHECK_SCRIPTS=(
   "v001-cli-build-regression.sh"
   "v001-cli-doctor-regression.sh"
   "v001-ssrf-regression.sh"
+  "v002-plugin-manifest-regression.sh"
+  "v002-mcp-paths-regression.sh"
+  "v002-hooks-inline-regression.sh"
 )
 
 run_one() {

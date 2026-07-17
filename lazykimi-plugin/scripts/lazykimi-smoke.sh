@@ -3,7 +3,7 @@
 #
 # Creates a temp project dir, runs `lazykimi init`, verifies the expected
 # files/dirs are created, runs `lazykimi doctor` (must PASS) and `lazykimi
-# load-check` (must report 17/17, 11/11, 8/8, 6/6), then cleans up.
+# load-check` (must report 17/17, 11/11, 16/16, 6/6), then cleans up.
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -44,9 +44,9 @@ node "$CLI" load-check >"$TMP/load.out" 2>&1 \
   || { cat "$TMP/load.out" >&2; fail "load-check failed"; }
 grep -q '17/17 skills' "$TMP/load.out" || fail "load-check: 17/17 skills missing"
 grep -q '11/11 agents' "$TMP/load.out" || fail "load-check: 11/11 agents missing"
-grep -q '8/8 hooks' "$TMP/load.out" || fail "load-check: 8/8 hooks missing"
+grep -q '16/16 hooks' "$TMP/load.out" || fail "load-check: 16/16 hooks missing"
 grep -q '6/6 MCP' "$TMP/load.out" || fail "load-check: 6/6 MCP missing"
-echo "  [PASS] load-check reports 17/17, 11/11, 8/8, 6/6"
+echo "  [PASS] load-check reports 17/17, 11/11, 16/16, 6/6"
 
 echo ""
 echo "Smoke test: ALL PASS"

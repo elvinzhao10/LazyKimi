@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v001-hook-syntax-regression.sh
-# Verify 8 hooks present and each passes `bash -n` (syntax check).
+# Verify 16 hooks present and each passes `bash -n` (syntax check).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
-EXPECTED=8
+EXPECTED=16
 HOOKS_DIR="$PLUGIN_ROOT/hooks"
 [ -d "$HOOKS_DIR" ] || fail "hooks dir missing"
 

@@ -31,8 +31,8 @@ if len(servers) != expected:
 for name, cfg in servers.items():
     if not isinstance(cfg, dict):
         print(f"FAIL: {name} config not an object", file=sys.stderr); sys.exit(1)
-    if cfg.get("type") != "stdio":
-        print(f"FAIL: {name} type is not stdio", file=sys.stderr); sys.exit(1)
+    # type:stdio is implied by Kimi Code CLI mcp.json format (command+args);
+    # only the plugin manifest (kimi.plugin.json) carries an explicit type field.
     if cfg.get("required") is not False:
         print(f"FAIL: {name} required is not false", file=sys.stderr); sys.exit(1)
     if not cfg.get("command") or not isinstance(cfg.get("args"), list):

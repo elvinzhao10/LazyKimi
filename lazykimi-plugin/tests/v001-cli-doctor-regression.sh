@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v001-cli-doctor-regression.sh
 # Verify `lazykimi doctor` runs (exit 0 or 1, not crash) in a fresh init target,
-# and `lazykimi load-check` reports 17/17, 11/11, 8/8, 6/6.
+# and `lazykimi load-check` reports 17/17, 11/11, 16/16, 6/6.
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -40,7 +40,7 @@ node "$CLI" load-check >"$TMP/load.out" 2>&1 \
   || { cat "$TMP/load.out" >&2; fail "load-check failed"; }
 grep -q '17/17 skills' "$TMP/load.out" || fail "load-check: 17/17 skills missing"
 grep -q '11/11 agents' "$TMP/load.out" || fail "load-check: 11/11 agents missing"
-grep -q '8/8 hooks' "$TMP/load.out" || fail "load-check: 8/8 hooks missing"
+grep -q '16/16 hooks' "$TMP/load.out" || fail "load-check: 16/16 hooks missing"
 grep -q '6/6 MCP' "$TMP/load.out" || fail "load-check: 6/6 MCP missing"
 
 echo "v001 cli-doctor regression: PASS"
