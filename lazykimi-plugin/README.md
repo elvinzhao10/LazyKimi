@@ -8,6 +8,10 @@ lazycodex/OmO (the canonical TypeScript reference), with [NOTICE](NOTICE)
 recording upstream attribution. It is an independent implementation and does
 not require LazyBuddy, LazyTrae, or lazycodex at runtime.
 
+> **Verified on macOS only.** Linux and Windows paths and host behaviour are unverified. Package checks prove the copied package and its local contracts; a Kimi Code CLI or Kimi Work session remains the authority for plugin loading, hooks, and MCP connection.
+
+> **Honest-claims discipline.** Package evidence proves copied files and declarations, not plugin loading, SessionStart, hooks, or an MCP connection. A Kimi Code CLI or Kimi Work session must confirm connection.
+
 ## Quick Start
 
 `.kimi-code/` is the Kimi Code CLI host entry point: skills live under
@@ -62,7 +66,7 @@ session; the local fallback imports skills manually:
 | `.kimi-code/AGENTS.md` | Project agent catalog (11 roles mapped to 3 Kimi sub-agents) | Loaded by Kimi Code CLI session |
 | `.kimi-code/mcp.json` | 6 local MCP server declarations | Kimi Code CLI declarations; manual connector configuration is the verified Kimi Work fallback |
 | `agents/` | 11 agent role definitions (Greek-myth identities) | Used by Sisyphus for role dispatch |
-| `hooks/` | 8 hook event declarations + shell scripts | Installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh` |
+| `hooks/` | 16 hook event declarations + shell scripts | Installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh` |
 | `hooks/hooks-config.toml` | Hook registration fragment for `~/.kimi-code/config.toml` | Appended to user config; never overwrites |
 | `mcp/` | 6 local MCP servers (Python stdio) with 19 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; provides init, doctor, load-check, verify, mcp, uninstall |
@@ -70,13 +74,31 @@ session; the local fallback imports skills manually:
 
 ## Install
 
+LazyKimi ships **two install routes**. Pick the one that matches your
+project layout; both end at the same package assets, but the host loading
+path differs.
+
+### Two install routes
+
+- **Plugin manifest route (recommended):** `/plugins install <path-to-lazykimi-plugin>` —
+  Kimi Code CLI reads `kimi.plugin.json`, activates skills, registers hooks,
+  and starts MCP servers. Use this when the host supports plugin manifests.
+  A loaded Kimi Code CLI session must still confirm activation.
+- **Project config route (for cloned repos):** `lazykimi init` copies
+  `.kimi-code/`, `.lazykimi/`, and `mcp.json` into the project root, then run
+  `bash lazykimi-plugin/scripts/install-hooks.sh --project-root <path>` to
+  append the eight `[[hooks]]` entries to `~/.kimi-code/config.toml`. Use
+  this when the host does not support plugin manifests or you want explicit
+  file-level control. A loaded session still must confirm `/skill` loading
+  and `/mcp` connection.
+
 For **Kimi Code CLI**, the package is loaded through the host's project
 configuration. Ensure Kimi Code CLI v0.26.0 or later is installed at
 `~/.kimi-code/bin/kimi`, then open the cloned repository and let Kimi Code
 CLI auto-discover `.kimi-code/`. For **Kimi Work**, use its documented Skills
 UI to import skills; the copied repository is not a verified Kimi Work
 installer and a loaded session must be verified before relying on plugin
-capabilities.
+capabilities. See [Kimi Work (Secondary Host)](#kimi-work-secondary-host) below.
 
 ### Development validation
 
@@ -131,6 +153,13 @@ node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
 ```
+
+`lazykimi verify --must-pass` checks **PACKAGE READINESS** — copied assets,
+declarations, regression tests, and evidence files. It does **NOT** check
+host readiness. A Kimi Code CLI or Kimi Work session is a separate
+observation: the package can prove its own files are correct without proving
+that any host actually loaded a skill, fired a hook, or connected an MCP
+server.
 
 Package readiness, doctor, and capability-status output are read-only
 package evidence. They do not activate optional providers, install a global
@@ -204,18 +233,26 @@ The eleven roles map to Kimi Code CLI's three built-in sub-agent channels
 (`coder`, `explore`, `plan`) plus the top-level main agent, preserving the
 planner/implementer/verifier separation the five evidence gates depend on.
 
-## Hook list (8)
+## Hook list (16)
 
 | Event | Script | Enforcement |
 | --- | --- | --- |
 | `SessionStart` | `session-start.sh` | Reports package readiness on session open |
 | `UserPromptSubmit` | `user-prompt-submit.sh` | Advises on workflow selection |
 | `PreToolUse` (Bash) | `pre-tool-use.sh` | Denies secrets and destructive operands |
-| `PostToolUse` | `post-tool-use.sh` | Records tool output to run ledger |
+| `PostToolUse` | `post-tool-use.sh` | Advisory only (echoes to stderr, no run-ledger writes) |
 | `Stop` | `stop-gate.sh` | Blocks premature completion without evidence |
-| `SubagentStop` | `subagent-stop.sh` | Verifies sub-agent evidence; max 3 retries |
+| `SubagentStop` | `subagent-stop.sh` | Warns once on failure (no retry logic) |
 | `PreCompact` | `pre-compact.sh` | Snapshots state before context compaction |
 | `PostCompact` | `post-compact.sh` | Reconstructs state after compaction via Atlas |
+| `PostToolUseFailure` | `post-tool-use-failure.sh` | Advisory: appends to test-runs.md |
+| `SessionEnd` | `session-end.sh` | Advisory: appends to sessions.json |
+| `SubagentStart` | `subagent-start.sh` | Advisory: logs to stderr |
+| `StopFailure` | `stop-failure.sh` | Advisory: logs to stderr |
+| `Interrupt` | `interrupt.sh` | Advisory: logs to stderr |
+| `PermissionRequest` | `permission-request.sh` | Advisory: logs to stderr |
+| `PermissionResult` | `permission-result.sh` | Advisory: logs to stderr |
+| `Notification` | `notification.sh` | Advisory: logs to stderr |
 
 Hooks are host-governed: the package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` actually
@@ -225,17 +262,29 @@ fires them. Package readiness does not prove hook execution.
 
 | Server | Tools | Purpose |
 | --- | ---: | --- |
-| `lazykimi-run-ledger` | 4 | Read/write durable workflow records |
-| `lazykimi-verification` | 4 | Report bounded package checks |
-| `lazykimi-status-dashboard` | 3 | Display package and run status |
-| `lazykimi-context-graph` | 3 | Local grep-based relationships (heuristic, not CodeGraph) |
-| `lazykimi-code-intel` | 3 | Local code-oriented helpers |
-| `lazykimi-docs` | 2 | Fixed-registry documentation lookup with SSRF boundaries |
+| `lazykimi-run-ledger` | 8 | Read/write durable workflow records (`create_run`, `list_runs`, `latest_run`, `read_state`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`) |
+| `lazykimi-verification` | 4 | Report bounded package checks (`record_evidence`, `get_evidence`, `mark_complete`, `get_completion_status`) |
+| `lazykimi-status-dashboard` | 1 | Display package and run status (`get_status`) |
+| `lazykimi-context-graph` | 2 | Local grep-based relationships, heuristic not semantic (`search_context`, `get_references`) |
+| `lazykimi-code-intel` | 3 | Local code-oriented helpers (`get_symbols`, `find_references`, `goto_definition`) |
+| `lazykimi-docs` | 1 | Fixed-registry documentation lookup with SSRF boundaries (`lookup_docs`) |
+| **Total** | **19** | Six stdio servers |
 
 Each declaration is a recipe for a host: it becomes a service only when
 Kimi Code CLI starts it over stdio. The six endpoints have JSON-RPC stream
 regression coverage, including malformed-input recovery; that is endpoint
 protocol evidence, not a host connection claim.
+
+## Kimi Work (Secondary Host)
+
+Kimi Work is the secondary host. **Kimi Work has no plugin manifest support**;
+LazyKimi supports it via skill import only. The `lazykimi-*` MCP connectors
+must be added manually through Kimi Work's MCP configuration, and a loaded
+session must be observed before claiming host readiness. Package evidence
+proves only that the source skills are present and importable; it does not
+prove that Kimi Work loaded them. See
+[docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md) for the import walk-through
+(will be created by Task 8).
 
 ## Workflow phases and evidence gates
 
