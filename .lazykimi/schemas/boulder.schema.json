@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lazykimi.dev/schemas/boulder.schema.json",
+  "title": "LazyKimi Boulder State",
+  "description": "Active work state for the evidence-led agent workflow (port of LazyTrae boulder).",
+  "type": "object",
+  "required": ["schema_version", "active_goal_id", "tasks", "blockers"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version for forward compatibility."
+    },
+    "active_goal_id": {
+      "type": ["string", "null"],
+      "description": "ID of the currently active goal (null when idle). Cleared on completion to prevent loop blocking."
+    },
+    "plan_path": {
+      "type": ["string", "null"],
+      "description": "Path to the active plan file under .lazykimi/plans/."
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "content", "status", "priority"],
+        "properties": {
+          "id": { "type": "string" },
+          "content": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "blocked"] },
+          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+          "summary": { "type": ["string", "null"] },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "acceptance_criteria": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason", "created_at"],
+        "properties": {
+          "id": { "type": "string" },
+          "reason": { "type": "string" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "resolved": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

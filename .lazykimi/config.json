@@ -1,0 +1,28 @@
+{
+  "host": "kimi-code-cli",
+  "model": "kimi-k3",
+  "state_dir": ".lazykimi",
+  "skills_dir": ".kimi-code/skills",
+  "agents_dir": "agents",
+  "hooks_config": "hooks/hooks-config.toml",
+  "mcp_config": ".kimi-code/mcp.json",
+  "plugin_manifest": ".kimi-code/plugin.json",
+  "evidence_gates": [
+    "plan-reread",
+    "automated-verification",
+    "manual-qa",
+    "adversarial-qa",
+    "cleanup"
+  ],
+  "kimi_native_modes": {
+    "swarm": "/swarm <task>",
+    "goal": "/goal <objective>",
+    "plan": "/plan on|off"
+  },
+  "subagent_mapping": {
+    "coder": ["hephaestus", "cleaner", "migration-planner"],
+    "explore": ["explorer", "librarian", "atlas", "metis"],
+    "plan": ["prometheus", "momus"],
+    "main": ["sisyphus", "oracle"]
+  }
+}

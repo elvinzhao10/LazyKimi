@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lazykimi.dev/schemas/evidence.schema.json",
+  "title": "LazyKimi Evidence Record",
+  "description": "Evidence record for the 5-gate verification model.",
+  "type": "object",
+  "required": ["gate", "status", "reason", "timestamp"],
+  "properties": {
+    "gate": {
+      "type": "string",
+      "enum": ["plan-reread", "automated-verification", "manual-qa", "adversarial-qa", "cleanup"],
+      "description": "Which of the 5 evidence gates this record belongs to."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pass", "fail", "skipped", "blocked"],
+      "description": "Outcome of the gate."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Human-readable explanation of the outcome."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task_id": { "type": ["string", "null"] },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Paths to artifacts produced or inspected."
+    },
+    "command": { "type": ["string", "null"], "description": "Command executed, if any." },
+    "exit_code": { "type": ["integer", "null"] }
+  }
+}
