@@ -80,7 +80,7 @@ kimi /status                            # verify session
 - MCP: `/mcp` lists servers, `/mcp-config` configures them, `/plugins` manages plugins.
 - `/init` generates AGENTS.md; `/import-from-cc-codex` imports Claude Code/Codex skills/MCP.
 - Config: `~/.kimi-code/config.toml` (providers, models, thinking, loop_control, background, subagent, permission, hooks); `.kimi-code/local.toml` (project-level).
-- Kimi Work: desktop agent with Agent Swarm + built-in Skills system (secondary host).
+- Kimi Work: desktop agent (Beta, 2026-06-03) with Agent Swarm + built-in Skills system. LazyKimi supports it as a secondary host via skill import only. See `lazykimi-plugin/docs/11-kimi-work-setup.md`.
 - Kimi K3 tool calling: JSON Schema; dynamic loading via `search_tools` + system-message injection; `tool_choice: "required"`.
 
 ## LazyKimi onboard/offboard
@@ -105,6 +105,8 @@ When the user types `onboard`:
    `lazykimi init` to copy package assets into `.kimi-code/` and
    `.lazykimi/`; then run `lazykimi load-check` and `lazykimi doctor` to
    report package readiness.
+   - **Kimi Code CLI onboard**: `lazykimi init` copies `.kimi-code/` and `.lazykimi/` into the project. Run `bash lazykimi-plugin/scripts/install-hooks.sh` to wire the eight `[[hooks]]` entries into `~/.kimi-code/config.toml`. Open the project in Kimi Code CLI and confirm via `/mcp`.
+   - **Kimi Work onboard**: Run `bash lazykimi-plugin/scripts/install-kimi-work.sh` to copy 17 lazy-* skills into `~/.kimi-work/skills/`. Restart Kimi Work. Manually add the 6 lazykimi-* MCP servers through Kimi Work's MCP configuration UI. See `lazykimi-plugin/docs/11-kimi-work-setup.md` for the command table. Kimi Work has no plugin manifest support — only skills are imported; no hooks, no sessionStart.skill.
 3. If the companion CLI is absent, fall back to the repo-only path: copy
    `.kimi-code/` and `.lazykimi/` into the project manually. The MCP
    declarations remain pending until hooks are installed and the host opens
@@ -136,7 +138,7 @@ When the user types `offboard`:
      `~/.kimi-code/config.toml` (those whose `command` references
      `.kimi-code/hooks/`), and remove each `lazykimi-*` MCP server via
      `/mcp-config` in a Kimi Code CLI session.
-   - **Kimi Work**: remove imported LazyKimi skills through the Skills UI.
+   - **Kimi Work offboard**: Delete `~/.kimi-work/skills/lazy-*/` directories. Remove each `lazykimi-*` MCP server through Kimi Work's MCP configuration UI.
 5. Report **package removal** separately from the **user-observed host
    result**. The package can prove receipt-safe local removal; only the user
    can confirm plugin, hook, and MCP removal in a new host session. Keep or
@@ -147,7 +149,7 @@ When the user types `offboard`:
 | Host | Skills and project assets | MCP step |
 | --- | --- | --- |
 | **Kimi Code CLI** | Project `.kimi-code/` skills, `AGENTS.md`, `mcp.json`, and `.lazykimi/` state. | `.kimi-code/mcp.json` declares six servers; open the project and confirm via `/mcp`. |
-| **Kimi Work** | Import `lazykimi-plugin/.kimi-code/skills/` through the Skills UI. | Add each `lazykimi-*` MCP connector manually through Kimi Work's MCP configuration. |
+| **Kimi Work** | Run `bash lazykimi-plugin/scripts/install-kimi-work.sh` to copy 17 `lazy-*` skills into `~/.kimi-work/skills/`. | Add each `lazykimi-*` MCP server manually through Kimi Work's MCP configuration UI (no `mcp.json` autoload). |
 
 ### Install
 
@@ -187,6 +189,8 @@ These read-only reports cover copied assets and declarations. The installed
 layout contains 17 skills, 11 agents, eight hook scripts across eight events,
 and six MCP server declarations exposing 19 tools. The MCP servers expose
 tools only after a host connection.
+
+- **Honest-claims discipline**: Package evidence proves copied files and declarations, not plugin loading, SessionStart, hooks, or an MCP connection. A Kimi Code CLI or Kimi Work session must confirm connection.
 
 ### Removal reference
 

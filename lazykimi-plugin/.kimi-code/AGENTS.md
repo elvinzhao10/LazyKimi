@@ -93,6 +93,17 @@ JSON Schema (Draft 2020-12) files at `.lazykimi/schemas/` validate the runtime s
 | `sessions.schema.json` | `.lazykimi/schemas/sessions.schema.json` | `.lazykimi/state/sessions.json` | `session_id`, `started_at`, `host` |
 | `active-loop.schema.json` | `.lazykimi/schemas/active-loop.schema.json` | `.lazykimi/state/active-loop.json` | `loop_id`, `objective`, `mode`, `started_at`, `turn_count`, `status` |
 
+## Kimi Work Limitations
+
+Kimi Work (desktop agent, Beta 2026-06-03) is supported as a secondary host via skill import only. Limitations:
+
+- **No plugin manifest support**: `kimi.plugin.json` is ignored. No `/plugins install` route.
+- **No hooks**: The 16 hook scripts do not run on Kimi Work.
+- **No `sessionStart.skill`**: No automatic skill loading on session start.
+- **Manual MCP configuration**: Kimi Work does not auto-load `.kimi-code/mcp.json`. Add each of the 6 `lazykimi-*` MCP servers manually through Kimi Work's MCP configuration UI.
+
+Setup: run `bash scripts/install-kimi-work.sh` to copy the 17 `lazy-*` skills into `~/.kimi-work/skills/`. See `docs/11-kimi-work-setup.md` for full instructions.
+
 ## CONVENTIONS
 
 - **No emojis.** All agent output is plain text. This keeps output parseable by downstream agents and by the `lazykimi` CLI.
