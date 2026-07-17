@@ -1,0 +1,43 @@
+{
+  "name": "lazykimi-ai",
+  "version": "0.1.0",
+  "description": "Kimi-native evidence-led agent workflow harness (port of LazyBuddy/LazyTrae to Kimi Code CLI)",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "bin": {
+    "lazykimi": "dist/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "bash scripts/lazykimi-verify.sh",
+    "smoke": "bash scripts/lazykimi-smoke.sh"
+  },
+  "keywords": [
+    "kimi",
+    "kimi-code",
+    "agent",
+    "workflow",
+    "evidence-led",
+    "swarm",
+    "ultrawork"
+  ],
+  "license": "MIT",
+  "files": [
+    "dist",
+    ".kimi-code",
+    "agents",
+    "hooks",
+    "mcp",
+    "commands",
+    "schemas",
+    "templates",
+    "scripts",
+    "tooling",
+    "contracts",
+    "NOTICE",
+    "LICENSE"
+  ]
+}

@@ -1,0 +1,37 @@
+lazykimi-plugin
+===============
+
+Kimi-native evidence-led agent workflow harness.
+
+This work is a port of the LazyBuddy and LazyTrae harness designs to the
+Kimi Code CLI platform, with lazycodex/OmO as the canonical design reference.
+
+Upstream attribution
+--------------------
+
+LazyBuddy  -- https://github.com/elvinzhao10/LazyBuddy
+  Bash/Python evidence-led agent workflow harness for CodeBuddy.
+  Original author: elvinzhao10
+  License: MIT
+
+LazyTrae  -- https://github.com/elvinzhao10/LazyTrae
+  Node.js evidence-led agent workflow harness for Trae IDE/Work/CLI.
+  Original author: elvinzhao10
+  License: MIT
+
+lazycodex / OmO  -- https://github.com/code-yeongyu/lazycodex
+  Canonical TypeScript distribution for Codex, wrapping OmO (oh-my-openagent).
+  Provides the canonical ultrawork directive, agent role definitions, and
+  component isolation patterns.
+  Original author: code-yeongyu
+  License: MIT
+
+Kimi Code CLI  -- https://www.kimi.com/code/docs/kimi-code-cli/
+  Target host platform. Provides SKILL.md system, 16 hook events,
+  /swarm (300-agent swarm), /goal (persistent autonomous goals),
+  /plan mode, MCP support, and plugin system.
+
+This package reuses architectural patterns, skill structures, agent role
+definitions, hook semantics, and verification contracts from the three
+upstream projects. All ported content has been adapted to the Kimi Code CLI
+platform's native capabilities and is distributed under the same MIT license.
