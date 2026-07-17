@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "owner": "lazykimi-tooling",
+  "capabilities": [
+    {
+      "name": "local_search",
+      "description": "Fast text search across the project using ripgrep",
+      "providers": ["ripgrep", "grep"],
+      "fallback_chain": ["ripgrep", "grep"],
+      "default_provider": "ripgrep",
+      "permissions": ["filesystem_read"],
+      "auto_enable": true
+    },
+    {
+      "name": "structural_search",
+      "description": "Structural code search using ast-grep",
+      "providers": ["ast-grep"],
+      "fallback_chain": ["ast-grep", "ripgrep"],
+      "default_provider": "ast-grep",
+      "permissions": ["filesystem_read"],
+      "auto_enable": true
+    },
+    {
+      "name": "code_navigation",
+      "description": "LSP-based go-to-definition and find-references",
+      "providers": ["typescript-language-server", "basedpyright"],
+      "fallback_chain": ["typescript-language-server", "basedpyright"],
+      "default_provider": "typescript-language-server",
+      "permissions": ["filesystem_read"],
+      "auto_enable": true
+    },
+    {
+      "name": "architecture_search",
+      "description": "CodeGraph-based dependency graph search",
+      "providers": ["codegraph"],
+      "fallback_chain": ["codegraph"],
+      "default_provider": "codegraph",
+      "permissions": ["filesystem_read"],
+      "auto_enable": false
+    },
+    {
+      "name": "documentation_search",
+      "description": "npm/PyPI registry documentation lookup",
+      "providers": ["context7"],
+      "fallback_chain": ["context7", "web_search"],
+      "default_provider": "context7",
+      "permissions": ["network"],
+      "auto_enable": false
+    },
+    {
+      "name": "web_search",
+      "description": "General web search",
+      "providers": ["web"],
+      "fallback_chain": ["web"],
+      "default_provider": "web",
+      "permissions": ["network"],
+      "auto_enable": false
+    },
+    {
+      "name": "external_code_search",
+      "description": "grep.app or similar external code search",
+      "providers": ["grep_app"],
+      "fallback_chain": ["grep_app", "web_search"],
+      "default_provider": "grep_app",
+      "permissions": ["network"],
+      "auto_enable": false
+    },
+    {
+      "name": "browser_automation",
+      "description": "Playwright browser automation",
+      "providers": ["playwright"],
+      "fallback_chain": ["playwright"],
+      "default_provider": "playwright",
+      "permissions": ["network", "shell_exec"],
+      "auto_enable": false
+    },
+    {
+      "name": "filesystem_read",
+      "description": "Direct filesystem read",
+      "providers": ["filesystem"],
+      "fallback_chain": ["filesystem"],
+      "default_provider": "filesystem",
+      "permissions": ["filesystem_read"],
+      "auto_enable": true
+    }
+  ]
+}
