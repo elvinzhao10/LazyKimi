@@ -61,10 +61,24 @@ Options:
       console.log('');
     }
   }
+  console.log('Path resolution:');
+  console.log('  The source .kimi-code/mcp.json uses __KIMI_PLUGIN_ROOT__');
+  console.log('  placeholders. Kimi Code CLI does NOT interpolate env vars in');
+  console.log('  project-level mcp.json (per');
+  console.log('  https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html),');
+  console.log('  so the placeholder must be replaced with an absolute path.');
+  console.log('');
+  console.log('  - `lazykimi init` rewrites __KIMI_PLUGIN_ROOT__ to the absolute');
+  console.log('    plugin root (resolved at install time) in the copied');
+  console.log('    .kimi-code/mcp.json. This is the recommended route.');
+  console.log('  - Users who clone the repo WITHOUT running `lazykimi init` must');
+  console.log('    manually replace __KIMI_PLUGIN_ROOT__ in .kimi-code/mcp.json');
+  console.log('    with the absolute path to the lazykimi-plugin directory.');
+  console.log('');
   console.log('To register in Kimi Code CLI:');
-  console.log('  1. Run `kimi /mcp-config`');
-  console.log('  2. Import this configuration, OR add each server manually.');
-  console.log('  3. Set KIMI_PLUGIN_ROOT to the lazykimi-plugin directory.');
+  console.log('  1. Run `lazykimi init` in the target project (rewrites paths).');
+  console.log('  2. Open the project in Kimi Code CLI and run `/mcp`.');
+  console.log('  3. Confirm each lazykimi-* server connects.');
   console.log('\nFor JSON output: `lazykimi mcp --json`');
   return 0;
 }

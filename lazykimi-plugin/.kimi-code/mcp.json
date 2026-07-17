@@ -1,39 +1,39 @@
 {
   "mcpServers": {
     "lazykimi-run-ledger": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/run-ledger/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/run-ledger/server.sh"],
+      "cwd": ".",
       "required": false
     },
     "lazykimi-verification": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/verification/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/verification/server.sh"],
+      "cwd": ".",
       "required": false
     },
     "lazykimi-status-dashboard": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/status-dashboard/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/status-dashboard/server.sh"],
+      "cwd": ".",
       "required": false
     },
     "lazykimi-context-graph": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/context-graph/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/context-graph/server.sh"],
+      "cwd": ".",
       "required": false
     },
     "lazykimi-code-intel": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/code-intel/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/code-intel/server.sh"],
+      "cwd": ".",
       "required": false
     },
     "lazykimi-docs": {
-      "type": "stdio",
-      "command": "python3",
-      "args": ["${KIMI_PLUGIN_ROOT}/mcp/docs/server.py"],
+      "command": "bash",
+      "args": ["__KIMI_PLUGIN_ROOT__/mcp/docs/server.sh"],
+      "cwd": ".",
       "required": false
     }
   }

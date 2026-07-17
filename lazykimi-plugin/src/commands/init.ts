@@ -1,6 +1,6 @@
-import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getKimiConfigFile } from '../lib/paths';
+import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getKimiConfigFile, getPluginRoot } from '../lib/paths';
 import { writeJson } from '../lib/json';
 import { appendHooksToConfig, isHooksInstalled } from '../lib/hooks-config';
 import { writeReceipt } from '../lib/receipt';
@@ -79,6 +79,25 @@ function writeSeedJson(rel: string, data: unknown, target: string, dryRun: boole
   actions.push(`write ${rel}`);
 }
 
+function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): void {
+  // Kimi Code CLI does not interpolate env vars in .kimi-code/mcp.json (per
+  // https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html). The
+  // source template ships with __KIMI_PLUGIN_ROOT__ placeholders that we
+  // rewrite to absolute paths at install time so the project-level mcp.json
+  // resolves server.sh correctly regardless of CWD.
+  const mcpPath = path.join(target, '.kimi-code', 'mcp.json');
+  if (!existsSync(mcpPath)) return;
+  const pluginRoot = getPluginRoot();
+  if (dryRun) {
+    actions.push(`rewrite mcp.json paths (__KIMI_PLUGIN_ROOT__ -> ${pluginRoot})`);
+    return;
+  }
+  const raw = readFileSync(mcpPath, 'utf-8');
+  const rewritten = raw.replace(/__KIMI_PLUGIN_ROOT__/g, pluginRoot);
+  writeFileSync(mcpPath, rewritten, 'utf-8');
+  actions.push(`rewrite mcp.json paths (absolute: ${pluginRoot})`);
+}
+
 function defaultBoulderState(): unknown {
   return { schema_version: 1, active_goal_id: null, tasks: [], blockers: [] };
 }
@@ -99,6 +118,10 @@ export function run(args: string[]): number {
 
   // 1. Copy .kimi-code/ template (skills/, AGENTS.md, mcp.json)
   copyDir(getPluginKimiCodeDir(), path.join(target, '.kimi-code'), target, opts.dryRun, actions, copied);
+  // 1b. Rewrite __KIMI_PLUGIN_ROOT__ placeholders in the copied mcp.json to
+  //     absolute plugin-root paths (Kimi does not interpolate env vars in
+  //     project-level mcp.json).
+  rewriteMcpPaths(target, opts.dryRun, actions);
   // 2. Copy agents/ -> .kimi-code/agents/
   copyDir(getPluginAgentsDir(), path.join(target, '.kimi-code', 'agents'), target, opts.dryRun, actions, copied);
   // 3. Copy hooks/ -> .kimi-code/hooks/
