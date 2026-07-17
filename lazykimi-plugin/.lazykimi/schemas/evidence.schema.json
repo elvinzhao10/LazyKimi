@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lazykimi.dev/schemas/evidence.schema.json",
+  "title": "Evidence Gate Record",
+  "type": "object",
+  "properties": {
+    "gate": {
+      "enum": ["plan-reread", "automated-verification", "manual-qa", "adversarial-qa", "cleanup"]
+    },
+    "status": {
+      "enum": ["pass", "fail", "skipped"]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "task_id": {
+      "type": ["integer", "string"]
+    },
+    "work_id": {
+      "type": "string"
+    }
+  },
+  "required": ["gate", "status", "timestamp"]
+}

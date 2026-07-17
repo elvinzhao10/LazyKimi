@@ -7,7 +7,7 @@ import { writeReceipt } from '../lib/receipt';
 const PLUGIN_VERSION = '0.1.0';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
-const EXPECTED_HOOKS = 8;
+const EXPECTED_HOOKS = 16;
 const EXPECTED_MCP = 6;
 
 interface InitOptions {
@@ -133,6 +133,17 @@ export function run(args: string[]): number {
   ensureDir(path.join(target, '.lazykimi', 'schemas'), opts.dryRun, actions, '.lazykimi/schemas');
   ensureDir(path.join(target, '.lazykimi', 'plans'), opts.dryRun, actions, '.lazykimi/plans');
   ensureDir(path.join(target, '.lazykimi', 'loop'), opts.dryRun, actions, '.lazykimi/loop');
+  // 4b. Copy JSON Schema files from <plugin>/.lazykimi/schemas/*.schema.json
+  //     into <target>/.lazykimi/schemas/ so installed projects can validate
+  //     boulder, evidence, sessions, and active-loop state files.
+  copyDir(
+    path.join(getPluginRoot(), '.lazykimi', 'schemas'),
+    path.join(target, '.lazykimi', 'schemas'),
+    target,
+    opts.dryRun,
+    actions,
+    copied,
+  );
   writeSeedJson('.lazykimi/state/boulder.json', defaultBoulderState(), target, opts.dryRun, actions);
   writeSeedJson('.lazykimi/config.json', defaultConfig(), target, opts.dryRun, actions);
 

@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lazykimi.dev/schemas/boulder.schema.json",
+  "title": "Boulder State",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "type": "integer"
+    },
+    "active_work_id": {
+      "type": ["string", "null"]
+    },
+    "works": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/work"
+      }
+    }
+  },
+  "required": ["schema_version", "active_work_id", "works"],
+  "$defs": {
+    "work": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string"
+        },
+        "active_plan": {
+          "type": "string"
+        },
+        "plan_name": {
+          "type": "string"
+        },
+        "session_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": ["active", "completed", "paused", "blocked"]
+        },
+        "tasks_completed": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "tasks_remaining": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "worktree_path": {
+          "type": ["string", "null"]
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "work_id",
+        "active_plan",
+        "plan_name",
+        "session_ids",
+        "status",
+        "tasks_completed",
+        "tasks_remaining",
+        "started_at",
+        "worktree_path"
+      ]
+    }
+  }
+}

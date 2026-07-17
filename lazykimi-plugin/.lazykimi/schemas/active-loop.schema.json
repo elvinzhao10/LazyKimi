@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lazykimi.dev/schemas/active-loop.schema.json",
+  "title": "Active Loop State",
+  "type": "object",
+  "properties": {
+    "loop_id": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": ["goal", "swarm", "ulw-loop"]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "turn_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": ["active", "paused", "completed", "blocked"]
+    }
+  },
+  "required": ["loop_id", "objective", "mode", "started_at", "turn_count", "status"]
+}

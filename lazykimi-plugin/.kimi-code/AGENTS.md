@@ -82,6 +82,17 @@ All LazyKimi runtime state lives under `.lazykimi/`. Configuration lives under `
 
 The boulder state file (`.lazykimi/state/boulder.json`) is the single source of truth for "where are we in the plan?" — Atlas reconstructs from it, Sisyphus advances it, Oracle reads it to verify plan compliance.
 
+## State Schemas
+
+JSON Schema (Draft 2020-12) files at `.lazykimi/schemas/` validate the runtime state files written under `.lazykimi/state/` and `.lazykimi/evidence/`. The `lazykimi init` command copies these schemas into the target project.
+
+| Schema | Path | Validates | Required fields |
+| --- | --- | --- | --- |
+| `boulder.schema.json` | `.lazykimi/schemas/boulder.schema.json` | `.lazykimi/state/boulder.json` | `schema_version`, `active_work_id`, `works` (work entries: `work_id`, `active_plan`, `plan_name`, `session_ids`, `status`, `tasks_completed`, `tasks_remaining`, `started_at`, `worktree_path`) |
+| `evidence.schema.json` | `.lazykimi/schemas/evidence.schema.json` | `.lazykimi/evidence/*.json` gate records | `gate`, `status`, `timestamp` |
+| `sessions.schema.json` | `.lazykimi/schemas/sessions.schema.json` | `.lazykimi/state/sessions.json` | `session_id`, `started_at`, `host` |
+| `active-loop.schema.json` | `.lazykimi/schemas/active-loop.schema.json` | `.lazykimi/state/active-loop.json` | `loop_id`, `objective`, `mode`, `started_at`, `turn_count`, `status` |
+
 ## CONVENTIONS
 
 - **No emojis.** All agent output is plain text. This keeps output parseable by downstream agents and by the `lazykimi` CLI.
