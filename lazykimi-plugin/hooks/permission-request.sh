@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# LazyKimi — PermissionRequest hook
+# Advisory: logs permission requests to stderr. Never blocks.
+set -euo pipefail
+trap 'echo "[LazyKimi] permission-request internal error; failing open" >&2; exit 0' ERR
+
+[ -t 0 ] && exit 0
+payload=$(cat)
+truncated=${payload:0:200}
+ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+echo "[${ts}] PermissionRequest: ${truncated}" >&2
+exit 0

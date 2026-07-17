@@ -6,7 +6,7 @@ import { readJson, isObject } from '../lib/json';
 const PLUGIN_VERSION = '0.1.0';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
-const EXPECTED_HOOKS = 8;
+const EXPECTED_HOOKS = 16;
 const EXPECTED_MCP = 6;
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'WARN';

@@ -59,7 +59,7 @@ This is an SSRF boundary, not a general web fetch.
 
 ## Hook policy
 
-The eight hook scripts under `hooks/` apply narrow local policy to host
+The sixteen hook scripts under `hooks/` apply narrow local policy to host
 events:
 
 | Event | Policy |
@@ -72,6 +72,14 @@ events:
 | `SubagentStop` | Verify sub-agent evidence; max 3 retries before failure. |
 | `PreCompact` | Snapshot state to `.lazykimi/` before context compaction. |
 | `PostCompact` | Reconstruct state via Atlas after compaction. |
+| `PostToolUseFailure` | Advisory: append failure record to test-runs.md. |
+| `SessionEnd` | Advisory: append session-end line to sessions.json. |
+| `SubagentStart` | Advisory: log subagent start to stderr. |
+| `StopFailure` | Advisory: log Stop hook failure to stderr. |
+| `Interrupt` | Advisory: log user interrupt to stderr. |
+| `PermissionRequest` | Advisory: log permission request to stderr. |
+| `PermissionResult` | Advisory: log permission decision to stderr. |
+| `Notification` | Advisory: log notification payload to stderr. |
 
 Hooks are host-governed. The package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` actually

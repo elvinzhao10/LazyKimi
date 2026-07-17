@@ -103,6 +103,46 @@
       "event": "PostCompact",
       "command": "bash ./hooks/post-compact.sh",
       "timeout": 5
+    },
+    {
+      "event": "PostToolUseFailure",
+      "command": "bash ./hooks/post-tool-use-failure.sh",
+      "timeout": 5
+    },
+    {
+      "event": "SessionEnd",
+      "command": "bash ./hooks/session-end.sh",
+      "timeout": 5
+    },
+    {
+      "event": "SubagentStart",
+      "command": "bash ./hooks/subagent-start.sh",
+      "timeout": 5
+    },
+    {
+      "event": "StopFailure",
+      "command": "bash ./hooks/stop-failure.sh",
+      "timeout": 5
+    },
+    {
+      "event": "Interrupt",
+      "command": "bash ./hooks/interrupt.sh",
+      "timeout": 5
+    },
+    {
+      "event": "PermissionRequest",
+      "command": "bash ./hooks/permission-request.sh",
+      "timeout": 5
+    },
+    {
+      "event": "PermissionResult",
+      "command": "bash ./hooks/permission-result.sh",
+      "timeout": 5
+    },
+    {
+      "event": "Notification",
+      "command": "bash ./hooks/notification.sh",
+      "timeout": 5
     }
   ],
   "commands": "./.kimi-code/commands/"
