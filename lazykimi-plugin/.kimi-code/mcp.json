@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "lazykimi-run-ledger": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/run-ledger/server.py"],
+      "required": false
+    },
+    "lazykimi-verification": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/verification/server.py"],
+      "required": false
+    },
+    "lazykimi-status-dashboard": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/status-dashboard/server.py"],
+      "required": false
+    },
+    "lazykimi-context-graph": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/context-graph/server.py"],
+      "required": false
+    },
+    "lazykimi-code-intel": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/code-intel/server.py"],
+      "required": false
+    },
+    "lazykimi-docs": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${KIMI_PLUGIN_ROOT}/mcp/docs/server.py"],
+      "required": false
+    }
+  }
+}
