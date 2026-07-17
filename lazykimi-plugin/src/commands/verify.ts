@@ -14,9 +14,9 @@ const EVIDENCE_GATES = [
 ] as const;
 
 const EVIDENCE_FILES: Record<string, string> = {
-  'plan-reread': '.lazykimi/evidence/completion.md',
+  'plan-reread': '.lazykimi/evidence/plan-reread.md',
   'automated-verification': '.lazykimi/evidence/test-runs.md',
-  'manual-qa': '.lazykimi/evidence/completion.md',
+  'manual-qa': '.lazykimi/evidence/manual-qa.md',
   'adversarial-qa': '.lazykimi/evidence/oracle-review.md',
   'cleanup': '.lazykimi/evidence/reviewer.md',
 };

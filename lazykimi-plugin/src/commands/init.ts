@@ -79,6 +79,21 @@ function writeSeedJson(rel: string, data: unknown, target: string, dryRun: boole
   actions.push(`write ${rel}`);
 }
 
+function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string[]): void {
+  const files: ReadonlyArray<readonly [string, string]> = [
+    ['plan-reread.md', '# Plan Reread Evidence\n\n(none yet)\n'],
+    ['test-runs.md', '# Test Runs Evidence\n\n(none yet)\n'],
+    ['manual-qa.md', '# Manual QA Evidence\n\n(none yet)\n'],
+    ['oracle-review.md', '# Oracle Review Evidence\n\n(none yet)\n'],
+    ['reviewer.md', '# Reviewer Evidence\n\n(none yet)\n'],
+  ];
+  for (const [name, content] of files) {
+    const rel = path.join('.lazykimi', 'evidence', name);
+    if (!dryRun) writeFileSync(path.join(target, rel), content, 'utf-8');
+    actions.push(`write ${rel}`);
+  }
+}
+
 function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): void {
   // Kimi Code CLI does not interpolate env vars in .kimi-code/mcp.json (per
   // https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html). The
@@ -130,6 +145,7 @@ export function run(args: string[]): number {
   // 4. Create .lazykimi/ seed state
   ensureDir(path.join(target, '.lazykimi', 'state'), opts.dryRun, actions, '.lazykimi/state');
   ensureDir(path.join(target, '.lazykimi', 'evidence'), opts.dryRun, actions, '.lazykimi/evidence');
+  writeEvidenceTemplates(target, opts.dryRun, actions);
   ensureDir(path.join(target, '.lazykimi', 'schemas'), opts.dryRun, actions, '.lazykimi/schemas');
   ensureDir(path.join(target, '.lazykimi', 'plans'), opts.dryRun, actions, '.lazykimi/plans');
   ensureDir(path.join(target, '.lazykimi', 'loop'), opts.dryRun, actions, '.lazykimi/loop');

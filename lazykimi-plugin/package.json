@@ -32,8 +32,6 @@
     "hooks",
     "mcp",
     "commands",
-    "schemas",
-    "templates",
     "scripts",
     "tooling",
     "contracts",

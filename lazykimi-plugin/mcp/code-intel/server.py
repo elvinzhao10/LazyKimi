@@ -96,7 +96,8 @@ def handle(req, notification):
             if not os.path.isfile(fp):
                 err("file not found: " + path)
                 return
-            src = open(fp, errors="ignore").read().split("\n")
+            with open(fp, errors="ignore") as f:
+                src = f.read().split("\n")
             out = "symbols in %s:\n" % path
             count = 0
             for i, line in enumerate(src, 1):
