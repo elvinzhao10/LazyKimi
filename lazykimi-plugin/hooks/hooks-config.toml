@@ -1,0 +1,44 @@
+# LazyKimi hooks for Kimi Code CLI
+# Append these entries to ~/.kimi-code/config.toml
+# Install via: bash lazykimi-plugin/scripts/install-hooks.sh
+
+[[hooks]]
+event = "SessionStart"
+command = "bash .kimi-code/hooks/session-start.sh"
+timeout = 10
+
+[[hooks]]
+event = "UserPromptSubmit"
+command = "bash .kimi-code/hooks/user-prompt-submit.sh"
+timeout = 5
+
+[[hooks]]
+event = "PreToolUse"
+matcher = "Bash"
+command = "bash .kimi-code/hooks/pre-tool-use.sh"
+timeout = 5
+
+[[hooks]]
+event = "PostToolUse"
+command = "bash .kimi-code/hooks/post-tool-use.sh"
+timeout = 5
+
+[[hooks]]
+event = "Stop"
+command = "bash .kimi-code/hooks/stop-gate.sh"
+timeout = 10
+
+[[hooks]]
+event = "SubagentStop"
+command = "bash .kimi-code/hooks/subagent-stop.sh"
+timeout = 5
+
+[[hooks]]
+event = "PreCompact"
+command = "bash .kimi-code/hooks/pre-compact.sh"
+timeout = 5
+
+[[hooks]]
+event = "PostCompact"
+command = "bash .kimi-code/hooks/post-compact.sh"
+timeout = 5
