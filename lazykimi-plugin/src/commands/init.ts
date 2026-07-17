@@ -1,8 +1,7 @@
 import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getKimiConfigFile, getPluginRoot } from '../lib/paths';
+import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginRoot } from '../lib/paths';
 import { writeJson } from '../lib/json';
-import { appendHooksToConfig, isHooksInstalled } from '../lib/hooks-config';
 import { writeReceipt } from '../lib/receipt';
 
 const PLUGIN_VERSION = '0.1.0';
@@ -20,8 +19,9 @@ function printHelp(): void {
   console.log(`Usage: lazykimi init [options]
 
 Install LazyKimi into a target project. Copies .kimi-code/ (skills, agents,
-AGENTS.md, mcp.json, hooks) and .lazykimi/ seed state, then appends hooks to
-~/.kimi-code/config.toml idempotently.
+AGENTS.md, mcp.json, hooks) and .lazykimi/ seed state. Hook scripts are
+copied to <target>/.kimi-code/hooks/ but NOT auto-appended to
+~/.kimi-code/config.toml — see the post-install message for activation.
 
 Options:
   --help, -h        Show this help message
@@ -136,18 +136,18 @@ export function run(args: string[]): number {
   writeSeedJson('.lazykimi/state/boulder.json', defaultBoulderState(), target, opts.dryRun, actions);
   writeSeedJson('.lazykimi/config.json', defaultConfig(), target, opts.dryRun, actions);
 
-  // 5. Append hooks to ~/.kimi-code/config.toml (idempotent)
-  const configFile = getKimiConfigFile();
-  if (opts.dryRun) {
-    const installed = isHooksInstalled(configFile);
-    actions.push(installed ? `skip hooks (already present)` : `append hooks to ${configFile}`);
-  } else {
-    try {
-      const result = appendHooksToConfig(configFile);
-      actions.push(result.changed ? `append hooks to ${configFile}` : `skip hooks (${result.reason})`);
-    } catch (e) {
-      actions.push(`FAIL hooks: ${e instanceof Error ? e.message : String(e)}`);
-    }
+  // 5. Hooks: scripts are copied (step 3) but NOT auto-appended to
+  //    ~/.kimi-code/config.toml. The plugin manifest (kimi.plugin.json)
+  //    handles hook activation when installed via /plugins install. Users
+  //    who clone the repo without /plugins install must run install-hooks.sh
+  //    to wire config.toml entries with absolute paths.
+  if (!opts.dryRun) {
+    const pluginRoot = getPluginRoot();
+    console.log('');
+    console.log(`Hooks: ${EXPECTED_HOOKS} hook scripts copied to .kimi-code/hooks/`);
+    console.log('To activate hooks via config.toml (alternative to /plugins install), run:');
+    console.log(`  bash ${pluginRoot}/scripts/install-hooks.sh --project-root ${target}`);
+    console.log(`Or install as a plugin via /plugins install ${pluginRoot} (hooks auto-activate from manifest).`);
   }
 
   // 6. Write receipt tracking installed .kimi-code/ files
