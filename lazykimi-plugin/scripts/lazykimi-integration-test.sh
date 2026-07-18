@@ -39,6 +39,17 @@ else
   fail "init did not create expected files"
 fi
 
+# Step 3b: init must create .lazykimi/schemas/ with 4 schema files.
+SCHEMA_COUNT=0
+if [ -d "$TMP/.lazykimi/schemas" ]; then
+  SCHEMA_COUNT=$(ls "$TMP/.lazykimi/schemas"/*.schema.json 2>/dev/null | wc -l | tr -d ' ')
+fi
+if [ "$SCHEMA_COUNT" -eq 4 ]; then
+  pass "init creates .lazykimi/schemas/ with 4 schema files"
+else
+  fail "init did not create .lazykimi/schemas/ with 4 schema files (found $SCHEMA_COUNT)"
+fi
+
 # Seed stub evidence files so verify's evidence gates can pass. init only
 # creates the empty evidence/ dir; a completed workflow would populate these.
 mkdir -p "$TMP/.lazykimi/evidence"
@@ -46,32 +57,49 @@ for f in completion.md test-runs.md oracle-review.md reviewer.md; do
   echo "# Integration test evidence stub ($f)" > "$TMP/.lazykimi/evidence/$f"
 done
 
-# Step 4: doctor must PASS in the fresh project.
+# Step 4: doctor must PASS in the fresh project and report 16 hooks.
 if ( cd "$TMP" && HOME="$TMP" node "$CLI" doctor ) >"$TMP/doctor.out" 2>&1 \
-  && grep -q 'PASS' "$TMP/doctor.out"; then
-  pass "doctor passes in fresh project"
+  && grep -q 'PASS' "$TMP/doctor.out" \
+  && grep -q 'hooks count (16 expected)' "$TMP/doctor.out"; then
+  pass "doctor passes in fresh project (16 hooks)"
 else
   cat "$TMP/doctor.out" >&2
-  fail "doctor did not pass"
+  fail "doctor did not pass or did not report 16 hooks"
 fi
 
-# Step 5: load-check must report 17/17 skills, 11/11 agents, 8/8 hooks.
+# Step 5: load-check must report 17/17 skills, 11/11 agents, 16/16 hooks, 6/6 MCP.
 if node "$CLI" load-check >"$TMP/load.out" 2>&1 \
   && grep -q '17/17 skills' "$TMP/load.out" \
   && grep -q '11/11 agents' "$TMP/load.out" \
-  && grep -q '8/8 hooks' "$TMP/load.out"; then
-  pass "load-check reports 17/17, 11/11, 8/8"
+  && grep -q '16/16 hooks' "$TMP/load.out" \
+  && grep -q '6/6 MCP servers' "$TMP/load.out"; then
+  pass "load-check reports 17/17, 11/11, 16/16, 6/6"
 else
   cat "$TMP/load.out" >&2
   fail "load-check counts mismatch"
 fi
 
-# Step 6: verify --must-pass must exit 0.
-if ( cd "$TMP" && HOME="$TMP" node "$CLI" verify --must-pass ) >"$TMP/verify.out" 2>&1; then
-  pass "verify --must-pass exits 0"
+# Step 6: verify --must-pass must exit 0 in fresh project (all 5 evidence gates PASS).
+if ( cd "$TMP" && HOME="$TMP" node "$CLI" verify --must-pass ) >"$TMP/verify.out" 2>&1 \
+  && grep -q 'Gates: 5/5 passed' "$TMP/verify.out" \
+  && grep -q 'Overall: READY' "$TMP/verify.out"; then
+  pass "verify --must-pass exits 0 (5/5 gates PASS)"
 else
   cat "$TMP/verify.out" >&2
-  fail "verify --must-pass failed"
+  fail "verify --must-pass failed or gates not 5/5"
+fi
+
+# Step 6b: install-kimi-work.sh --help must exit 0.
+if bash "$PLUGIN_ROOT/scripts/install-kimi-work.sh" --help >"$TMP/kimi-work-help.out" 2>&1; then
+  if grep -q 'Usage: bash install-kimi-work.sh' "$TMP/kimi-work-help.out"; then
+    pass "install-kimi-work.sh --help exits 0"
+  else
+    cat "$TMP/kimi-work-help.out" >&2
+    fail "install-kimi-work.sh --help did not print expected usage"
+  fi
+else
+  cat "$TMP/kimi-work-help.out" >&2
+  fail "install-kimi-work.sh --help did not exit 0"
 fi
 
 # Detect kimi binary: PATH first, then ~/.kimi-code/bin/kimi.
