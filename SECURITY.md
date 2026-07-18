@@ -1,0 +1,1 @@
+lazykimi-plugin/SECURITY.md

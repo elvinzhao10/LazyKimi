@@ -1,0 +1,157 @@
+# LazyKimi
+
+> Kimi-native evidence-led agent workflow harness for **Kimi Code CLI** (primary)
+> and **Kimi Work** (secondary, skills import only).
+
+> **Verified on macOS only.** Linux and Windows paths and host behaviour are
+> unverified. Package checks prove the copied package and its local contracts;
+> a Kimi Code CLI or Kimi Work session remains the authority for plugin loading,
+> hooks, and MCP connection.
+
+> **Honest-claims discipline.** Package evidence proves copied files and
+> declarations, not plugin loading, SessionStart, hooks, or an MCP connection.
+> A Kimi Code CLI or Kimi Work session must confirm connection.
+
+LazyKimi is a self-contained workflow harness that recreates the
+[LazyBuddy](https://github.com/elvinzhao10/LazyBuddy) and
+[LazyTrae](https://github.com/elvinzhao10/LazyTrae) evidence-led agent workflow
+harness design as a Kimi-native package. It targets Kimi Code CLI (primary
+host) and Kimi Work (secondary host, skills import only). The canonical design
+reference is [lazycodex/OmO](https://github.com/code-yeongyu/lazycodex).
+
+## Start with the outcome
+
+State the result you need, the acceptance criteria, and the surface that must
+prove it. Use the smallest workflow that fits the uncertainty and risk:
+
+| Situation | Ask for | Why |
+| --- | --- | --- |
+| Small, well-understood change | A normal request | Avoid process for process's sake. |
+| Unfamiliar repository | `lazy-init-deep` | Establish project-local instructions and context. |
+| Broad or ambiguous change | `lazy-ulw-plan` | Make decisions reviewable before editing. |
+| Approved plan | `lazy-start-work` | Execute against explicit acceptance criteria. |
+| Failure | "Debug why … fails" | Reproduce, compare hypotheses, and verify the fix. |
+| Material-risk completion | `lazy-review-work` | Add independent quality, QA, security, and scope checks. |
+| Long-running goal | `lazy-ulw-loop` | Keep durable state and checkpoints. |
+
+In a Kimi Code CLI session, skills are invoked via `/skill:lazy-<name>` or the
+`/<name>` shorthand. Kimi Work imports skills through its Skills UI; native
+modes `/swarm`, `/goal`, and `/plan` are available only in Kimi Code CLI.
+
+## Design mindset
+
+LazyKimi treats a task as an evidence problem: define the observable outcome,
+keep authority with the host and user, choose local tools before heavier
+providers, and finish by exercising the surface the user actually cares about.
+A passing unit test is useful evidence, not automatically proof of a CLI, API,
+page, or host integration.
+
+The package never turns its own readiness check into a claim about a running
+host. It keeps package-owned state separate from marketplace state, host MCP
+registrations, credentials, and live sessions.
+
+## Repository structure
+
+```
+lazykimi/
+├── AGENTS.md              # Agent instructions (onboard/offboard, conventions)
+├── LICENSE                # MIT (symlink to lazykimi-plugin/LICENSE)
+├── NOTICE                 # Upstream attribution (symlink to lazykimi-plugin/NOTICE)
+├── README.md              # This file (project overview)
+├── CODE_OF_CONDUCT.md     # symlink to lazykimi-plugin/CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md        # symlink to lazykimi-plugin/CONTRIBUTING.md
+├── SECURITY.md            # symlink to lazykimi-plugin/SECURITY.md
+├── docs/                  # symlink to lazykimi-plugin/docs/
+├── lazykimi-evaluation.md # Public verification evidence
+├── lazykimi-plugin/       # The installable plugin package (see lazykimi-plugin/README.md)
+│   ├── .kimi-code/         # Kimi Code CLI host entry (skills, mcp.json, AGENTS.md)
+│   ├── agents/             # 11 Greek-myth agent role definitions
+│   ├── commands/           # 9 named slash-command workflows
+│   ├── hooks/              # 16 hook event declarations + shell scripts
+│   ├── mcp/                # 6 local MCP servers (Python stdio, 19 tools)
+│   ├── src/                # TypeScript `lazykimi` CLI
+│   ├── scripts/            # install-hooks.sh and verification utilities
+│   └── docs/               # Numbered technical architecture pages
+└── sources/                # Read-only reference repos (LazyBuddy, LazyTrae, lazycodex)
+```
+
+## Install and onboard
+
+Start from the immutable release, open the cloned folder in the host you want
+to use, and type `onboard` in the agent chat:
+
+```bash
+git clone https://github.com/elvinzhao10/LazyKimi.git
+cd LazyKimi
+```
+
+`onboard` asks whether you use Kimi Code CLI or Kimi Work, then follows only
+that route from [AGENTS.md](AGENTS.md), stops before changing host-managed
+settings, and tells you the exact command, skill, and MCP status to confirm in
+a new session.
+
+For full installation routes (plugin manifest vs. project config), hook
+installation, MCP configuration, and uninstall, see
+[lazykimi-plugin/README.md](lazykimi-plugin/README.md).
+
+## Verify and remove
+
+```bash
+lazykimi load-check
+lazykimi doctor
+lazykimi verify --must-pass
+```
+
+These read-only reports cover copied assets and declarations. The installed
+layout contains 17 skills, 11 agents, eight hook scripts across eight events,
+and six MCP server declarations exposing 19 tools. The MCP servers expose
+tools only after a host connection.
+
+Type `offboard` for the matching safe-removal protocol; it never guesses or
+removes host-managed paths.
+
+## Package inventory
+
+| Surface | Count | Role |
+| --- | ---: | --- |
+| Skills | 17 | Host-facing workflow policies for planning, execution, review, and verification. |
+| Commands | 9 | Named host entry points for those workflow policies. |
+| Agents | 11 | Specialist role definitions mapped to Kimi Code CLI's three sub-agent channels. |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs. |
+| Hooks | 8 | Hook event declarations installed into `~/.kimi-code/config.toml`. |
+
+## Documentation
+
+- [Plugin README](lazykimi-plugin/README.md) — installation, usage, MCP servers,
+  hooks, skills, agent list, workflow phases, and evidence gates.
+- [Docs index](docs/) — numbered technical architecture pages (00-11).
+- [Kimi Work setup](docs/11-kimi-work-setup.md) — secondary host setup walk-through.
+- [Evaluation evidence](lazykimi-evaluation.md) — public verification report
+  with capability comparison to LazyBuddy, LazyTrae, and lazycodex.
+- [AGENTS.md](AGENTS.md) — onboard/offboard protocol and project conventions.
+
+## Technical reference and evaluation
+
+The source-level explanation lives in [docs/](docs/). It maps the package
+structure, request flow, state model, security boundaries, MCP lifecycle, and
+release checks with diagrams tied to the implementation.
+
+For a capability-by-capability comparison with the original LazyBuddy, LazyTrae,
+and lazycodex designs, including what LazyKimi implements and where it
+intentionally differs, see [lazykimi-evaluation.md](lazykimi-evaluation.md).
+
+LazyKimi is primarily inspired by lazycodex/OmO. Its relationship to upstream
+sources (LazyBuddy, LazyTrae, lazycodex) is recorded in [NOTICE](NOTICE). It is
+an independent implementation and does not require LazyBuddy, LazyTrae, or
+lazycodex at runtime.
+
+## License
+
+[MIT](LICENSE). See [NOTICE](NOTICE) for attribution and provenance.
+
+## Contributing
+
+Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md)
+for the development checks, release expectations, and guidance for reporting
+sanitized reproduction details. Report vulnerabilities privately according to
+[SECURITY.md](SECURITY.md).

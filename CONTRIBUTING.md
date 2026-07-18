@@ -1,0 +1,1 @@
+lazykimi-plugin/CONTRIBUTING.md
