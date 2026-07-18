@@ -4,7 +4,7 @@ import { getKimiConfigFile } from '../lib/paths';
 import { removeHooksFromConfig } from '../lib/hooks-config';
 import { isFileModified, listInstalledFiles, receiptExists } from '../lib/receipt';
 
-const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_VERSION = '0.2.0';
 
 interface UninstallOptions {
   readonly soft: boolean;

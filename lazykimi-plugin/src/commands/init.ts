@@ -4,7 +4,7 @@ import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginR
 import { writeJson } from '../lib/json';
 import { writeReceipt } from '../lib/receipt';
 
-const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_VERSION = '0.2.0';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
 const EXPECTED_HOOKS = 16;

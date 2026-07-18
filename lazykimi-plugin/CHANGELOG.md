@@ -5,6 +5,32 @@
 > `README.md`, `AGENTS.md`, and `lazykimi-plugin/README.md`; a copied package
 > should use its local `README.md`.
 
+## v0.2.0 — Spec compliance + Kimi Work support (2026-07-18)
+
+- Moved plugin manifest from `.kimi-code/plugin.json` to `kimi.plugin.json`
+  at plugin root per Kimi Code CLI spec; inlined 16 hooks with `./hooks/...`
+  commands; inlined 6 `mcpServers` with `./mcp/.../server.py` commands.
+- Removed `${KIMI_PLUGIN_ROOT}` interpolation from `.kimi-code/mcp.json`
+  (Kimi does not interpolate env vars in mcp.json); `lazykimi init` now
+  rewrites the `__KIMI_PLUGIN_ROOT__` placeholder to an absolute path.
+- Deleted `hooks/hooks-config.toml` (superseded by inline manifest hooks).
+- Added 8 advisory hook scripts for full 16-event Kimi coverage
+  (PostToolUseFailure, SessionEnd, SubagentStart, StopFailure, Interrupt,
+  PermissionRequest, PermissionResult, Notification).
+- Created 4 JSON Schema files at `.lazykimi/schemas/` (boulder, evidence,
+  sessions, active-loop) using Draft 2020-12.
+- Added v2 `marketplace.json` at plugin root for `/plugins marketplace`.
+- Fixed `commands` manifest field to point to `./commands/` (the actual
+  location of the 9 `.md` slash command files).
+- Aligned npm `package.json` `name` to `lazykimi` and `version` to `0.2.0`
+  to match the manifest and the `bin` mapping.
+- Added Kimi Work setup script (`scripts/install-kimi-work.sh`) and
+  `docs/11-kimi-work-setup.md` documenting Kimi Work as a secondary host
+  (skills import only — no plugin manifest, hooks, or sessionStart).
+- Fixed `code-intel/server.py` file handle leak (`with open(...)`).
+- Added 3 v002 regression tests (manifest, mcp paths, inline hooks);
+  updated v001 tests for 16-hook expectation; refreshed integration test.
+
 ## v0.1.0 — Initial Kimi-native port (2026-07-17)
 
 - Ported the evidence-led agent workflow harness from LazyBuddy (CodeBuddy

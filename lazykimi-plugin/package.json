@@ -1,6 +1,6 @@
 {
-  "name": "lazykimi-ai",
-  "version": "0.1.0",
+  "name": "lazykimi",
+  "version": "0.2.0",
   "description": "Kimi-native evidence-led agent workflow harness (port of LazyBuddy/LazyTrae to Kimi Code CLI)",
   "type": "commonjs",
   "main": "dist/index.js",

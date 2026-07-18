@@ -3,7 +3,7 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { runDoctor } from './doctor';
 
-const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_VERSION = '0.2.0';
 
 const EVIDENCE_GATES = [
   'plan-reread',

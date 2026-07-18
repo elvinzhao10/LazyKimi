@@ -34,7 +34,9 @@ Idempotent: skips entries whose command string is already present in
 config.toml. A backup config.toml.bak is written before the first new entry
 is appended. Restart Kimi Code CLI after running this script.
 
-Events wired (mirrors kimi.plugin.json manifest hooks array):
+Events wired (8 blockable/critical hooks; the 8 advisory hooks
+  in the manifest run only when the plugin is enabled via /plugins
+  install and do not need config.toml registration):
   SessionStart, UserPromptSubmit, PreToolUse (Bash), PostToolUse, Stop,
   SubagentStop, PreCompact, PostCompact.
 EOF
@@ -85,8 +87,8 @@ else
   exit 1
 fi
 
-# Define the 8 hooks: event|matcher|script|timeout
-# (mirrors kimi.plugin.json manifest hooks array)
+# Define the 8 blockable/critical hooks: event|matcher|script|timeout
+# (the 8 advisory hooks in the manifest are plugin-only and not wired here)
 HOOKS=(
   "SessionStart||session-start.sh|10"
   "UserPromptSubmit||user-prompt-submit.sh|5"

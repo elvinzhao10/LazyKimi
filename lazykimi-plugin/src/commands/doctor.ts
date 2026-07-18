@@ -3,7 +3,7 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { readJson, isObject } from '../lib/json';
 
-const PLUGIN_VERSION = '0.1.0';
+const PLUGIN_VERSION = '0.2.0';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
 const EXPECTED_HOOKS = 16;

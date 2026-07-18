@@ -26,40 +26,28 @@
   "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /lazy-init-deep on first use.",
   "mcpServers": {
     "lazykimi-run-ledger": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/run-ledger/server.py"],
-      "required": false
+      "args": ["./mcp/run-ledger/server.py"]
     },
     "lazykimi-verification": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/verification/server.py"],
-      "required": false
+      "args": ["./mcp/verification/server.py"]
     },
     "lazykimi-status-dashboard": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/status-dashboard/server.py"],
-      "required": false
+      "args": ["./mcp/status-dashboard/server.py"]
     },
     "lazykimi-context-graph": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/context-graph/server.py"],
-      "required": false
+      "args": ["./mcp/context-graph/server.py"]
     },
     "lazykimi-code-intel": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/code-intel/server.py"],
-      "required": false
+      "args": ["./mcp/code-intel/server.py"]
     },
     "lazykimi-docs": {
-      "type": "stdio",
       "command": "python3",
-      "args": ["./mcp/docs/server.py"],
-      "required": false
+      "args": ["./mcp/docs/server.py"]
     }
   },
   "hooks": [
@@ -145,5 +133,5 @@
       "timeout": 5
     }
   ],
-  "commands": "./.kimi-code/commands/"
+  "commands": "./commands/"
 }
