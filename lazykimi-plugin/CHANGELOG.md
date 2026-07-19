@@ -14,6 +14,8 @@
   (Kimi does not interpolate env vars in mcp.json); `lazykimi init` now
   rewrites the `__KIMI_PLUGIN_ROOT__` placeholder to an absolute path.
 - Deleted `hooks/hooks-config.toml` (superseded by inline manifest hooks).
+- Added `get_active_plan` and `generate_handoff` tools to `run-ledger` (10
+  tools; 21 total across all MCP servers).
 - Added 8 advisory hook scripts for full 16-event Kimi coverage
   (PostToolUseFailure, SessionEnd, SubagentStart, StopFailure, Interrupt,
   PermissionRequest, PermissionResult, Notification).
@@ -48,7 +50,7 @@
   PreCompact, and PostCompact, with a TOML registration fragment for
   `~/.kimi-code/config.toml` and an idempotent `install-hooks.sh` installer.
 - Implemented 6 local MCP servers under `mcp/` (run-ledger, verification,
-  status-dashboard, context-graph, code-intel, docs) exposing 19 tools over
+  status-dashboard, context-graph, code-intel, docs) exposing 21 tools over
   stdio JSON-RPC, with SSRF and path-boundary protections inherited from
   LazyBuddy.
 - Built the `lazykimi` TypeScript CLI under `src/` providing `init`,

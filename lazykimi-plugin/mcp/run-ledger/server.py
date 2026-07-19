@@ -2,11 +2,12 @@
 """run-ledger MCP server — autonomous run state ledger for lazykimi.
 
 Manages per-run state under `.lazykimi/state/runs/<run_id>/` and the active-loop
-pointer at `.lazykimi/loop/active-loop.json`. Replaces the LazyBuddy runs/ dir
-layout with a state/+loop/ split as required by the Kimi Code CLI port.
+pointer at `.lazykimi/state/active-loop.json`. Replaces the LazyBuddy runs/ dir
+layout with a state/+runs/ split as required by the Kimi Code CLI port.
 
 Tools: create_run, list_runs, latest_run, read_state, append_event,
-       update_task, create_checkpoint, recover_run.
+       update_task, create_checkpoint, recover_run, get_active_plan,
+       generate_handoff.
 """
 import json
 import os
@@ -23,14 +24,97 @@ CWD = os.environ.get("CWD", ".")
 LAZYKIMI = os.path.join(CWD, ".lazykimi")
 STATE_DIR = os.path.join(LAZYKIMI, "state")
 RUNS_DIR = os.path.join(STATE_DIR, "runs")
-LOOP_DIR = os.path.join(LAZYKIMI, "loop")
 INDEX_FILE = os.path.join(STATE_DIR, "index.json")
-ACTIVE_LOOP_FILE = os.path.join(LOOP_DIR, "active-loop.json")
+ACTIVE_LOOP_FILE = os.path.join(STATE_DIR, "active-loop.json")
+BOULDER_FILE = os.path.join(STATE_DIR, "boulder.json")
+EVIDENCE_DIR = os.path.join(LAZYKIMI, "evidence")
 SAFE_RUN_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
 
 
 def _now():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+
+def _load_json(path):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return None
+
+
+def _recent_evidence(limit=5):
+    try:
+        entries = os.listdir(EVIDENCE_DIR)
+    except OSError:
+        return []
+    files = []
+    for name in entries:
+        if name.endswith(".md"):
+            p = os.path.join(EVIDENCE_DIR, name)
+            try:
+                st = os.stat(p)
+                files.append((st.st_mtime, name))
+            except OSError:
+                continue
+    files.sort(reverse=True)
+    return [name for _, name in files[:limit]]
+
+
+def _get_active_plan():
+    boulder = _load_json(BOULDER_FILE)
+    active_loop = _load_json(ACTIVE_LOOP_FILE)
+    work_id = None
+    if isinstance(boulder, dict):
+        work_id = boulder.get("active_work_id") or None
+    if work_id is None and isinstance(active_loop, dict):
+        work_id = active_loop.get("loop_id") or None
+    if not work_id:
+        return None
+    works = boulder.get("works", {}) if isinstance(boulder, dict) else {}
+    work = works.get(work_id)
+    if not isinstance(work, dict):
+        return None
+    return {
+        "plan_path": work.get("active_plan", ""),
+        "plan_name": work.get("plan_name", ""),
+        "work_id": work.get("work_id", work_id),
+    }
+
+
+def _generate_handoff():
+    lines = ["# LazyKimi Handoff", ""]
+    plan = _get_active_plan()
+    boulder = _load_json(BOULDER_FILE)
+    active_loop = _load_json(ACTIVE_LOOP_FILE)
+    lines.append("## Active Work")
+    if plan:
+        work = {}
+        if isinstance(boulder, dict):
+            work = boulder.get("works", {}).get(plan["work_id"], {})
+        lines.append("- work_id: %s" % plan["work_id"])
+        lines.append("- plan_path: %s" % plan["plan_path"])
+        lines.append("- plan_name: %s" % plan["plan_name"])
+        lines.append("- status: %s" % work.get("status", ""))
+    else:
+        lines.append("- (none)")
+    lines.append("")
+    lines.append("## Active Loop")
+    if isinstance(active_loop, dict):
+        for key in ("loop_id", "objective", "mode", "status", "turn_count", "started_at"):
+            lines.append("- %s: %s" % (key, active_loop.get(key, "")))
+    else:
+        lines.append("- (none)")
+    lines.append("")
+    lines.append("## Recent Evidence")
+    recent = _recent_evidence()
+    if recent:
+        for name in recent:
+            lines.append("- %s" % name)
+    else:
+        lines.append("- (none)")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def _run_dir(run_id):
@@ -73,11 +157,18 @@ def _save_state(run_dir, state):
     os.replace(tmp, os.path.join(run_dir, "state.json"))
 
 
-def _set_active(run_id):
-    os.makedirs(LOOP_DIR, exist_ok=True)
+def _set_active(run_id, objective):
+    os.makedirs(STATE_DIR, exist_ok=True)
     tmp = ACTIVE_LOOP_FILE + ".tmp"
     with open(tmp, "w") as f:
-        json.dump({"run_id": run_id, "updated_at": _now()}, f, separators=(",", ":"))
+        json.dump({
+            "loop_id": run_id,
+            "objective": objective,
+            "mode": "goal",
+            "started_at": _now(),
+            "turn_count": 0,
+            "status": "active",
+        }, f, separators=(",", ":"))
     os.replace(tmp, ACTIVE_LOOP_FILE)
 
 
@@ -117,6 +208,8 @@ def handle(req, notification):
             {"name": "update_task", "description": "Update a task status in state.json.", "inputSchema": {"type": "object", "properties": {"run_id": {"type": "string"}, "task_id": {"type": "string"}, "status": {"type": "string"}}, "required": ["run_id", "task_id", "status"]}},
             {"name": "create_checkpoint", "description": "Snapshot current state under checkpoints/.", "inputSchema": {"type": "object", "properties": {"run_id": {"type": "string"}}, "required": ["run_id"]}},
             {"name": "recover_run", "description": "Restore state from the latest checkpoint.", "inputSchema": {"type": "object", "properties": {"run_id": {"type": "string"}}, "required": ["run_id"]}},
+            {"name": "get_active_plan", "description": "Return the active plan path/name/work_id from boulder + active-loop, or null if none.", "inputSchema": {"type": "object", "properties": {}}},
+            {"name": "generate_handoff", "description": "Generate a Markdown handoff summary of active work, active loop, and recent evidence.", "inputSchema": {"type": "object", "properties": {}}},
         ]})
         return
     if method != "tools/call":
@@ -140,7 +233,7 @@ def handle(req, notification):
                 idx = _load_index()
                 idx[run_id] = {"status": "active", "updated_at": state["updated_at"], "objective": objective}
                 _save_index(idx)
-                _set_active(run_id)
+                _set_active(run_id, objective)
                 tool_result("created run %s\nobjective: %s" % (run_id, objective))
         elif tool == "list_runs":
             idx = _load_index()
@@ -230,6 +323,10 @@ def handle(req, notification):
                     with open(os.path.join(cp_dir, cps[-1])) as f:
                         _save_state(rdir, json.load(f))
                     tool_result("recovered from %s" % cps[-1])
+        elif tool == "get_active_plan":
+            tool_result(json.dumps(_get_active_plan()))
+        elif tool == "generate_handoff":
+            tool_result(_generate_handoff())
         else:
             err("unknown tool: " + tool)
     except Exception as e:

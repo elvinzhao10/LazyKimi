@@ -1,7 +1,8 @@
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { runDoctor } from './doctor';
+import { detectTargetRoot, isPluginSourceRoot } from '../lib/paths';
 
 const PLUGIN_VERSION = '0.2.0';
 
@@ -33,17 +34,57 @@ interface TestResult {
   readonly detail: string;
 }
 
+function resolveEvidenceProjectRoot(target: string): string {
+  if (isPluginSourceRoot(target)) {
+    return path.join(target, '..');
+  }
+  return target;
+}
+
+function isHeading(line: string): boolean {
+  return /^#+\s/.test(line);
+}
+
+function isPlaceholder(line: string): boolean {
+  return /^\(?\s*none\s*yet\s*\)?$/i.test(line);
+}
+
+function hasEvidenceContent(filePath: string): boolean {
+  const content = readFileSync(filePath, 'utf-8');
+  for (const raw of content.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line.length === 0) continue;
+    // A bullet is treated as concrete evidence.
+    if (/^[-*]\s+/.test(line)) return true;
+    if (isHeading(line)) continue;
+    if (isPlaceholder(line)) continue;
+    // Any other non-empty, non-heading, non-placeholder line counts.
+    return true;
+  }
+  return false;
+}
+
 function checkEvidenceGates(target: string): GateResult[] {
   const results: GateResult[] = [];
+  const projectRoot = resolveEvidenceProjectRoot(target);
   for (const gate of EVIDENCE_GATES) {
     const file = EVIDENCE_FILES[gate];
-    const fullPath = path.join(target, file);
-    const exists = existsSync(fullPath);
-    results.push({
-      gate,
-      status: exists ? 'PASS' : 'FAIL',
-      detail: exists ? file : `${file} not found`,
-    });
+    const fullPath = path.join(projectRoot, file);
+    if (!existsSync(fullPath)) {
+      results.push({ gate, status: 'FAIL', detail: `${file} not found` });
+      continue;
+    }
+    try {
+      const hasContent = hasEvidenceContent(fullPath);
+      results.push({
+        gate,
+        status: hasContent ? 'PASS' : 'FAIL',
+        detail: hasContent ? file : `${file} contains only placeholder content`,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      results.push({ gate, status: 'FAIL', detail: `${file} could not be read: ${message}` });
+    }
   }
   return results;
 }
@@ -84,7 +125,7 @@ Options:
   --must-pass  Exit 1 if any gate fails (non-blocking otherwise)`);
     return 0;
   }
-  const target = process.cwd();
+  const target = detectTargetRoot();
 
   // 1. Doctor
   console.log('=== Doctor ===');

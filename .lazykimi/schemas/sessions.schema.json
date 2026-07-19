@@ -1,28 +1,47 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lazykimi.dev/schemas/sessions.schema.json",
-  "title": "LazyKimi Sessions State",
-  "description": "Session tracking state for /goal and /swarm loop recovery.",
+  "title": "Sessions Log",
   "type": "object",
-  "required": ["schema_version", "sessions"],
   "properties": {
-    "schema_version": { "type": "integer", "const": 1 },
     "sessions": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "started_at", "status"],
         "properties": {
-          "id": { "type": "string" },
-          "started_at": { "type": "string", "format": "date-time" },
-          "ended_at": { "type": ["string", "null"], "format": "date-time" },
-          "status": { "type": "string", "enum": ["active", "paused", "completed", "failed"] },
-          "goal": { "type": ["string", "null"] },
-          "mode": { "type": "string", "enum": ["normal", "swarm", "goal", "plan"] },
-          "turn_count": { "type": "integer", "minimum": 0 },
-          "token_used": { "type": "integer", "minimum": 0 }
-        }
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "host": {
+            "enum": ["kimi-code-cli", "kimi-work"]
+          },
+          "model": {
+            "type": "string"
+          },
+          "work_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["timestamp", "event", "payload"]
       }
     }
-  }
+  },
+  "required": ["sessions"]
 }

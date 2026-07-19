@@ -1,54 +1,83 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lazykimi.dev/schemas/boulder.schema.json",
-  "title": "LazyKimi Boulder State",
-  "description": "Active work state for the evidence-led agent workflow (port of LazyTrae boulder).",
+  "title": "Boulder State",
   "type": "object",
-  "required": ["schema_version", "active_goal_id", "tasks", "blockers"],
   "properties": {
     "schema_version": {
-      "type": "integer",
-      "const": 1,
-      "description": "Schema version for forward compatibility."
+      "type": "integer"
     },
-    "active_goal_id": {
-      "type": ["string", "null"],
-      "description": "ID of the currently active goal (null when idle). Cleared on completion to prevent loop blocking."
+    "active_work_id": {
+      "type": ["string", "null"]
     },
-    "plan_path": {
-      "type": ["string", "null"],
-      "description": "Path to the active plan file under .lazykimi/plans/."
-    },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "content", "status", "priority"],
-        "properties": {
-          "id": { "type": "string" },
-          "content": { "type": "string" },
-          "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "blocked"] },
-          "priority": { "type": "string", "enum": ["high", "medium", "low"] },
-          "summary": { "type": ["string", "null"] },
-          "evidence": { "type": "array", "items": { "type": "string" } },
-          "acceptance_criteria": { "type": "array", "items": { "type": "string" } }
-        }
+    "works": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/work"
       }
-    },
-    "blockers": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "reason", "created_at"],
-        "properties": {
-          "id": { "type": "string" },
-          "reason": { "type": "string" },
-          "created_at": { "type": "string", "format": "date-time" },
-          "resolved": { "type": "boolean", "default": false }
+    }
+  },
+  "required": ["schema_version", "active_work_id", "works"],
+  "$defs": {
+    "work": {
+      "type": "object",
+      "properties": {
+        "work_id": {
+          "type": "string"
+        },
+        "active_plan": {
+          "type": "string"
+        },
+        "plan_name": {
+          "type": "string"
+        },
+        "session_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "enum": ["active", "completed", "paused", "blocked"]
+        },
+        "tasks_completed": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "tasks_remaining": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "worktree_path": {
+          "type": ["string", "null"]
+        },
+        "notes": {
+          "type": "string"
         }
-      }
-    },
-    "created_at": { "type": "string", "format": "date-time" },
-    "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "work_id",
+        "active_plan",
+        "plan_name",
+        "session_ids",
+        "status",
+        "tasks_completed",
+        "tasks_remaining",
+        "started_at",
+        "worktree_path"
+      ]
+    }
   }
 }

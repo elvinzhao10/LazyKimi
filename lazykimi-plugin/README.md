@@ -66,9 +66,8 @@ session; the local fallback imports skills manually:
 | `.kimi-code/AGENTS.md` | Project agent catalog (11 roles mapped to 3 Kimi sub-agents) | Loaded by Kimi Code CLI session |
 | `.kimi-code/mcp.json` | 6 local MCP server declarations | Kimi Code CLI declarations; manual connector configuration is the verified Kimi Work fallback |
 | `agents/` | 11 agent role definitions (Greek-myth identities) | Used by Sisyphus for role dispatch |
-| `hooks/` | 16 hook event declarations + shell scripts | Installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh` |
-| `hooks/hooks-config.toml` | Hook registration fragment for `~/.kimi-code/config.toml` | Appended to user config; never overwrites |
-| `mcp/` | 6 local MCP servers (Python stdio) with 19 tools | Host starts each over stdio; declarations are recipes, not running services |
+| `hooks/` | 16 hook event declarations + shell scripts | 8 critical hooks installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
+| `mcp/` | 6 local MCP servers (Python stdio) with 21 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; provides init, doctor, load-check, verify, mcp, uninstall |
 | `scripts/` | install-hooks.sh and verification utilities | Used by package readiness and workflow checks |
 
@@ -87,7 +86,7 @@ path differs.
 - **Project config route (for cloned repos):** `lazykimi init` copies
   `.kimi-code/`, `.lazykimi/`, and `mcp.json` into the project root, then run
   `bash lazykimi-plugin/scripts/install-hooks.sh --project-root <path>` to
-  append the eight `[[hooks]]` entries to `~/.kimi-code/config.toml`. Use
+  append the eight critical `[[hooks]]` entries to `~/.kimi-code/config.toml`. Use
   this when the host does not support plugin manifests or you want explicit
   file-level control. A loaded session still must confirm `/skill` loading
   and `/mcp` connection.
@@ -118,8 +117,11 @@ node dist/index.js doctor
 bash lazykimi-plugin/scripts/install-hooks.sh
 ```
 
-The installer appends the eight `[[hooks]]` entries from
-`hooks/hooks-config.toml` to `~/.kimi-code/config.toml`. It does not
+The installer appends eight critical `[[hooks]]` entries
+(`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`,
+`SubagentStop`, `PreCompact`, `PostCompact`) to `~/.kimi-code/config.toml`.
+The remaining eight advisory hooks are declared in `kimi.plugin.json` and
+activate only when the plugin manifest is loaded. The installer does not
 overwrite existing entries, does not modify provider/model/permission
 configuration, and does not touch any other host file.
 
@@ -258,17 +260,17 @@ Hooks are host-governed: the package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` actually
 fires them. Package readiness does not prove hook execution.
 
-## MCP list (6 servers, 19 tools)
+## MCP list (6 servers, 21 tools)
 
 | Server | Tools | Purpose |
 | --- | ---: | --- |
-| `lazykimi-run-ledger` | 8 | Read/write durable workflow records (`create_run`, `list_runs`, `latest_run`, `read_state`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`) |
+| `lazykimi-run-ledger` | 10 | Read/write durable workflow records (`create_run`, `list_runs`, `latest_run`, `read_state`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`, `get_active_plan`, `generate_handoff`) |
 | `lazykimi-verification` | 4 | Report bounded package checks (`record_evidence`, `get_evidence`, `mark_complete`, `get_completion_status`) |
 | `lazykimi-status-dashboard` | 1 | Display package and run status (`get_status`) |
 | `lazykimi-context-graph` | 2 | Local grep-based relationships, heuristic not semantic (`search_context`, `get_references`) |
 | `lazykimi-code-intel` | 3 | Local code-oriented helpers (`get_symbols`, `find_references`, `goto_definition`) |
 | `lazykimi-docs` | 1 | Fixed-registry documentation lookup with SSRF boundaries (`lookup_docs`) |
-| **Total** | **19** | Six stdio servers |
+| **Total** | **21** | Six stdio servers |
 
 Each declaration is a recipe for a host: it becomes a service only when
 Kimi Code CLI starts it over stdio. The six endpoints have JSON-RPC stream
@@ -283,8 +285,7 @@ must be added manually through Kimi Work's MCP configuration, and a loaded
 session must be observed before claiming host readiness. Package evidence
 proves only that the source skills are present and importable; it does not
 prove that Kimi Work loaded them. See
-[docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md) for the import walk-through
-(will be created by Task 8).
+[docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md) for the import walk-through.
 
 ## Workflow phases and evidence gates
 
@@ -301,7 +302,7 @@ LazyKimi follows the canonical evidence-led loop:
    ITERATE / REJECT verdict with per-gate PASS/FAIL evidence.
 5. **Review** — `lazy-reviewer`. Output: consolidated review report.
 6. **Librarian** — Memory update. Output: `.lazykimi/evidence/` findings.
-7. **Handoff** — `lazykimi handoff`. Output: parseable handoff summary.
+7. **Handoff** — `/lazy-handoff`. Output: parseable handoff summary.
 
 Every completion must pass all five evidence gates:
 

@@ -5,3 +5,10 @@ __pycache__/
 .DS_Store
 *.tsbuildinfo
 .lazykimi/state/
+
+# lazytrae:managed:start:gitignore
+# LazyTrae runtime (managed by lazytrae init)
+.lazytrae/state/
+.lazytrae/logs/
+.lazytrae/evidence/
+# lazytrae:managed:end:gitignore

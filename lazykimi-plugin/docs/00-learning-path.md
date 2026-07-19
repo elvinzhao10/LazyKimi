@@ -35,8 +35,8 @@ in that path, but only a host observation proves loading or connection.
 - `.kimi-code/skills/`, `agents/`: policy and role definitions;
 - `.kimi-code/mcp.json` and `mcp/`: MCP declarations and local JSON-RPC
   endpoints with their launchers;
-- `hooks/` and `hooks/hooks-config.toml`: event mappings and input-policy
-  adapters installed into `~/.kimi-code/config.toml`;
+- `hooks/`: 16 hook event declarations + shell scripts; eight critical hooks
+  are installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`;
 - `src/`: the TypeScript `lazykimi` CLI providing init, doctor, load-check,
   verify, mcp, and uninstall commands;
 - `scripts/`: hook installation and verification utilities.

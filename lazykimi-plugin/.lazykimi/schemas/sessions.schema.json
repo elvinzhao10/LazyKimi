@@ -1,28 +1,47 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lazykimi.dev/schemas/sessions.schema.json",
-  "title": "Session Record",
+  "title": "Sessions Log",
   "type": "object",
   "properties": {
-    "session_id": {
-      "type": "string"
-    },
-    "started_at": {
-      "type": "string",
-      "format": "date-time"
-    },
-    "host": {
-      "enum": ["kimi-code-cli", "kimi-work"]
-    },
-    "model": {
-      "type": "string"
-    },
-    "work_ids": {
+    "sessions": {
       "type": "array",
       "items": {
-        "type": "string"
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "event": {
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "host": {
+            "enum": ["kimi-code-cli", "kimi-work"]
+          },
+          "model": {
+            "type": "string"
+          },
+          "work_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["timestamp", "event", "payload"]
       }
     }
   },
-  "required": ["session_id", "started_at", "host"]
+  "required": ["sessions"]
 }

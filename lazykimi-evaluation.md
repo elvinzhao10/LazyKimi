@@ -15,8 +15,8 @@ LazyTrae, or lazycodex at runtime.
 
 ## Implemented package behavior
 
-LazyKimi packages 17 `lazy-` skills, 11 Greek-myth agent role definitions, 8
-hook event declarations, and six local MCP declarations exposing 19 tools:
+LazyKimi packages 17 `lazy-` skills, 11 Greek-myth agent role definitions, 16
+hook event declarations, and six local MCP declarations exposing 21 tools:
 `run-ledger`, `verification`, `status-dashboard`, `context-graph`,
 `code-intel`, and `docs`. The package checks validate manifests, component
 inventory, JSON, executable MCP scripts, internal Markdown links, hook and
@@ -135,8 +135,8 @@ workflow heritage and the same MIT license.
 |---|---|---|---|---|
 | Skills | 14 | 17 | 16+ | 17 |
 | Agents | 13 | 11 | 5 (TOML) | 11 (mapped to 3 Kimi sub-agents) |
-| Hooks | 12 | 8 | 24 | 8 |
-| MCP servers | 6 | 15 tools | N/A | 6 (19 tools) |
+| Hooks | 12 | eight | 24 | 16 |
+| MCP servers | 6 | 15 tools | N/A | 6 (21 tools) |
 | Host | CodeBuddy | Trae IDE/Work/CLI | Codex | Kimi Code CLI |
 | Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Python MCP |
 | Native swarm | No | No | No | Yes (/swarm 300 agents) |
@@ -154,11 +154,11 @@ workflow heritage and the same MIT license.
   to Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`,
   `plan`) plus the main agent. This is a structural difference from LazyBuddy
   (13 roles, no sub-agent channel constraint) and lazycodex (5 TOML agents).
-- **Hooks**: LazyKimi ships 8 hook scripts (matching LazyTrae) covering the
+- **Hook scripts**: LazyKimi ships 16 hook scripts covering the
   events Kimi Code CLI exposes through `[[hooks]]` in `~/.kimi-code/config.toml`.
 - **MCP**: LazyKimi inherits LazyBuddy's six-server Python model (run-ledger,
   verification, status-dashboard, context-graph, code-intel, docs) exposing
-  19 tools. LazyTrae consolidates into a single Node.js core server exposing
+  21 tools. LazyTrae consolidates into a single Node.js core server exposing
   15 tools.
 - **Native modes**: LazyKimi is the only harness in the series whose target
   host exposes native swarm, goal, and plan modes. The other harnesses

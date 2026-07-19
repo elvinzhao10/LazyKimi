@@ -37,7 +37,7 @@ LazyKimi follows the canonical evidence-led loop. Each phase has a primary owner
 4. **Verify (verifier)** — `lazykimi verify` or Oracle invocation. Owner: Oracle. Runs the five evidence gates. Output: APPROVE / ITERATE / REJECT verdict with per-gate PASS/FAIL evidence.
 5. **Review (reviewer)** — `lazykimi review-work`. Owner: Oracle (post-implementation review) and Momus (plan-vs-implementation compliance). Output: consolidated review report.
 6. **Librarian** — Memory update. Owner: Librarian. Updates AGENTS.md managed sections, parity ledger, command index. Output: `.lazykimi/evidence/` research findings and memory-update report.
-7. **Handoff** — `lazykimi handoff`. Owner: Sisyphus. Produces a parseable handoff summary that lets the next session resume without re-discovery (Atlas reconstructs it on resume).
+7. **Handoff** — `/lazy-handoff`. Owner: Sisyphus. Produces a parseable handoff summary that lets the next session resume without re-discovery (Atlas reconstructs it on resume).
 
 ## EVIDENCE GATE REQUIREMENTS
 
@@ -90,8 +90,19 @@ JSON Schema (Draft 2020-12) files at `.lazykimi/schemas/` validate the runtime s
 | --- | --- | --- | --- |
 | `boulder.schema.json` | `.lazykimi/schemas/boulder.schema.json` | `.lazykimi/state/boulder.json` | `schema_version`, `active_work_id`, `works` (work entries: `work_id`, `active_plan`, `plan_name`, `session_ids`, `status`, `tasks_completed`, `tasks_remaining`, `started_at`, `worktree_path`) |
 | `evidence.schema.json` | `.lazykimi/schemas/evidence.schema.json` | `.lazykimi/evidence/*.json` gate records | `gate`, `status`, `timestamp` |
-| `sessions.schema.json` | `.lazykimi/schemas/sessions.schema.json` | `.lazykimi/state/sessions.json` | `session_id`, `started_at`, `host` |
+| `sessions.schema.json` | `.lazykimi/schemas/sessions.schema.json` | `.lazykimi/state/sessions.json` | `sessions` array of records containing `timestamp`, `event`, `payload` |
 | `active-loop.schema.json` | `.lazykimi/schemas/active-loop.schema.json` | `.lazykimi/state/active-loop.json` | `loop_id`, `objective`, `mode`, `started_at`, `turn_count`, `status` |
+
+## MCP TOOLS
+
+| Server | Tools |
+| --- | --- |
+| `lazykimi-run-ledger` | `create_run`, `list_runs`, `latest_run`, `read_state`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`, `get_active_plan`, `generate_handoff` |
+| `lazykimi-verification` | `record_evidence`, `get_evidence`, `mark_complete`, `get_completion_status` |
+| `lazykimi-status-dashboard` | `get_status` |
+| `lazykimi-context-graph` | `search_context`, `get_references` |
+| `lazykimi-code-intel` | `get_symbols`, `find_references`, `goto_definition` |
+| `lazykimi-docs` | `lookup_docs` |
 
 ## Kimi Work Limitations
 

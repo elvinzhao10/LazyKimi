@@ -30,8 +30,13 @@ HOME="$TMP" node "$CLI" init --target "$TMP" >"$TMP/init.out" 2>&1 \
 [ -d "$TMP/.kimi-code/skills" ] || fail ".kimi-code/skills/ not created"
 [ -f "$TMP/.kimi-code/AGENTS.md" ] || fail ".kimi-code/AGENTS.md not created"
 [ -f "$TMP/.kimi-code/mcp.json" ] || fail ".kimi-code/mcp.json not created"
+[ -d "$TMP/.kimi-code/commands" ] || fail ".kimi-code/commands/ not created"
+[ -d "$TMP/.kimi-code/contracts" ] || fail ".kimi-code/contracts/ not created"
+[ -d "$TMP/.kimi-code/tooling" ] || fail ".kimi-code/tooling/ not created"
+[ -f "$TMP/.kimi-code/kimi.plugin.json" ] || fail ".kimi-code/kimi.plugin.json not created"
 [ -d "$TMP/.lazykimi" ] || fail ".lazykimi/ not created"
-echo "  [PASS] init creates .kimi-code/ and .lazykimi/"
+[ -f "$TMP/.lazykimi/state/active-loop.json" ] || fail ".lazykimi/state/active-loop.json not created"
+echo "  [PASS] init creates .kimi-code/ and .lazykimi/ (including active-loop.json)"
 
 # 2. doctor must PASS (exit 0) in the fresh project.
 ( cd "$TMP" && HOME="$TMP" node "$CLI" doctor ) >"$TMP/doctor.out" 2>&1 \

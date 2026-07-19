@@ -19,7 +19,7 @@ from jsonrpc import serve
 CWD = os.environ.get("CWD", ".")
 LAZYKIMI = os.path.join(CWD, ".lazykimi")
 BOULDER_FILE = os.path.join(LAZYKIMI, "state", "boulder.json")
-ACTIVE_LOOP_FILE = os.path.join(LAZYKIMI, "loop", "active-loop.json")
+ACTIVE_LOOP_FILE = os.path.join(LAZYKIMI, "state", "active-loop.json")
 RUN_INDEX_FILE = os.path.join(LAZYKIMI, "state", "index.json")
 EVIDENCE_FILE = os.path.join(LAZYKIMI, "evidence", "evidence.jsonl")
 COMPLETION_FILE = os.path.join(LAZYKIMI, "evidence", "completion.json")
@@ -73,18 +73,17 @@ def _summarize_active_loop():
     data = _load_json(ACTIVE_LOOP_FILE)
     if data is None:
         return {"present": False, "note": "no active-loop.json found"}
-    run_id = data.get("run_id", "") if isinstance(data, dict) else ""
-    state = None
-    if run_id:
-        state = _load_json(os.path.join(LAZYKIMI, "state", "runs", run_id, "state.json"))
-    summary = {"present": True, "run_id": run_id, "updated_at": data.get("updated_at", "") if isinstance(data, dict) else ""}
-    if state is not None:
-        summary["objective"] = state.get("objective", "")
-        summary["run_status"] = state.get("status", "")
-        summary["iteration_count"] = state.get("iteration_count", 0)
-        rtasks = state.get("tasks", [])
-        summary["run_tasks_done"] = sum(1 for t in rtasks if isinstance(t, dict) and t.get("status") == "completed")
-        summary["run_tasks_total"] = len(rtasks)
+    if not isinstance(data, dict):
+        return {"present": False, "note": "active-loop.json is not a JSON object"}
+    summary = {
+        "present": True,
+        "loop_id": data.get("loop_id", ""),
+        "objective": data.get("objective", ""),
+        "mode": data.get("mode", ""),
+        "status": data.get("status", ""),
+        "turn_count": data.get("turn_count", 0),
+        "started_at": data.get("started_at", ""),
+    }
     return summary
 
 
@@ -132,11 +131,11 @@ def _format_text(status):
         lines.append("boulder: (none) — %s" % b.get("note", ""))
     al = status["active_loop"]
     if al["present"]:
-        lines.append("active loop: run=%s  status=%s  iter=%s  tasks=%s/%s  updated=%s" % (
-            al.get("run_id", ""), al.get("run_status", "?"), al.get("iteration_count", "?"),
-            al.get("run_tasks_done", "?"), al.get("run_tasks_total", "?"), al.get("updated_at", "")))
+        lines.append("active loop: loop_id=%s  objective=%s  mode=%s  status=%s  turn_count=%s  started_at=%s" % (
+            al.get("loop_id", ""), al.get("objective", "")[:60], al.get("mode", "?"),
+            al.get("status", "?"), al.get("turn_count", "?"), al.get("started_at", "")))
     else:
-        lines.append("active loop: (none)")
+        lines.append("active loop: (none) — %s" % al.get("note", ""))
     ev = status["evidence"]
     lines.append("evidence: %d records  passed=%d  failed=%d  gates=%d" % (ev["records"], ev["passed"], ev["failed"], len(ev["gates"])))
     cp = status["completion"]

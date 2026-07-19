@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { readJson, isObject } from '../lib/json';
+import { isPluginSourceRoot } from '../lib/paths';
 
 const PLUGIN_VERSION = '0.2.0';
 const EXPECTED_SKILLS = 17;
@@ -24,8 +25,8 @@ export interface DoctorResult {
   readonly warn: number;
 }
 
-function countSkills(kimiCodeDir: string): number {
-  const skillsDir = path.join(kimiCodeDir, 'skills');
+function countSkills(skillsRoot: string): number {
+  const skillsDir = path.join(skillsRoot, 'skills');
   if (!existsSync(skillsDir)) return 0;
   const entries = readdirSync(skillsDir, { withFileTypes: true });
   let count = 0;
@@ -37,20 +38,17 @@ function countSkills(kimiCodeDir: string): number {
   return count;
 }
 
-function countAgents(kimiCodeDir: string): number {
-  const agentsDir = path.join(kimiCodeDir, 'agents');
+function countAgents(agentsDir: string): number {
   if (!existsSync(agentsDir)) return 0;
   return readdirSync(agentsDir).filter(f => f.startsWith('lazykimi-') && f.endsWith('.md')).length;
 }
 
-function countHooks(kimiCodeDir: string): number {
-  const hooksDir = path.join(kimiCodeDir, 'hooks');
+function countHooks(hooksDir: string): number {
   if (!existsSync(hooksDir)) return 0;
   return readdirSync(hooksDir).filter(f => f.endsWith('.sh')).length;
 }
 
-function countMcpServers(kimiCodeDir: string): number {
-  const mcpPath = path.join(kimiCodeDir, 'mcp.json');
+function countMcpServers(mcpPath: string): number {
   if (!existsSync(mcpPath)) return -1;
   try {
     const data = readJson(mcpPath);
@@ -63,8 +61,7 @@ function countMcpServers(kimiCodeDir: string): number {
   }
 }
 
-function checkBoulderState(target: string): CheckResult {
-  const boulderPath = path.join(target, '.lazykimi', 'state', 'boulder.json');
+function checkBoulderState(boulderPath: string): CheckResult {
   if (!existsSync(boulderPath)) {
     return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'not found' };
   }
@@ -72,6 +69,15 @@ function checkBoulderState(target: string): CheckResult {
     const data = readJson(boulderPath);
     if (!isObject(data)) {
       return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'not a JSON object' };
+    }
+    if (typeof data.schema_version !== 'number') {
+      return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'schema_version must be a number' };
+    }
+    if (typeof data.active_work_id !== 'string' && data.active_work_id !== null) {
+      return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'active_work_id must be a string or null' };
+    }
+    if (!isObject(data.works)) {
+      return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'works must be an object' };
     }
     return { label: '.lazykimi/state/boulder.json', status: 'PASS' };
   } catch (e) {
@@ -97,43 +103,58 @@ function checkKimiBinary(): CheckResult {
 
 export function runDoctor(target: string): DoctorResult {
   const checks: CheckResult[] = [];
-  const kimiCodeDir = path.join(target, '.kimi-code');
+  const isPluginRoot = isPluginSourceRoot(target);
+
+  const resolvedKimiCodeDir = path.join(target, '.kimi-code');
+  const skillsRoot = isPluginRoot
+    ? (existsSync(resolvedKimiCodeDir) ? resolvedKimiCodeDir : path.join(target, 'skills'))
+    : resolvedKimiCodeDir;
+  const agentsDir = isPluginRoot ? path.join(target, 'agents') : path.join(resolvedKimiCodeDir, 'agents');
+  const hooksDir = isPluginRoot ? path.join(target, 'hooks') : path.join(resolvedKimiCodeDir, 'hooks');
+  const mcpPath = path.join(resolvedKimiCodeDir, 'mcp.json');
+  const resolvedBoulderPath = isPluginRoot
+    ? (
+        existsSync(path.join(target, '.lazykimi', 'state', 'boulder.json'))
+          ? path.join(target, '.lazykimi', 'state', 'boulder.json')
+          : path.join(target, '..', '.lazykimi', 'state', 'boulder.json')
+      )
+    : path.join(target, '.lazykimi', 'state', 'boulder.json');
 
   checks.push({
     label: '.kimi-code/ present',
-    status: existsSync(kimiCodeDir) ? 'PASS' : 'FAIL',
-    detail: existsSync(kimiCodeDir) ? undefined : 'run `lazykimi init` first',
+    status: existsSync(path.join(target, '.kimi-code')) ? 'PASS' : 'FAIL',
+    detail: existsSync(path.join(target, '.kimi-code')) ? undefined : 'run `lazykimi init` first',
   });
 
-  const skillCount = countSkills(kimiCodeDir);
+  const skillCount = countSkills(skillsRoot);
   checks.push({
     label: `skills count (${EXPECTED_SKILLS} expected)`,
     status: skillCount === EXPECTED_SKILLS ? 'PASS' : 'FAIL',
     detail: `found ${skillCount}`,
   });
 
-  const agentCount = countAgents(kimiCodeDir);
+  const agentCount = countAgents(agentsDir);
   checks.push({
     label: `agents count (${EXPECTED_AGENTS} expected)`,
     status: agentCount === EXPECTED_AGENTS ? 'PASS' : 'FAIL',
     detail: `found ${agentCount}`,
   });
 
-  const hookCount = countHooks(kimiCodeDir);
+  const hookCount = countHooks(hooksDir);
   checks.push({
     label: `hooks count (${EXPECTED_HOOKS} expected)`,
     status: hookCount === EXPECTED_HOOKS ? 'PASS' : 'FAIL',
     detail: `found ${hookCount}`,
   });
 
-  const mcpCount = countMcpServers(kimiCodeDir);
+  const mcpCount = countMcpServers(mcpPath);
   checks.push({
     label: `mcp.json valid (${EXPECTED_MCP} servers)`,
     status: mcpCount === EXPECTED_MCP ? 'PASS' : 'FAIL',
     detail: mcpCount < 0 ? 'invalid or missing' : `found ${mcpCount} servers`,
   });
 
-  checks.push(checkBoulderState(target));
+  checks.push(checkBoulderState(resolvedBoulderPath));
   checks.push(checkKimiBinary());
 
   let pass = 0, fail = 0, warn = 0;

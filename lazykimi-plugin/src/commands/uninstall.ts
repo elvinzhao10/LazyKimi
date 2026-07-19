@@ -81,7 +81,7 @@ export function run(args: string[]): number {
 
   if (opts.soft) {
     const configFile = getKimiConfigFile();
-    const result = removeHooksFromConfig(configFile);
+    const result = removeHooksFromConfig(configFile, target);
     if (result.changed) {
       console.log(`Removed hooks from ${configFile}`);
     } else {
@@ -126,7 +126,7 @@ export function run(args: string[]): number {
     }
   }
 
-  const hookResult = removeHooksFromConfig(getKimiConfigFile());
+  const hookResult = removeHooksFromConfig(getKimiConfigFile(), target);
   if (hookResult.changed) removed.push('hooks from ~/.kimi-code/config.toml');
 
   console.log('=== Removed ===');

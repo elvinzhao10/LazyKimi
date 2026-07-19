@@ -7,7 +7,7 @@ tooling only when its receipt proves ownership. These are separate operations.
 
 | Route | Safe action | Preserve |
 | --- | --- | --- |
-| Kimi Code CLI project configuration | Run `lazykimi uninstall --yes`; then remove the eight `[[hooks]]` entries from `~/.kimi-code/config.toml` and remove each `lazykimi-*` MCP server via `/mcp-config`. | `~/.kimi-code/` global state, credentials, unrelated MCP entries, and host configuration. |
+| Kimi Code CLI project configuration | Run `lazykimi uninstall --yes`; then remove the eight critical `[[hooks]]` entries from `~/.kimi-code/config.toml` and remove each `lazykimi-*` MCP server via `/mcp-config`. | `~/.kimi-code/` global state, credentials, unrelated MCP entries, and host configuration. |
 | Kimi Work imported skills | Remove imported LazyKimi skills through the Skills UI; remove manually configured MCP connectors through Kimi Work's MCP configuration. | Other imported skills, connectors, and host settings. |
 | Receipt-owned tooling root | Run the package uninstall command only for the exact owned root. | Modified, foreign, linked, caller-owned, project, global, and host-managed paths. |
 
@@ -30,7 +30,7 @@ After the package uninstall, perform the manual host step:
 ### Kimi Code CLI
 
 1. Open `~/.kimi-code/config.toml` in a text editor.
-2. Remove the eight `[[hooks]]` entries whose `command` field references
+2. Remove the eight critical `[[hooks]]` entries whose `command` field references
    `.kimi-code/hooks/`. These correspond to SessionStart, UserPromptSubmit,
    PreToolUse, PostToolUse, Stop, SubagentStop, PreCompact, and PostCompact.
 3. Save the file.

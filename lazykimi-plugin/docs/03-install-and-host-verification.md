@@ -47,11 +47,10 @@ Hooks are not auto-installed. Run the installer explicitly:
 bash lazykimi-plugin/scripts/install-hooks.sh
 ```
 
-The installer appends the eight `[[hooks]]` entries from
-`hooks/hooks-config.toml` to `~/.kimi-code/config.toml`. It is idempotent and
-does not overwrite existing entries, provider/model/permission configuration,
-or any other host file. After installation, restart the Kimi Code CLI session
-so the new hooks take effect.
+The installer appends eight critical `[[hooks]]` entries to
+`~/.kimi-code/config.toml`. It is idempotent and does not overwrite existing
+entries, provider/model/permission configuration, or any other host file. After
+installation, restart the Kimi Code CLI session so the new hooks take effect.
 
 ## MCP configuration
 

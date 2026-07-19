@@ -105,7 +105,7 @@ When the user types `onboard`:
    `lazykimi init` to copy package assets into `.kimi-code/` and
    `.lazykimi/`; then run `lazykimi load-check` and `lazykimi doctor` to
    report package readiness.
-   - **Kimi Code CLI onboard**: `lazykimi init` copies `.kimi-code/` and `.lazykimi/` into the project. Run `bash lazykimi-plugin/scripts/install-hooks.sh` to wire the eight `[[hooks]]` entries into `~/.kimi-code/config.toml`. Open the project in Kimi Code CLI and confirm via `/mcp`.
+   - **Kimi Code CLI onboard**: `lazykimi init` copies `.kimi-code/` and `.lazykimi/` into the project. Run `bash lazykimi-plugin/scripts/install-hooks.sh` to wire the eight critical `[[hooks]]` entries into `~/.kimi-code/config.toml` (the package ships 16 hook scripts; the remaining eight advisory hooks activate only through the plugin manifest). Open the project in Kimi Code CLI and confirm via `/mcp`.
    - **Kimi Work onboard**: Run `bash lazykimi-plugin/scripts/install-kimi-work.sh` to copy 17 lazy-* skills into `~/.kimi-work/skills/`. Restart Kimi Work. Manually add the 6 lazykimi-* MCP servers through Kimi Work's MCP configuration UI. See `lazykimi-plugin/docs/11-kimi-work-setup.md` for the command table. Kimi Work has no plugin manifest support — only skills are imported; no hooks, no sessionStart.skill.
 3. If the companion CLI is absent, fall back to the repo-only path: copy
    `.kimi-code/` and `.lazykimi/` into the project manually. The MCP
@@ -134,7 +134,7 @@ When the user types `offboard`:
    them. Never delete `~/.kimi-code/` global state, credentials, or MCP
    configuration belonging to another host.
 4. Give the remaining manual host step:
-   - **Kimi Code CLI**: remove the eight `[[hooks]]` entries from
+   - **Kimi Code CLI**: remove the eight critical `[[hooks]]` entries from
      `~/.kimi-code/config.toml` (those whose `command` references
      `.kimi-code/hooks/`), and remove each `lazykimi-*` MCP server via
      `/mcp-config` in a Kimi Code CLI session.
@@ -186,8 +186,8 @@ lazykimi verify --must-pass
 ```
 
 These read-only reports cover copied assets and declarations. The installed
-layout contains 17 skills, 11 agents, eight hook scripts across eight events,
-and six MCP server declarations exposing 19 tools. The MCP servers expose
+layout contains 17 skills, 11 agents, sixteen hook scripts across sixteen events,
+and six MCP server declarations exposing 21 tools. The MCP servers expose
 tools only after a host connection.
 
 - **Honest-claims discipline**: Package evidence proves copied files and declarations, not plugin loading, SessionStart, hooks, or an MCP connection. A Kimi Code CLI or Kimi Work session must confirm connection.

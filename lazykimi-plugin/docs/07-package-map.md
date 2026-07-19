@@ -10,15 +10,13 @@ flowchart TB
     subgraph Assets["plugin assets"]
       Skills[".kimi-code/skills/ (17)"]
       Agents["agents/ (11 roles)"]
-      HookMap["hooks/hooks-config.toml"]
-      HookScripts["hooks/*.sh (8)"]
+      HookScripts["hooks/*.sh (16)"]
       MCP["mcp/*/server.* (6 servers)"]
       CLI["src/ (TypeScript CLI)"]
       Scripts["scripts/"]
     end
     KCDot --> Skills
     KCDot --> MCPDecl[".kimi-code/mcp.json"]
-    HookMap --> HookScripts
     Skills --> Agents
     HookScripts --> State[".lazykimi/ state"]
     MCP --> State
@@ -33,10 +31,12 @@ mapped to Kimi Code CLI's three sub-agent channels. These files have no
 process authority by themselves; they are loaded only if the host accepts the
 package.
 
-`hooks/hooks-config.toml` declares which host event may call a script. The
-scripts under `hooks/` read structured input, apply narrow local policy, and
-avoid treating untrusted text as a shell command. Their output is host advice
-or local evidence, not proof that the host enforced the result.
+`hooks/` ships 16 hook scripts. Eight critical hooks are installed into
+`~/.kimi-code/config.toml` by `scripts/install-hooks.sh`; the remaining eight
+advisory hooks activate only through the plugin manifest. The scripts read
+structured input, apply narrow local policy, and avoid treating untrusted text
+as a shell command. Their output is host advice or local evidence, not proof
+that the host enforced the result.
 
 ## Local MCP inventory
 

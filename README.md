@@ -68,7 +68,7 @@ lazykimi/
 │   ├── agents/             # 11 Greek-myth agent role definitions
 │   ├── commands/           # 9 named slash-command workflows
 │   ├── hooks/              # 16 hook event declarations + shell scripts
-│   ├── mcp/                # 6 local MCP servers (Python stdio, 19 tools)
+│   ├── mcp/                # 6 local MCP servers (Python stdio, 21 tools)
 │   ├── src/                # TypeScript `lazykimi` CLI
 │   ├── scripts/            # install-hooks.sh and verification utilities
 │   └── docs/               # Numbered technical architecture pages
@@ -103,8 +103,8 @@ lazykimi verify --must-pass
 ```
 
 These read-only reports cover copied assets and declarations. The installed
-layout contains 17 skills, 11 agents, eight hook scripts across eight events,
-and six MCP server declarations exposing 19 tools. The MCP servers expose
+layout contains 17 skills, 11 agents, sixteen hook scripts across sixteen events,
+and six MCP server declarations exposing 21 tools. The MCP servers expose
 tools only after a host connection.
 
 Type `offboard` for the matching safe-removal protocol; it never guesses or
@@ -118,7 +118,7 @@ removes host-managed paths.
 | Commands | 9 | Named host entry points for those workflow policies. |
 | Agents | 11 | Specialist role definitions mapped to Kimi Code CLI's three sub-agent channels. |
 | MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs. |
-| Hooks | 8 | Hook event declarations installed into `~/.kimi-code/config.toml`. |
+| Hooks | 16 | Hook event declarations installed into `~/.kimi-code/config.toml`. |
 
 ## Documentation
 

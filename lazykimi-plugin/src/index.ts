@@ -5,6 +5,7 @@ import { run as runVerify } from './commands/verify';
 import { run as runLoadCheck } from './commands/load-check';
 import { run as runUninstall } from './commands/uninstall';
 import { run as runMcp } from './commands/mcp';
+import { run as runTooling } from './commands/tooling';
 
 type CommandFn = (args: string[]) => number;
 
@@ -15,6 +16,7 @@ const commands: Record<string, CommandFn> = {
   'load-check': runLoadCheck,
   uninstall: runUninstall,
   mcp: runMcp,
+  tooling: runTooling,
 };
 
 const aliases: Record<string, string> = {
@@ -36,6 +38,7 @@ Commands:
   load-check   Report package readiness (skills/agents/hooks/mcp counts)
   uninstall    Remove LazyKimi from the current project
   mcp          Print MCP server declarations for /mcp-config import
+  tooling      Query the receipt-owned tooling capability broker
 
 Aliases: i=init, d=doctor, v=verify, rm=uninstall
 

@@ -28,6 +28,7 @@
   "files": [
     "dist",
     ".kimi-code",
+    ".lazykimi/schemas",
     "agents",
     "hooks",
     "mcp",
@@ -35,6 +36,7 @@
     "scripts",
     "tooling",
     "contracts",
+    "kimi.plugin.json",
     "NOTICE",
     "LICENSE"
   ],

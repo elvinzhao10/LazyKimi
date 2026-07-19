@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginRoot } from '../lib/paths';
+import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginCommandsDir, getPluginContractsDir, getPluginToolingDir, getPluginRoot } from '../lib/paths';
 import { writeJson } from '../lib/json';
 import { writeReceipt } from '../lib/receipt';
 
@@ -69,6 +69,25 @@ function copyDir(
   }
 }
 
+function copyFile(
+  src: string,
+  destDir: string,
+  target: string,
+  dryRun: boolean,
+  actions: string[],
+  copied: string[],
+): void {
+  if (!existsSync(src)) return;
+  const destPath = path.join(destDir, path.basename(src));
+  if (!dryRun) {
+    mkdirSync(destDir, { recursive: true });
+    copyFileSync(src, destPath);
+  }
+  const rel = path.relative(target, destPath);
+  copied.push(rel);
+  actions.push(`copy ${rel}`);
+}
+
 function ensureDir(dir: string, dryRun: boolean, actions: string[], rel: string): void {
   if (!dryRun) mkdirSync(dir, { recursive: true });
   actions.push(`mkdir ${rel}`);
@@ -79,13 +98,17 @@ function writeSeedJson(rel: string, data: unknown, target: string, dryRun: boole
   actions.push(`write ${rel}`);
 }
 
+function evidenceStub(title: string): string {
+  return `# ${title} Evidence\n\n## Findings\n\n## Acceptance Criteria\n\n## QA Scenarios\n`;
+}
+
 function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string[]): void {
   const files: ReadonlyArray<readonly [string, string]> = [
-    ['plan-reread.md', '# Plan Reread Evidence\n\n(none yet)\n'],
-    ['test-runs.md', '# Test Runs Evidence\n\n(none yet)\n'],
-    ['manual-qa.md', '# Manual QA Evidence\n\n(none yet)\n'],
-    ['oracle-review.md', '# Oracle Review Evidence\n\n(none yet)\n'],
-    ['reviewer.md', '# Reviewer Evidence\n\n(none yet)\n'],
+    ['plan-reread.md', evidenceStub('Plan Reread')],
+    ['test-runs.md', evidenceStub('Test Runs')],
+    ['manual-qa.md', evidenceStub('Manual QA')],
+    ['oracle-review.md', evidenceStub('Oracle Review')],
+    ['reviewer.md', evidenceStub('Reviewer')],
   ];
   for (const [name, content] of files) {
     const rel = path.join('.lazykimi', 'evidence', name);
@@ -114,7 +137,18 @@ function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): vo
 }
 
 function defaultBoulderState(): unknown {
-  return { schema_version: 1, active_goal_id: null, tasks: [], blockers: [] };
+  return { schema_version: 2, active_work_id: null, works: {} };
+}
+
+function defaultActiveLoopState(): unknown {
+  return {
+    loop_id: '',
+    objective: '',
+    mode: 'goal',
+    started_at: '1970-01-01T00:00:00Z',
+    turn_count: 0,
+    status: 'completed',
+  };
 }
 
 function defaultConfig(): unknown {
@@ -141,6 +175,14 @@ export function run(args: string[]): number {
   copyDir(getPluginAgentsDir(), path.join(target, '.kimi-code', 'agents'), target, opts.dryRun, actions, copied);
   // 3. Copy hooks/ -> .kimi-code/hooks/
   copyDir(getPluginHooksDir(), path.join(target, '.kimi-code', 'hooks'), target, opts.dryRun, actions, copied);
+  // 3b. Copy commands/, contracts/, tooling/ -> .kimi-code/
+  copyDir(getPluginCommandsDir(), path.join(target, '.kimi-code', 'commands'), target, opts.dryRun, actions, copied);
+  copyDir(getPluginContractsDir(), path.join(target, '.kimi-code', 'contracts'), target, opts.dryRun, actions, copied);
+  copyDir(getPluginToolingDir(), path.join(target, '.kimi-code', 'tooling'), target, opts.dryRun, actions, copied);
+  // 3c. Copy the plugin manifest for reference. Its paths are relative to the
+  //     plugin root; project-level activation uses config.toml + skills, or a
+  //     /plugins install from the canonical plugin root.
+  copyFile(path.join(getPluginRoot(), 'kimi.plugin.json'), path.join(target, '.kimi-code'), target, opts.dryRun, actions, copied);
 
   // 4. Create .lazykimi/ seed state
   ensureDir(path.join(target, '.lazykimi', 'state'), opts.dryRun, actions, '.lazykimi/state');
@@ -161,6 +203,8 @@ export function run(args: string[]): number {
     copied,
   );
   writeSeedJson('.lazykimi/state/boulder.json', defaultBoulderState(), target, opts.dryRun, actions);
+  writeSeedJson('.lazykimi/state/sessions.json', { sessions: [] }, target, opts.dryRun, actions);
+  writeSeedJson('.lazykimi/state/active-loop.json', defaultActiveLoopState(), target, opts.dryRun, actions);
   writeSeedJson('.lazykimi/config.json', defaultConfig(), target, opts.dryRun, actions);
 
   // 5. Hooks: scripts are copied (step 3) but NOT auto-appended to

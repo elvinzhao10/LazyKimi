@@ -1,34 +1,29 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://lazykimi.dev/schemas/active-loop.schema.json",
-  "title": "LazyKimi Active Loop State",
-  "description": "State for /goal persistent autonomous goals and /swarm loop tracking.",
+  "title": "Active Loop State",
   "type": "object",
-  "required": ["schema_version", "active"],
   "properties": {
-    "schema_version": { "type": "integer", "const": 1 },
-    "active": { "type": "boolean", "description": "Whether a /goal or /swarm loop is currently active." },
-    "loop_type": { "type": "string", "enum": ["goal", "swarm", "ultrawork", "none"] },
-    "objective": { "type": ["string", "null"], "description": "The persistent objective for /goal mode." },
-    "task": { "type": ["string", "null"], "description": "The task for /swarm mode." },
-    "started_at": { "type": ["string", "null"], "format": "date-time" },
-    "turn_count": { "type": "integer", "minimum": 0 },
-    "max_turns": { "type": ["integer", "null"], "minimum": 1 },
-    "blocked_turns": { "type": "integer", "minimum": 0, "description": "Consecutive blocked turns; loop stops when this exceeds threshold." },
-    "block_threshold": { "type": "integer", "minimum": 1, "default": 20 },
-    "run_id": { "type": ["string", "null"] },
-    "checkpoints": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["turn", "timestamp", "summary"],
-        "properties": {
-          "turn": { "type": "integer", "minimum": 0 },
-          "timestamp": { "type": "string", "format": "date-time" },
-          "summary": { "type": "string" },
-          "artifact_path": { "type": ["string", "null"] }
-        }
-      }
+    "loop_id": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": ["goal", "swarm", "ulw-loop"]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "turn_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": ["active", "paused", "completed", "blocked"]
     }
-  }
+  },
+  "required": ["loop_id", "objective", "mode", "started_at", "turn_count", "status"]
 }
