@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginCommandsDir, getPluginContractsDir, getPluginToolingDir, getPluginRoot } from '../lib/paths';
+import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginCommandsDir, getPluginContractsDir, getPluginToolingDir, getPluginRulesDir, getPluginRoot } from '../lib/paths';
 import { writeJson } from '../lib/json';
 import { writeReceipt } from '../lib/receipt';
 
@@ -117,7 +117,7 @@ function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string
   }
 }
 
-function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): void {
+export function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): void {
   // Kimi Code CLI does not interpolate env vars in .kimi-code/mcp.json (per
   // https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html). The
   // source template ships with __KIMI_PLUGIN_ROOT__ placeholders that we
@@ -171,6 +171,9 @@ export function run(args: string[]): number {
   //     absolute plugin-root paths (Kimi does not interpolate env vars in
   //     project-level mcp.json).
   rewriteMcpPaths(target, opts.dryRun, actions);
+  // 1c. Copy rules/ -> .kimi-code/rules/ (also covered by step 1, but kept
+  //     explicit so future rules additions are obvious).
+  copyDir(getPluginRulesDir(), path.join(target, '.kimi-code', 'rules'), target, opts.dryRun, actions, copied);
   // 2. Copy agents/ -> .kimi-code/agents/
   copyDir(getPluginAgentsDir(), path.join(target, '.kimi-code', 'agents'), target, opts.dryRun, actions, copied);
   // 3. Copy hooks/ -> .kimi-code/hooks/
@@ -187,6 +190,7 @@ export function run(args: string[]): number {
   // 4. Create .lazykimi/ seed state
   ensureDir(path.join(target, '.lazykimi', 'state'), opts.dryRun, actions, '.lazykimi/state');
   ensureDir(path.join(target, '.lazykimi', 'evidence'), opts.dryRun, actions, '.lazykimi/evidence');
+  ensureDir(path.join(target, '.lazykimi', 'logs'), opts.dryRun, actions, '.lazykimi/logs');
   writeEvidenceTemplates(target, opts.dryRun, actions);
   ensureDir(path.join(target, '.lazykimi', 'schemas'), opts.dryRun, actions, '.lazykimi/schemas');
   ensureDir(path.join(target, '.lazykimi', 'plans'), opts.dryRun, actions, '.lazykimi/plans');

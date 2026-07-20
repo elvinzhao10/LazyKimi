@@ -22,6 +22,40 @@ ISO=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 CP_DIR="$STATE_DIR/state/checkpoints/cp-$TS"
 mkdir -p "$CP_DIR" 2>/dev/null || true
 
+# Set post-compact recovery flag and rules hash in sessions.json (fail-open, no jq required).
+if command -v python3 >/dev/null 2>&1; then
+  python3 -c "
+import json, os, hashlib
+sessions_path = '$STATE_DIR/state/sessions.json'
+rules_dir = '$CWD/.kimi-code/rules'
+try:
+    data = {}
+    if os.path.isfile(sessions_path):
+        with open(sessions_path, 'r') as f:
+            data = json.load(f)
+    if not isinstance(data, dict):
+        data = {'sessions': []}
+    rules_hash = ''
+    if os.path.isdir(rules_dir):
+        h = hashlib.sha256()
+        for root, dirs, files in os.walk(rules_dir):
+            dirs.sort()
+            for name in sorted(files):
+                path = os.path.join(root, name)
+                rel = os.path.relpath(path, rules_dir)
+                h.update(rel.encode('utf-8'))
+                with open(path, 'rb') as f:
+                    h.update(f.read())
+        rules_hash = h.hexdigest()
+    data['post_compact_recovery_needed'] = True
+    data['rules_hash_pre_compact'] = rules_hash
+    with open(sessions_path, 'w') as f:
+        json.dump(data, f, indent=2)
+except Exception:
+    pass
+" 2>/dev/null || true
+fi
+
 # Snapshot key state files
 for f in state/boulder.json state/active-loop.json state/sessions.json config.json; do
   src="$STATE_DIR/$f"

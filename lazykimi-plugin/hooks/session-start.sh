@@ -51,5 +51,43 @@ if [ -d "$EVIDENCE_DIR" ]; then
   echo "[LazyKimi] Evidence files: $count"
 fi
 
+# 5. Post-compact recovery hint (fail-open, no jq required).
+if command -v python3 >/dev/null 2>&1; then
+  python3 -c "
+import json, os
+sessions_path = '$STATE_DIR/sessions.json'
+boulder_path = '$BOULDER'
+rules_dir = '$CWD/.kimi-code/rules'
+hint_lines = []
+try:
+    if os.path.isfile(sessions_path):
+        with open(sessions_path, 'r') as f:
+            data = json.load(f)
+        if isinstance(data, dict) and data.get('post_compact_recovery_needed'):
+            plan_path = '(none)'
+            if os.path.isfile(boulder_path):
+                with open(boulder_path, 'r') as bf:
+                    boulder = json.load(bf)
+                if isinstance(boulder, dict):
+                    plan_path = boulder.get('plan_path') or boulder.get('active_plan') or '(none)'
+            rule_files = []
+            if os.path.isdir(rules_dir):
+                for root, dirs, files in os.walk(rules_dir):
+                    for name in sorted(files):
+                        path = os.path.join(root, name)
+                        rule_files.append(os.path.relpath(path, rules_dir))
+            hint_lines.append('[LazyKimi] Compact recovery needed — context may have been compacted.')
+            hint_lines.append('[LazyKimi] Active plan: ' + plan_path)
+            hint_lines.append('[LazyKimi] Rule files: ' + ','.join(rule_files))
+            data['post_compact_recovery_needed'] = False
+            with open(sessions_path, 'w') as f:
+                json.dump(data, f, indent=2)
+except Exception:
+    pass
+for line in hint_lines:
+    print(line)
+" 2>/dev/null || true
+fi
+
 echo "[LazyKimi] Readiness: ready"
 exit 0

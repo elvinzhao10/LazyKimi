@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # lazykimi-verify.sh — Master verification runner
 #
-# Runs the smoke gate plus the 10 v001 and 3 v002 regression scripts and emits
-# a bounded JSON summary. Exit 0 only when ALL_PASS is true; exit 1 otherwise.
+# Runs the smoke gate plus the 10 v001, 3 v002, and 11 v003 regression scripts
+# and emits a bounded JSON summary. Exit 0 only when ALL_PASS is true; exit 1 otherwise.
 #
 # Usage: bash scripts/lazykimi-verify.sh
 # Works from lazykimi-plugin/ (it cds into the plugin root).
@@ -33,6 +33,17 @@ CHECK_NAMES=(
   "v002_plugin_manifest"
   "v002_mcp_paths"
   "v002_hooks_inline"
+  "v003_ssrf_boundary"
+  "v003_mcp_path_traversal"
+  "v003_hook_uninstall_corrupt"
+  "v003_evidence_gate_content"
+  "v003_dynamic_rules"
+  "v003_compact_recovery"
+  "v003_sync"
+  "v003_tooling_capability"
+  "v003_tooling_command"
+  "v003_doctor_plugin_root"
+  "v003_hook_uninstall"
 )
 CHECK_SCRIPTS=(
   "v001-package-boundary-regression.sh"
@@ -48,6 +59,17 @@ CHECK_SCRIPTS=(
   "v002-plugin-manifest-regression.sh"
   "v002-mcp-paths-regression.sh"
   "v002-hooks-inline-regression.sh"
+  "v003-ssrf-boundary-regression.sh"
+  "v003-mcp-path-traversal-regression.sh"
+  "v003-hook-uninstall-corrupt-regression.sh"
+  "v003-evidence-gate-content-regression.sh"
+  "v003-dynamic-rules-regression.sh"
+  "v003-compact-recovery-regression.sh"
+  "v003-sync-regression.sh"
+  "v003-tooling-capability-regression.sh"
+  "v003-tooling-command-regression.sh"
+  "v003-doctor-plugin-root-regression.sh"
+  "v003-hook-uninstall-regression.sh"
 )
 
 run_one() {

@@ -3,12 +3,12 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { readJson, isObject } from '../lib/json';
 import { isPluginSourceRoot } from '../lib/paths';
+import { validateMcpServers, REQUIRED_MCP_SERVERS } from '../lib/mcp-validation';
 
 const PLUGIN_VERSION = '0.2.0';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
 const EXPECTED_HOOKS = 16;
-const EXPECTED_MCP = 6;
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'WARN';
 
@@ -46,19 +46,6 @@ function countAgents(agentsDir: string): number {
 function countHooks(hooksDir: string): number {
   if (!existsSync(hooksDir)) return 0;
   return readdirSync(hooksDir).filter(f => f.endsWith('.sh')).length;
-}
-
-function countMcpServers(mcpPath: string): number {
-  if (!existsSync(mcpPath)) return -1;
-  try {
-    const data = readJson(mcpPath);
-    if (!isObject(data)) return -1;
-    const servers = data.mcpServers;
-    if (!isObject(servers)) return -1;
-    return Object.keys(servers).length;
-  } catch {
-    return -1;
-  }
 }
 
 function checkBoulderState(boulderPath: string): CheckResult {
@@ -147,11 +134,20 @@ export function runDoctor(target: string): DoctorResult {
     detail: `found ${hookCount}`,
   });
 
-  const mcpCount = countMcpServers(mcpPath);
+  const mcpValidation = validateMcpServers(mcpPath);
+  const mcpDetailParts: string[] = [
+    `found ${mcpValidation.count} servers (${mcpValidation.required} required, ${mcpValidation.optional} optional)`,
+  ];
+  if (mcpValidation.missing.length > 0) {
+    mcpDetailParts.push(`missing ${mcpValidation.missing.join(', ')}`);
+  }
+  if (mcpValidation.unknown.length > 0) {
+    mcpDetailParts.push(`unknown ${mcpValidation.unknown.join(', ')}`);
+  }
   checks.push({
-    label: `mcp.json valid (${EXPECTED_MCP} servers)`,
-    status: mcpCount === EXPECTED_MCP ? 'PASS' : 'FAIL',
-    detail: mcpCount < 0 ? 'invalid or missing' : `found ${mcpCount} servers`,
+    label: `mcp.json valid (${REQUIRED_MCP_SERVERS.length} required servers)`,
+    status: mcpValidation.valid ? 'PASS' : 'FAIL',
+    detail: mcpDetailParts.join('; '),
   });
 
   checks.push(checkBoulderState(resolvedBoulderPath));

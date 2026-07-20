@@ -40,6 +40,10 @@ export function getPluginToolingDir(): string {
   return path.join(getPluginRoot(), 'tooling');
 }
 
+export function getPluginRulesDir(): string {
+  return path.join(getPluginRoot(), '.kimi-code', 'rules');
+}
+
 export function getHomeDir(): string {
   return homedir();
 }

@@ -6,6 +6,9 @@ import { run as runLoadCheck } from './commands/load-check';
 import { run as runUninstall } from './commands/uninstall';
 import { run as runMcp } from './commands/mcp';
 import { run as runTooling } from './commands/tooling';
+import { run as runSync } from './commands/sync';
+import { run as runHandoff } from './commands/handoff';
+import { run as runCompletionStatus } from './commands/completion-status';
 
 type CommandFn = (args: string[]) => number;
 
@@ -13,16 +16,20 @@ const commands: Record<string, CommandFn> = {
   init: runInit,
   doctor: runDoctor,
   verify: runVerify,
+  'completion-status': runCompletionStatus,
   'load-check': runLoadCheck,
   uninstall: runUninstall,
   mcp: runMcp,
   tooling: runTooling,
+  sync: runSync,
+  handoff: runHandoff,
 };
 
 const aliases: Record<string, string> = {
   i: 'init',
   d: 'doctor',
   v: 'verify',
+  cs: 'completion-status',
   rm: 'uninstall',
 };
 
@@ -32,15 +39,18 @@ function printUsage(): void {
 Usage: lazykimi <command> [options]
 
 Commands:
-  init         Install LazyKimi into the current project
-  doctor       Check LazyKimi installation health
-  verify       Run doctor + regression tests + evidence gates; --must-pass
-  load-check   Report package readiness (skills/agents/hooks/mcp counts)
-  uninstall    Remove LazyKimi from the current project
-  mcp          Print MCP server declarations for /mcp-config import
-  tooling      Query the receipt-owned tooling capability broker
+  init              Install LazyKimi into the current project
+  doctor            Check LazyKimi installation health
+  verify            Run doctor + regression tests + evidence gates; --must-pass
+  completion-status Run doctor + regression tests + evidence gates and report READY/NOT READY
+  load-check        Report package readiness (skills/agents/hooks/mcp counts)
+  uninstall         Remove LazyKimi from the current project
+  sync              Update managed templates in an existing LazyKimi project
+  handoff           Generate a Markdown handoff summary of active work and evidence
+  mcp               Print MCP server declarations for /mcp-config import
+  tooling           Query the receipt-owned tooling capability broker
 
-Aliases: i=init, d=doctor, v=verify, rm=uninstall
+Aliases: i=init, d=doctor, v=verify, cs=completion-status, rm=uninstall
 
 Run 'lazykimi <command> --help' for command-specific options.`);
 }
