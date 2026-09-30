@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "owner": "lazykimi-portable-assets",
+  "roots": [
+    { "source": ".kimi-code/skills", "destination": "skills", "default_format": "text", "format_by_extension": {} }
+  ]
+}
