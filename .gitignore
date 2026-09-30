@@ -4,11 +4,12 @@ dist/
 __pycache__/
 .DS_Store
 *.tsbuildinfo
-.lazykimi/state/
 
-# lazytrae:managed:start:gitignore
-# LazyTrae runtime (managed by lazytrae init)
-.lazytrae/state/
-.lazytrae/logs/
-.lazytrae/evidence/
-# lazytrae:managed:end:gitignore
+# Optional local reference checkouts (see CONTRIBUTING.md); never commit.
+/sources/
+
+# Root-level runtime copies created by running `lazykimi init` in the repo
+# root during development; the shipped payload is lazykimi-plugin/.kimi-code/
+# and lazykimi-plugin/.lazykimi/schemas/.
+/.kimi-code/
+/.lazykimi/

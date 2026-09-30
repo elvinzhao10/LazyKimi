@@ -36,7 +36,7 @@ while IFS= read -r f; do
 done < <(git ls-files lazykimi-plugin/)
 
 # 4. Plugin code must not reference read-only parent reference dirs
-#    (sources/, .trae/, .lazytrae/) — those are immutable references, not deps.
+#    (sources/ and any sibling harness dirs) — immutable references, not deps.
 if grep -rIlE '(\.\./sources/|\.\./\.trae/|\.\./\.lazytrae/)' \
     "$PLUGIN_ROOT/src" "$PLUGIN_ROOT/mcp" "$PLUGIN_ROOT/tooling" \
     "$PLUGIN_ROOT/hooks" "$PLUGIN_ROOT/scripts" \

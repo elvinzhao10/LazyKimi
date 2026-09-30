@@ -82,6 +82,10 @@ development record.
 
 ## Boundaries
 
+- `sources/` is an optional, git-ignored area of local read-only reference
+  checkouts used during the v0.x port. It is never committed, never a build
+  dependency, and may be deleted freely: a fresh checkout builds and tests
+  without it.
 - Do not edit files under `sources/` — they are immutable references.
 - Do not present package readiness as Kimi host connection. Package checks
   prove copied assets and declarations; a live host session is a separate
