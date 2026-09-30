@@ -111,8 +111,20 @@ expect_stdout "SessionStart" "session-start.sh" "SessionStart.json" \
     && report "SessionStart (state bootstrap)" pass ".lazykimi tree bootstrapped" \
     || report "SessionStart (state bootstrap)" fail "state tree missing after SessionStart"
 
-# 2. UserPromptSubmit — plain prompt without keywords: silent.
+# 2. UserPromptSubmit — plain prompt without action verbs or keywords: silent
+#    (the adaptive runtime's ACTION_PATTERN gate keeps non-action prompts quiet).
 expect_stdout "UserPromptSubmit (plain)" "user-prompt-submit.sh" "UserPromptSubmit.json" "-" 0
+
+# 2b. UserPromptSubmit — action verb produces the adaptive intake directive
+#     (selection-only until the kimi host is observed, per v1.3.3).
+ACTION_PAYLOAD='{"session_id":"'"$SESSION_ID"'","cwd":"'"$CWD"'","hook_event_name":"UserPromptSubmit","prompt":"please review the current change set"}'
+out=$(printf '%s' "$ACTION_PAYLOAD" | run_hook bash "$HOOKS_DIR/user-prompt-submit.sh" 2>/dev/null); status=$?
+if [ "$status" -eq 0 ] && printf '%s' "$out" | grep -Eq 'additionalContext.*Adaptive intake directive' \
+    && printf '%s' "$out" | grep -Eq 'selection-only'; then
+    report "UserPromptSubmit (adaptive directive)" pass "action prompt produced a selection-only directive (exit 0)"
+else
+    report "UserPromptSubmit (adaptive directive)" fail "expected a selection-only adaptive directive, got: ${out:0:120}"
+fi
 
 # 3. UserPromptSubmit — command keyword routes to the explicit entry command.
 KW_PAYLOAD='{"session_id":"'"$SESSION_ID"'","cwd":"'"$CWD"'","hook_event_name":"UserPromptSubmit","prompt":"run ultrawork on the auth flow"}'

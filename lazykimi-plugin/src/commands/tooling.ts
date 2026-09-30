@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
-import { getPluginToolingDir } from '../lib/paths';
+import { getPluginRoot, getPluginToolingDir } from '../lib/paths';
 
 const OPTIONAL_CAPABILITIES: ReadonlyArray<string> = [
   'grep_app',
@@ -11,6 +11,15 @@ const OPTIONAL_CAPABILITIES: ReadonlyArray<string> = [
   'playwright',
   'ast_grep',
   'lsp',
+];
+
+const CODEGRAPH_VERBS: ReadonlyArray<string> = [
+  'codegraph-status',
+  'codegraph-install',
+  'codegraph-init',
+  'codegraph-enable',
+  'codegraph-doctor',
+  'codegraph-uninstall',
 ];
 
 function serverNameForCapability(capability: string): string {
@@ -126,14 +135,14 @@ function resolveToolingDir(): string {
   return getPluginToolingDir();
 }
 
-function runPythonScript(name: string): number {
+function runPythonScript(name: string, args: string[] = []): number {
   const script = path.join(resolveToolingDir(), name);
   if (!existsSync(script)) {
     console.error(`lazykimi tooling: script not found: ${script}`);
     return 1;
   }
 
-  const result = spawnSync('python3', [script], {
+  const result = spawnSync('python3', [script, ...args], {
     encoding: 'utf-8',
     stdio: 'pipe',
   });
@@ -157,18 +166,158 @@ function runPythonScript(name: string): number {
   return 0;
 }
 
+// --- Family capability surface (T13) ---------------------------------------
+
+function findOption(args: string[], name: string): string | undefined {
+  const index = args.indexOf(name);
+  if (index === -1 || index + 1 >= args.length) {
+    return undefined;
+  }
+  return args[index + 1];
+}
+
+/**
+ * Resolve the receipt-owned tooling root the family surface reports against.
+ * Precedence: explicit --tooling-root, LAZYKIMI_TOOLING_ROOT, then the
+ * uninstalled sentinel (mirrors the family default: report honestly as
+ * unavailable rather than fabricate a root).
+ */
+function resolveToolingRoot(args: string[]): string {
+  const explicit = findOption(args, '--tooling-root');
+  if (explicit) {
+    return path.resolve(explicit);
+  }
+  const fromEnv = process.env.LAZYKIMI_TOOLING_ROOT;
+  if (fromEnv) {
+    return path.resolve(fromEnv);
+  }
+  return path.join(getPluginRoot(), '.lazykimi-readiness-uninitialized');
+}
+
+function runToolingScript(scriptArgs: string[]): number {
+  const script = path.join(getPluginRoot(), 'scripts', 'lazykimi-tooling.sh');
+  if (!existsSync(script)) {
+    console.error(`lazykimi tooling: script not found: ${script}`);
+    return 1;
+  }
+  const result = spawnSync('bash', [script, ...scriptArgs], {
+    encoding: 'utf-8',
+    stdio: 'pipe',
+  });
+  if (result.stdout) {
+    process.stdout.write(result.stdout);
+  }
+  if (result.stderr) {
+    process.stderr.write(result.stderr);
+  }
+  if (result.error) {
+    console.error(`lazykimi tooling: failed to run lazykimi-tooling.sh: ${result.error.message}`);
+    return 1;
+  }
+  return result.status ?? 1;
+}
+
+/** Readiness records + the v1.3.3 adaptive selection report (selection-only
+ * until the kimi host is observed; the block is computed by the ported
+ * lazykimi_adaptive_runtime mapping, never asserted by the CLI). */
+function runCapabilityStatus(args: string[]): number {
+  const asJson = args.includes('--json');
+  const toolingRoot = resolveToolingRoot(args);
+  const toolingDir = resolveToolingDir();
+
+  const readiness = spawnSync(
+    'python3',
+    [path.join(toolingDir, 'lazykimi_capability_readiness.py'), 'readiness-report', '--tooling-root', toolingRoot, '--json'],
+    { encoding: 'utf-8', stdio: 'pipe' },
+  );
+  if (readiness.error || readiness.status !== 0) {
+    console.error(readiness.stderr || 'lazykimi tooling: capability readiness report failed');
+    return readiness.status ?? 1;
+  }
+
+  const adaptiveScript = [
+    'import json, sys',
+    `sys.path.insert(0, ${JSON.stringify(toolingDir)})`,
+    'from lazykimi_adaptive_runtime import _runtime_mapping',
+    "decision = {'mode': 'orchestrated', 'approval_required': False, 'snapshot': {}, 'explicitWorkflow': None}",
+    "mapping = _runtime_mapping(decision, False, 'kimi')",
+    'print(json.dumps({',
+    '  "host": "kimi",',
+    '  "hostObserved": False,',
+    '  "route": mapping["route"],',
+    '  "hostReadiness": mapping["hostReadiness"],',
+    '  "entryRoute": "explicit-start-work",',
+    '  "reason": "v1.3.3 rule: the kimi host profile stays selection-only until a host observation receipt exists",',
+    '}, sort_keys=True))',
+  ].join('\n');
+  const adaptive = spawnSync('python3', ['-c', adaptiveScript], { encoding: 'utf-8', stdio: 'pipe' });
+  if (adaptive.error || adaptive.status !== 0) {
+    console.error(adaptive.stderr || 'lazykimi tooling: adaptive selection report failed');
+    return adaptive.status ?? 1;
+  }
+
+  try {
+    const records = JSON.parse(readiness.stdout);
+    const adaptiveBlock = JSON.parse(adaptive.stdout);
+    const report = {
+      tooling_root: toolingRoot,
+      adaptive: adaptiveBlock,
+      ...records,
+    };
+    if (asJson) {
+      console.log(JSON.stringify(report, null, 2));
+      return 0;
+    }
+    console.log(`TOOLING_ROOT: ${toolingRoot}`);
+    console.log(`ADAPTIVE_ROUTE: ${adaptiveBlock.route} (host=${adaptiveBlock.host}, readiness=${adaptiveBlock.hostReadiness})`);
+    for (const record of records.records ?? []) {
+      const entry = record as { capability?: string; provider?: string; internal_status?: string };
+      console.log(`CAPABILITY: ${entry.capability ?? '?'} PROVIDER: ${entry.provider ?? '?'} STATUS: ${entry.internal_status ?? '?'}`);
+    }
+    return 0;
+  } catch (err) {
+    console.error(`lazykimi tooling: capability-status failed to parse reports: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+}
+
+function runCodegraph(verb: string, args: string[]): number {
+  const target = findOption(args, '--target') ?? process.cwd();
+  const toolingRoot = findOption(args, '--tooling-root') ?? process.env.LAZYKIMI_TOOLING_ROOT;
+  if (!toolingRoot) {
+    console.error('lazykimi tooling: codegraph lifecycle requires --tooling-root or LAZYKIMI_TOOLING_ROOT');
+    console.error('CodeGraph stays disabled until a caller explicitly installs it (family rule).');
+    return 1;
+  }
+  return runToolingScript([verb, '--target', path.resolve(target), '--tooling-root', path.resolve(toolingRoot)]);
+}
+
 function printHelp(): void {
   console.log(`Usage: lazykimi tooling <subcommand>
 
-Query the receipt-owned tooling capability broker.
+Query the receipt-owned tooling capability broker and the family
+capability surface.
 
 Subcommands:
-  detect   Print capability detection results for host-installed tools
-  status   Print overall capability status and detected tools
-  policy   Print the tooling policy digest and permission defaults
+  capability-status [--json] [--tooling-root DIR]
+                       Capability readiness records plus the v1.3.3 adaptive
+                       selection report (selection-only until the kimi host
+                       is observed)
+  detect [--tooling-root DIR]
+                       Tooling root status, registry, and provider detection
+  policy               Tooling policy provider report (JSON)
+  codegraph-status     CodeGraph receipt/index state (explicit capability)
+  codegraph-install    Provision the pinned CodeGraph package (absent root only)
+  codegraph-init       Initialize the project-local CodeGraph index
+  codegraph-enable     Enable the initialized index explicitly
+  codegraph-doctor     CodeGraph status + sizing recommendation
+  codegraph-uninstall  Receipt-gated removal (caller-created index survives)
   enable   <capability>  Enable an optional MCP capability placeholder
   disable  <capability>  Disable an optional MCP capability placeholder
   list     Show enabled/disabled optional MCP capabilities
+
+Codegraph verbs accept --target DIR (default: cwd) and require
+--tooling-root DIR or LAZYKIMI_TOOLING_ROOT.
 
 Optional capabilities:
   ${OPTIONAL_CAPABILITIES.join(', ')}
@@ -184,20 +333,25 @@ export function run(args: string[]): number {
   }
 
   const subcommand = args[0];
+  const rest = args.slice(1);
   switch (subcommand) {
-    case 'detect':
-      return runPythonScript('lazykimi_detector.py');
+    case 'capability-status':
     case 'status':
-      return runPythonScript('lazykimi_capability.py');
+      return runCapabilityStatus(rest);
+    case 'detect':
+      return runToolingScript(['detect', '--tooling-root', resolveToolingRoot(rest)]);
     case 'policy':
-      return runPythonScript('lazykimi_policy.py');
+      return runPythonScript('lazykimi_policy.py', ['providers', '--json']);
     case 'enable':
-      return runEnable(args.slice(1));
+      return runEnable(rest);
     case 'disable':
-      return runDisable(args.slice(1));
+      return runDisable(rest);
     case 'list':
       return runList();
     default:
+      if ((CODEGRAPH_VERBS as readonly string[]).includes(subcommand)) {
+        return runCodegraph(subcommand, rest);
+      }
       console.error(`lazykimi tooling: unknown subcommand '${subcommand}'`);
       printHelp();
       return 1;

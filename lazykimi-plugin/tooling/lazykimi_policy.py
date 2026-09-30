@@ -1,133 +1,208 @@
 #!/usr/bin/env python3
-"""LazyKimi tooling policy engine.
-
-Default-deny policy for the receipt-owned tooling lifecycle.
-- Network access requires explicit provider selection.
-- Filesystem reads are allowed by default within the workspace.
-- Shell execution is denied by default.
-- Default timeout is 30s; network operations use 10s.
-
-Python stdlib only.
-"""
 from __future__ import annotations
 
-import hashlib
+import argparse
 import json
+import os
+import sys
 from pathlib import Path
-from typing import Final, NoReturn
-
-DEFAULT_TIMEOUT_SECONDS: Final = 30
-NETWORK_TIMEOUT_SECONDS: Final = 10
-
-CONTRACT_VERSION: Final = "1.1.0"
-PLUGIN_ROOT: Final = Path(__file__).resolve().parent.parent
-CONTRACT: Final = PLUGIN_ROOT / "contracts" / "automatic-tooling-contract.v1.json"
-SIDECAR: Final = CONTRACT.with_suffix(CONTRACT.suffix + ".sha256")
-
-PERMISSION_DEFAULTS: Final = {
-    "filesystem_read": "default_allow",
-    "network": "default_deny",
-    "shell_exec": "default_deny",
-}
-
-# Capabilities that touch the network or host-governed resources and so
-# require an explicit provider selection before invocation.
-EXPLICIT_PROVIDER_CAPABILITIES: Final = frozenset({
-    "architecture_search",
-    "documentation_search",
-    "web_search",
-    "external_code_search",
-    "browser_automation",
-})
-
-# 8 typed error codes for the tooling lifecycle.
-ERROR_CODES: Final = {
-    "CAPABILITY_NOT_FOUND": "requested capability is not declared in the canonical contract",
-    "PROVIDER_NOT_AVAILABLE": "no provider for the capability is available on PATH or in the tooling root",
-    "PERMISSION_DENIED": "policy denied the requested capability or provider invocation",
-    "TIMEOUT_EXCEEDED": "provider invocation exceeded the configured timeout",
-    "NETWORK_NOT_ALLOWED": "network access requires explicit provider selection",
-    "TOOLING_ROOT_NOT_EMPTY": "tooling root must be empty or receipt-owned before install",
-    "RECEIPT_MISMATCH": "tooling root receipt is stale, modified, or mismatched",
-    "CONTRACT_VERSION_MISMATCH": "contract version does not match the broker's expected version",
-}
+from lazykimi_policy_config import (
+    ENCRYPTED_REFERENCE,
+    PolicyError,
+    config_path,
+    contract_digest,
+    fail,
+    read_config,
+    valid_reference,
+    workspace_id,
+    write_config,
+)
 
 
-class PolicyError(Exception):
-    """Typed policy failure carrying one of the ERROR_CODES keys."""
-
-    def __init__(self, code: str, message: str) -> None:
-        self.code = code
-        self.message = message
-        super().__init__(message)
-
-
-def fail(code: str, message: str) -> NoReturn:
-    raise PolicyError(code, message)
-
-
-def contract_digest() -> str:
-    """Return the sha256 of the contract file, validating the sidecar first."""
-    try:
-        raw = CONTRACT.read_bytes()
-        declared = SIDECAR.read_text(encoding="utf-8").split()[0]
-        value = json.loads(raw)
-    except (FileNotFoundError, IndexError, json.JSONDecodeError):
-        fail("CONTRACT_VERSION_MISMATCH", "contract or sha256 sidecar is unreadable")
-    if hashlib.sha256(raw).hexdigest() != declared:
-        fail("RECEIPT_MISMATCH", "contract sha256 sidecar does not match the contract file")
-    if value.get("contract_version") != CONTRACT_VERSION:
-        fail(
-            "CONTRACT_VERSION_MISMATCH",
-            f"contract version {value.get('contract_version')!r} != expected {CONTRACT_VERSION!r}",
-        )
-    return declared
+def approval_decision(config: dict[str, object], workspace: str, capability: str, provider: str, policy: str, digest: str) -> str:
+    if policy == "always-ask":
+        return "ask"
+    ledger = config["approvals"]
+    assert isinstance(ledger, list)
+    matches = [entry for entry in ledger if isinstance(entry, dict) and entry["workspace"] == workspace and entry["capability"] == capability and entry["provider"] == provider and entry["digest"] == digest]
+    if any(entry["decision"] == "deny" for entry in matches):
+        return "denied"
+    if policy == "automatic":
+        return "allowed"
+    if any(entry["decision"] == "allow" and entry["scope"] in {"once", "workspace"} for entry in matches):
+        return "allowed"
+    return "ask"
 
 
-def is_allowed(action: str) -> bool:
-    return PERMISSION_DEFAULTS.get(action, "default_deny") == "default_allow"
+def provider_reference(config: dict[str, object], provider: str, environment_name: str) -> str | None:
+    credentials = config["credentials"]
+    assert isinstance(credentials, dict)
+    configured = credentials.get(provider)
+    if isinstance(configured, str) and configured.startswith("keychain://"):
+        return configured
+    if environment_name in os.environ:
+        return f"env://{environment_name}"
+    if isinstance(configured, str) and ENCRYPTED_REFERENCE.fullmatch(configured):
+        return configured
+    return None
 
 
-def requires_explicit_provider_selection(capability: str) -> bool:
-    return capability in EXPLICIT_PROVIDER_CAPABILITIES
+def emit(value: dict[str, object], as_json: bool) -> None:
+    if as_json:
+        print(json.dumps(value, sort_keys=True))
+        return
+    for key, item in value.items():
+        print(f"{key.upper()}: {item}")
 
 
-def timeout_for(capability: str) -> int:
-    if requires_explicit_provider_selection(capability):
-        return NETWORK_TIMEOUT_SECONDS
-    return DEFAULT_TIMEOUT_SECONDS
+def provider_status(config: dict[str, object], workspace: str, policy: str) -> dict[str, object]:
+    digest = contract_digest()
+    documentation_decision = approval_decision(config, workspace, "documentation_search", "context7", policy, digest) if workspace else "ask"
+    external_code_decision = approval_decision(config, workspace, "external_code_search", "grep_app", policy, digest) if workspace else "ask"
+    architecture_decision = approval_decision(config, workspace, "architecture_search", "codegraph", policy, digest) if workspace else "ask"
+    browser_decision = approval_decision(config, workspace, "browser_automation", "playwright", policy, digest) if workspace else "ask"
+    return {
+        "contract_digest": digest,
+        "providers": {
+            "ripgrep": {"self_hosted": True, "cost": "free", "api_key": "not_required", "read_only": True, "reachability": "local", "decision": "allowed"},
+            "ast_grep": {"self_hosted": True, "cost": "free", "api_key": "not_required", "read_only": True, "reachability": "local", "decision": "allowed"},
+            "lsp": {"self_hosted": True, "cost": "free", "api_key": "not_required", "read_only": True, "reachability": "local", "decision": "allowed"},
+            "codegraph": {"self_hosted": True, "cost": "free", "api_key": "not_required", "read_only": True, "reachability": "not_started", "decision": architecture_decision},
+            "context7": {"self_hosted": False, "cost": "free_or_metered", "api_key": "optional", "credential_ref": provider_reference(config, "context7", "CONTEXT7_API_KEY"), "credential_source": "reference-only", "read_only": True, "reachability": "not_contacted", "decision": documentation_decision},
+            "web": {"self_hosted": False, "cost": "host_governed", "api_key": "host_managed", "read_only": True, "reachability": "host_governed", "decision": "ask"},
+            "grep_app": {"self_hosted": False, "cost": "free_or_metered", "api_key": "not_required", "credential_ref": None, "read_only": True, "reachability": "not_contacted", "decision": external_code_decision},
+            "filesystem": {"self_hosted": True, "cost": "free", "api_key": "not_required", "read_only": True, "reachability": "workspace_scoped", "decision": "allowed"},
+            "playwright": {"self_hosted": True, "cost": "free_or_metered", "api_key": "not_required", "read_only": True, "reachability": "not_started", "decision": browser_decision},
+        },
+    }
 
 
-def validate_tooling_root(tooling_root: Path) -> Path:
-    """Validate that the tooling root is absolute, traversal-free, and not a symlink."""
-    path = Path(tooling_root)
-    if not path.is_absolute() or ".." in path.parts:
-        fail("PERMISSION_DENIED", "tooling root must be an absolute traversal-free path")
-    if path.is_symlink():
-        fail("PERMISSION_DENIED", "tooling root must not be a symlink")
-    return path.resolve()
+def providers_status(args: argparse.Namespace) -> None:
+    config = read_config(config_path())
+    workspace = workspace_id(args.workspace) if args.workspace else ""
+    emit(provider_status(config, workspace, args.policy), args.json)
 
 
-def authorize(capability: str, action: str = "filesystem_read") -> None:
-    """Authorize a capability invocation under the default-deny policy."""
-    if action == "network" and not is_allowed("network"):
-        if requires_explicit_provider_selection(capability):
-            fail("NETWORK_NOT_ALLOWED", f"capability {capability!r} requires explicit provider selection")
-    if action == "shell_exec" and not is_allowed("shell_exec"):
-        fail("PERMISSION_DENIED", "shell execution is denied by default")
+def setup(args: argparse.Namespace) -> None:
+    if not args.non_interactive:
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "setup requires --non-interactive in this non-prompting command surface")
+    path = config_path()
+    config = read_config(path)
+    if not path.exists():
+        write_config(path, config)
+    emit(provider_status(config, "", "ask-once"), args.json)
 
 
-def error_codes() -> list[dict[str, str]]:
-    return [{"code": code, "description": desc} for code, desc in ERROR_CODES.items()]
+def providers_configure(args: argparse.Namespace) -> None:
+    if not args.non_interactive or args.consent != "yes":
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "noninteractive credential configuration requires --consent yes")
+    if args.provider not in {"context7"}:
+        fail("AUTOMATIC_TOOLING_UNKNOWN_PROVIDER", "provider does not accept a credential reference")
+    if not valid_reference(args.credential_ref):
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "credential configuration accepts only an opaque keychain, encrypted, or env reference")
+    path = config_path()
+    config = read_config(path)
+    credentials = config["credentials"]
+    assert isinstance(credentials, dict)
+    credentials[args.provider] = args.credential_ref
+    write_config(path, config)
+    emit({"provider": args.provider, "credential_ref": args.credential_ref, "status": "configured"}, args.json)
+
+
+def providers_test(args: argparse.Namespace) -> None:
+    path = config_path()
+    config = read_config(path)
+    if not path.exists():
+        write_config(path, config)
+    workspace = workspace_id(args.workspace) if args.workspace else ""
+    emit(provider_status(config, workspace, args.policy), args.json)
+
+
+def approval(args: argparse.Namespace) -> None:
+    digest = contract_digest()
+    path = config_path()
+    config = read_config(path)
+    identity = workspace_id(args.workspace)
+    if args.action == "check":
+        decision = approval_decision(config, identity, args.capability, args.provider, args.policy, digest)
+        if decision == "allowed" and args.policy == "ask-once":
+            ledger = config["approvals"]
+            assert isinstance(ledger, list)
+            ledger[:] = [entry for entry in ledger if not (isinstance(entry, dict) and entry["workspace"] == identity and entry["capability"] == args.capability and entry["provider"] == args.provider and entry["digest"] == digest and entry["scope"] == "once")]
+            write_config(path, config)
+        emit({"decision": decision}, args.json)
+        return
+    ledger = config["approvals"]
+    assert isinstance(ledger, list)
+    ledger[:] = [entry for entry in ledger if not (isinstance(entry, dict) and entry["workspace"] == identity and entry["capability"] == args.capability and entry["provider"] == args.provider)]
+    if args.action != "revoke":
+        scope = "deny" if args.action == "deny" else args.scope
+        ledger.append({"workspace": identity, "capability": args.capability, "provider": args.provider, "decision": "deny" if args.action == "deny" else "allow", "scope": scope, "digest": digest})
+    write_config(path, config)
+    emit({"decision": "revoked" if args.action == "revoke" else ("denied" if args.action == "deny" else "allowed")}, args.json)
+
+
+def toolpack(args: argparse.Namespace) -> None:
+    root = Path(args.toolpack_root) if args.toolpack_root else Path.home() / ".local" / "share" / "lazyseries" / "toolpack"
+    if not root.is_absolute() or ".." in root.parts:
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "toolpack root must be an absolute traversal-free path")
+    root.mkdir(mode=0o700, parents=True, exist_ok=True)
+    if root.is_symlink():
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "toolpack root must not be a symlink")
+    os.chmod(root, 0o700)
+    emit({"root": str(root.resolve()), "source": "override" if args.toolpack_root else "default", "receipt": str(root / ".lazykimi-toolpack-receipt.json")}, args.json)
+
+
+def parser() -> argparse.ArgumentParser:
+    root = argparse.ArgumentParser()
+    commands = root.add_subparsers(dest="command", required=True)
+    setup_command = commands.add_parser("setup")
+    setup_command.add_argument("--non-interactive", action="store_true")
+    setup_command.add_argument("--json", action="store_true")
+    setup_command.set_defaults(handler=setup)
+    providers_command = commands.add_parser("providers")
+    providers_command.add_argument("--workspace")
+    providers_command.add_argument("--policy", choices=("automatic", "ask-once", "always-ask"), default="ask-once")
+    providers_command.add_argument("--json", action="store_true")
+    providers_command.set_defaults(handler=providers_status)
+    providers = providers_command.add_subparsers(dest="action")
+    test = providers.add_parser("test")
+    test.add_argument("--workspace")
+    test.add_argument("--policy", choices=("automatic", "ask-once", "always-ask"), default="ask-once")
+    test.add_argument("--json", action="store_true")
+    test.set_defaults(handler=providers_test)
+    configure = providers.add_parser("configure")
+    configure.add_argument("--provider", required=True)
+    configure.add_argument("--credential-ref", required=True)
+    configure.add_argument("--consent")
+    configure.add_argument("--non-interactive", action="store_true")
+    configure.add_argument("--json", action="store_true")
+    configure.set_defaults(handler=providers_configure)
+    approvals = commands.add_parser("approval").add_subparsers(dest="action", required=True)
+    for name in ("grant", "deny", "revoke", "check"):
+        command = approvals.add_parser(name)
+        command.add_argument("--workspace", required=True)
+        command.add_argument("--capability", required=True)
+        command.add_argument("--provider", required=True)
+        command.add_argument("--policy", choices=("automatic", "ask-once", "always-ask"), default="ask-once")
+        command.add_argument("--json", action="store_true")
+        if name == "grant": command.add_argument("--scope", choices=("once", "workspace"), required=True)
+        command.set_defaults(handler=approval)
+    toolpacks = commands.add_parser("toolpack").add_subparsers(dest="action", required=True)
+    resolve = toolpacks.add_parser("resolve")
+    resolve.add_argument("--toolpack-root")
+    resolve.add_argument("--json", action="store_true")
+    resolve.set_defaults(handler=toolpack)
+    return root
 
 
 def main() -> int:
-    print(json.dumps({
-        "contract_version": CONTRACT_VERSION,
-        "permissions": PERMISSION_DEFAULTS,
-        "timeouts": {"default_seconds": DEFAULT_TIMEOUT_SECONDS, "network_seconds": NETWORK_TIMEOUT_SECONDS},
-        "error_codes": error_codes(),
-    }, indent=2, sort_keys=True))
+    try:
+        args = parser().parse_args()
+        args.handler(args)
+    except PolicyError as error:
+        print(json.dumps({"error": error.code, "status": "denied"}, sort_keys=True), file=sys.stderr)
+        return 2
     return 0
 
 

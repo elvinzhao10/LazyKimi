@@ -1,247 +1,217 @@
 #!/usr/bin/env python3
-"""LazyKimi capability broker: receipt-owned detect/install/verify/status.
-
-Installs land in an explicit empty caller-selected absolute tooling root;
-JSON receipts are written into tooling_root/receipts/. Python stdlib only.
-"""
 from __future__ import annotations
 
+import argparse
 import json
 import os
+import platform
+import re
 import shutil
-import stat
-import subprocess
-import time
+import sys
 from pathlib import Path
-from typing import Final, NoReturn
+from typing import Final
 
-from lazykimi_detector import detect_all
-from lazykimi_policy import (
-    CONTRACT_VERSION,
-    PolicyError,
-    contract_digest,
-    fail,
-    requires_explicit_provider_selection,
-    timeout_for,
-    validate_tooling_root,
-)
+from lazykimi_capability_contract import BrokerError, PLUGIN_ROOT, contract_digest, fail
+from lazykimi_capability_process import run_process, timeout_seconds
+from lazykimi_capability_receipt import prepare_toolpack, write_receipt
+from lazykimi_policy import approval_decision, config_path, read_config, workspace_id
 
-PLUGIN_ROOT: Final = Path(__file__).resolve().parent.parent
-CAPABILITIES_FILE: Final = PLUGIN_ROOT / "tooling" / "capabilities.json"
-RECEIPTS_DIR_NAME: Final = "receipts"
-PROVIDERS_DIR_NAME: Final = "providers"
-ALLOWED_ROOT_ENTRIES: Final = frozenset({RECEIPTS_DIR_NAME, PROVIDERS_DIR_NAME})
-
-# Map capability -> default provider command used for PATH detection.
-CAPABILITY_TO_COMMAND: Final = {
-    "local_search": "rg",
-    "structural_search": "sg",
-    "code_navigation": "typescript-language-server",
-    "architecture_search": "codegraph",
+ALIASES: Final = {
+    "rg": "local_search",
+    "search": "local_search",
+    "sg": "structural_search",
+    "semantic_navigation": "code_navigation",
+}
+SAFE_CAPABILITIES: Final = frozenset({"local_search", "structural_search", "code_navigation"})
+REMOTE_PROVIDERS: Final = {
     "documentation_search": "context7",
     "web_search": "web",
     "external_code_search": "grep_app",
+    "architecture_search": "codegraph",
     "browser_automation": "playwright",
     "filesystem_read": "filesystem",
 }
-
-# Capabilities that can be staged from a host-installed binary into the
-# receipt-owned tooling root. Remote/host-governed capabilities are not
-# auto-installable and require explicit provider selection.
-LOCALLY_INSTALLABLE: Final = frozenset({
-    "local_search",
-    "structural_search",
-    "code_navigation",
-    "architecture_search",
-    "browser_automation",
-})
+METERED_PROVIDERS: Final = frozenset({"context7", "web", "grep_app", "playwright"})
+ALWAYS_ASK_ACTIONS: Final = frozenset({"auth", "form", "download", "upload", "publish", "external-write", "purchase", "destructive", "secret-read"})
 
 
-def _load_capabilities() -> list[dict[str, object]]:
-    try:
-        data = json.loads(CAPABILITIES_FILE.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as error:
-        fail("CAPABILITY_NOT_FOUND", f"capabilities.json is unreadable: {error}")
-    capabilities = data.get("capabilities") if isinstance(data, dict) else None
-    if not isinstance(capabilities, list):
-        fail("CAPABILITY_NOT_FOUND", "capabilities.json has no capabilities array")
-    return capabilities
+def absolute_directory(raw: str, label: str) -> Path:
+    path = Path(raw)
+    if not path.is_absolute() or ".." in path.parts:
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", f"{label} must be an absolute traversal-free path")
+    if not path.is_dir() or path.is_symlink():
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", f"{label} must be an existing non-symlink directory")
+    return path.resolve()
 
 
-def detect_capability(name: str) -> dict[str, object]:
-    """Check if the tool backing the capability is on PATH."""
-    if name not in CAPABILITY_TO_COMMAND:
-        fail("CAPABILITY_NOT_FOUND", f"unknown capability {name!r}")
-    detected = detect_all()
-    command = CAPABILITY_TO_COMMAND[name]
-    explicit = requires_explicit_provider_selection(name)
-    # code_navigation may be served by either LSP command.
-    candidates = ("typescript-language-server", "basedpyright") if name == "code_navigation" else (command,)
+def ripgrep_platform_suffix(system: str, machine: str) -> str | None:
+    if system == "Darwin":
+        return "darwin-arm64" if machine == "arm64" else "darwin-x64" if machine == "x86_64" else None
+    if system == "Linux":
+        return "linux-arm64" if machine in {"aarch64", "arm64"} else "linux-x64" if machine == "x86_64" else None
+    return None
+
+
+def installed_provider(root: Path, capability: str) -> str | None:
+    providers = root / "providers"
+    if capability == "local_search":
+        suffix = ripgrep_platform_suffix(platform.system(), platform.machine())
+        if suffix is None:
+            return None
+        candidate = providers / "node_modules" / "@vscode" / f"ripgrep-{suffix}" / "bin" / "rg"
+    else:
+        candidate = providers / "node_modules" / "@ast-grep" / "cli" / "ast-grep"
+        if not candidate.is_file() or not os.access(candidate, os.X_OK):
+            candidate = providers / "node_modules" / "@ast-grep" / "cli" / "sg"
+    return str(candidate) if candidate.is_file() and os.access(candidate, os.X_OK) else None
+
+
+def local_provider(capability: str, toolpack: Path) -> str:
+    command = "rg" if capability == "local_search" else "sg"
+    host = shutil.which(command)
+    if host:
+        return host
+    owned = installed_provider(toolpack, capability)
+    if owned:
+        return owned
+    providers = toolpack / "providers"
+    providers.mkdir(mode=0o700)
+    lifecycle = PLUGIN_ROOT / "scripts" / "lazykimi-tooling.sh"
+    run_process(["bash", str(lifecycle), "install", "--tooling-root", str(providers)], toolpack, 120)
+    owned = installed_provider(toolpack, capability)
+    if owned is None:
+        fail("AUTOMATIC_TOOLING_PROVIDER_UNAVAILABLE", "locked local provider is unavailable")
+    write_receipt(toolpack, contract_digest(), True)
+    return owned
+
+
+def lsp_provider(workspace: Path, toolpack: Path) -> str:
+    typescript = any(any(workspace.rglob(pattern)) for pattern in ("*.ts", "*.tsx", "*.js", "*.jsx")) or (workspace / "tsconfig.json").is_file()
+    language, command = ("typescript", "typescript-language-server") if typescript else ("python", "basedpyright-langserver")
+    candidates = [workspace / "node_modules" / ".bin" / command]
+    host = shutil.which(command)
+    if host:
+        candidates.append(Path(host))
+    candidates.append(toolpack / "providers" / "lsp" / "lsp" / language / "node_modules" / ".bin" / command)
     for candidate in candidates:
-        info = detected.get(candidate)
-        if info and info.get("available"):
-            return {
-                "capability": name,
-                "command": candidate,
-                "available": True,
-                "path": str(info.get("path", "")),
-                "version": str(info.get("version", "")),
-                "requires_explicit_provider_selection": explicit,
-            }
-    return {
-        "capability": name,
-        "command": command,
-        "available": False,
-        "path": "",
-        "version": "",
-        "requires_explicit_provider_selection": explicit,
-    }
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate)
+    provider_root = toolpack / "providers"
+    try:
+        provider_root.mkdir(mode=0o700, exist_ok=True)
+    except (FileExistsError, PermissionError):
+        # PermissionError covers sandboxed mkdir brokers that report EEXIST as EACCES.
+        pass
+    if provider_root.is_symlink() or not provider_root.is_dir():
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "provider root must be a real private directory")
+    lsp_root = provider_root / "lsp"
+    try:
+        lsp_root.mkdir(mode=0o700, exist_ok=True)
+    except (FileExistsError, PermissionError):
+        # PermissionError covers sandboxed mkdir brokers that report EEXIST as EACCES.
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "LSP root must be a real private directory")
+    if lsp_root.is_symlink() or not lsp_root.is_dir():
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "LSP root must be a real private directory")
+    os.chmod(lsp_root, 0o700)
+    lifecycle = PLUGIN_ROOT / "scripts" / "lazykimi-tooling.sh"
+    run_process(["bash", str(lifecycle), "lsp-install", "--target", str(workspace), "--tooling-root", str(lsp_root)], workspace, 120)
+    candidate = lsp_root / "lsp" / language / "node_modules" / ".bin" / command
+    if not candidate.is_file() or not os.access(candidate, os.X_OK):
+        fail("AUTOMATIC_TOOLING_PROVIDER_UNAVAILABLE", "locked LSP provider is unavailable")
+    write_receipt(toolpack, contract_digest(), True)
+    return str(candidate)
 
 
-def _ensure_empty_tooling_root(tooling_root: Path) -> Path:
-    root = validate_tooling_root(tooling_root)
-    if root.exists():
-        if not root.is_dir():
-            fail("TOOLING_ROOT_NOT_EMPTY", "tooling root must be a directory")
-        unexpected = [e.name for e in root.iterdir() if e.name not in ALLOWED_ROOT_ENTRIES]
-        if unexpected:
-            fail("TOOLING_ROOT_NOT_EMPTY", f"tooling root contains unexpected entries: {sorted(unexpected)}")
-    root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(root, 0o700)
+def sanitized_query(raw: str) -> str:
+    value = raw
+    for secret in os.environ.values():
+        if len(secret) >= 8:
+            value = value.replace(secret, "[redacted]")
+    value = re.sub(r"(?i)\bsource\b(?:\s+[^\s,;]+)?", "[redacted]", value)
+    value = re.sub(r"(?i)\.env\b", "[redacted]", value)
+    value = re.sub(r"(?i)(?:authorization\s*:\s*)?bearer\s+[^\s,;]+", "[redacted]", value)
+    value = re.sub(r"(?i)(?:api[_-]?key|secret|token|password|credential)\s*[:=]\s*[^\s,;]+", "[redacted]", value)
+    value = re.sub(r"(?:^|\s)/(?:Users|home|private|var)/[^\s]*", " [path]", value)
+    return " ".join(value.split())[:512]
+
+
+def remote_provider(args: argparse.Namespace, canonical: str, workspace: Path) -> None:
+    provider = REMOTE_PROVIDERS[canonical]
+    if args.action in ALWAYS_ASK_ACTIONS:
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "selected action always requires an interactive approval")
+    if canonical == "filesystem_read":
+        selected = Path(args.path or workspace)
+        try:
+            selected.resolve().relative_to(workspace)
+        except ValueError:
+            fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "filesystem reads must remain within the selected workspace")
+    if canonical == "architecture_search":
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "CodeGraph install and index initialization remain explicit receipt-owned commands")
+    config = read_config(config_path())
+    decision = approval_decision(config, workspace_id(str(workspace)), canonical, provider, args.policy, contract_digest())
+    if decision != "allowed":
+        fail("AUTOMATIC_TOOLING_PERMISSION_DENIED", "provider invocation requires a matching task-scoped approval")
+    if provider in METERED_PROVIDERS and not (args.automatic_spend and args.budget > 0):
+        fail("AUTOMATIC_TOOLING_EGRESS_DENIED", "metered or unknown-cost provider requires explicit bounded budget consent")
+    query = sanitized_query(args.query)
+    if not query:
+        fail("AUTOMATIC_TOOLING_PROVIDER_UNAVAILABLE", "provider query is empty after sanitization")
+    adapter_name = f"LAZYKIMI_PROVIDER_{provider.upper()}_COMMAND"
+    adapter = os.environ.get(adapter_name)
+    if not adapter:
+        fail("AUTOMATIC_TOOLING_PROVIDER_UNAVAILABLE", "no task-scoped provider adapter is configured")
+    command = shutil.which(adapter)
+    if not command:
+        fail("AUTOMATIC_TOOLING_PROVIDER_UNAVAILABLE", "configured task-scoped provider adapter is unavailable")
+    result = run_process([command, query], workspace, timeout_seconds())
+    print(json.dumps({"status": "success", "capability": canonical, "provider": provider, "output": {"trust": "untrusted", "text": sanitized_query(result)}}, sort_keys=True))
+
+
+def run(args: argparse.Namespace) -> None:
+    digest = contract_digest()
+    canonical = ALIASES.get(args.capability, args.capability)
+    if canonical not in {"local_search", "structural_search", "code_navigation", "architecture_search", "documentation_search", "web_search", "external_code_search", "browser_automation", "filesystem_read"}:
+        fail("AUTOMATIC_TOOLING_UNKNOWN_CAPABILITY", "requested capability is not in the canonical contract")
+    workspace = absolute_directory(args.workspace or os.getcwd(), "workspace")
+    if canonical not in SAFE_CAPABILITIES:
+        remote_provider(args, canonical, workspace)
+        return
+    toolpack, receipt = prepare_toolpack(args.toolpack_root, digest)
+    timeout = timeout_seconds()
+    if canonical == "code_navigation":
+        provider = lsp_provider(workspace, toolpack)
+        command = [provider, "--version"]
+    else:
+        provider = local_provider(canonical, toolpack)
+        command = [provider, "--json", "--", args.query, str(workspace)] if canonical == "local_search" else [provider, "--json", "scan", "--pattern", args.query, str(workspace)]
+    result = run_process(command, workspace, timeout)
+    print(json.dumps({"status": "ok", "capability": canonical, "provider": provider, "result": result, "receipt": str(receipt)}, sort_keys=True))
+
+
+def parser() -> argparse.ArgumentParser:
+    root = argparse.ArgumentParser()
+    capability = root.add_subparsers(dest="command", required=True).add_parser("capability")
+    run_command = capability.add_subparsers(dest="action", required=True).add_parser("run")
+    run_command.add_argument("capability")
+    run_command.add_argument("--query", required=True)
+    run_command.add_argument("--workspace")
+    run_command.add_argument("--toolpack-root")
+    run_command.add_argument("--policy", choices=("automatic", "ask-once", "always-ask"), default="ask-once")
+    run_command.add_argument("--action", default="inspect")
+    run_command.add_argument("--path")
+    run_command.add_argument("--automatic-spend", action="store_true")
+    run_command.add_argument("--budget", type=float, default=0)
+    run_command.set_defaults(handler=run)
     return root
 
 
-def _receipt_path(tooling_root: Path, capability: str) -> Path:
-    return tooling_root / RECEIPTS_DIR_NAME / f"{capability}.receipt.json"
-
-
-def _write_receipt(tooling_root: Path, capability: str, payload: dict[str, object]) -> Path:
-    receipts = tooling_root / RECEIPTS_DIR_NAME
-    receipts.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(receipts, 0o700)
-    target = _receipt_path(tooling_root, capability)
-    temporary = target.with_suffix(f".tmp.{os.getpid()}")
-    descriptor = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-    with os.fdopen(descriptor, "w", encoding="utf-8") as output:
-        json.dump(payload, output, indent=2, sort_keys=True)
-        output.write("\n")
-    os.replace(temporary, target)
-    os.chmod(target, 0o600)
-    return target
-
-
-def install_capability(name: str, tooling_root: str | Path) -> dict[str, object]:
-    """Install the capability's provider into the receipt-owned tooling root."""
-    if name not in CAPABILITY_TO_COMMAND:
-        fail("CAPABILITY_NOT_FOUND", f"unknown capability {name!r}")
-    if name not in LOCALLY_INSTALLABLE:
-        fail("NETWORK_NOT_ALLOWED", f"capability {name!r} is not auto-installable; configure its provider explicitly")
-    root = _ensure_empty_tooling_root(Path(tooling_root))
-    digest = contract_digest()
-    detection = detect_capability(name)
-    if not detection["available"]:
-        fail("PROVIDER_NOT_AVAILABLE", f"host provider for {name!r} is not on PATH")
-    source = Path(str(detection["path"]))
-    providers_bin = root / PROVIDERS_DIR_NAME / "bin"
-    providers_bin.mkdir(mode=0o700, parents=True, exist_ok=True)
-    os.chmod(providers_bin, 0o700)
-    destination = providers_bin / source.name
-    if destination.is_symlink() or destination.exists():
-        destination.unlink()
-    try:
-        os.symlink(source, destination)
-    except OSError:
-        shutil.copy2(source, destination)
-    os.chmod(destination, 0o700)
-    payload = {
-        "schema_version": 1,
-        "owner": "lazykimi-capability-broker",
-        "capability": name,
-        "command": detection["command"],
-        "source_path": str(source),
-        "source_version": detection["version"],
-        "installed_path": str(destination),
-        "tooling_root": str(root),
-        "contract_digest": digest,
-        "contract_version": CONTRACT_VERSION,
-        "installed_at": int(time.time()),
-    }
-    receipt = _write_receipt(root, name, payload)
-    return {"capability": name, "installed": True, "receipt": str(receipt), "installed_path": str(destination)}
-
-
-def verify_capability(name: str, tooling_root: str | Path) -> dict[str, object]:
-    """Verify that the installed provider still works after install."""
-    if name not in CAPABILITY_TO_COMMAND:
-        fail("CAPABILITY_NOT_FOUND", f"unknown capability {name!r}")
-    root = validate_tooling_root(Path(tooling_root))
-    receipt = _receipt_path(root, name)
-    if not receipt.is_file():
-        fail("RECEIPT_MISMATCH", f"no receipt found for {name!r} in {root}")
-    if receipt.is_symlink() or stat.S_IMODE(receipt.stat().st_mode) != 0o600:
-        fail("RECEIPT_MISMATCH", f"receipt for {name!r} must be a non-symlink mode 0600 file")
-    try:
-        payload = json.loads(receipt.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        fail("RECEIPT_MISMATCH", f"receipt for {name!r} is unreadable")
-    if payload.get("contract_version") != CONTRACT_VERSION:
-        fail("CONTRACT_VERSION_MISMATCH", "receipt contract version does not match broker version")
-    declared_digest = payload.get("contract_digest")
-    if not isinstance(declared_digest, str) or declared_digest != contract_digest():
-        fail("RECEIPT_MISMATCH", "receipt contract digest does not match the live contract")
-    installed_path = Path(str(payload.get("installed_path", "")))
-    if not installed_path.is_file() or not os.access(installed_path, os.X_OK):
-        fail("PROVIDER_NOT_AVAILABLE", f"installed provider for {name!r} is missing or not executable")
-    timeout = timeout_for(name)
-    try:
-        result = subprocess.run(
-            [str(installed_path), "--version"],
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        fail("PROVIDER_NOT_AVAILABLE", f"installed provider for {name!r} failed to run")
-    version_lines = (result.stdout or result.stderr or "").strip().splitlines()
-    version = version_lines[0] if version_lines else ""
-    return {
-        "capability": name,
-        "verified": True,
-        "receipt": str(receipt),
-        "installed_path": str(installed_path),
-        "version": version,
-    }
-
-
-def get_status() -> dict[str, object]:
-    """Return the overall status of all capabilities."""
-    detected = detect_all()
-    capabilities_status: list[dict[str, object]] = []
-    for name in CAPABILITY_TO_COMMAND:
-        detection = detect_capability(name)
-        capabilities_status.append({
-            "capability": name,
-            "available": detection["available"],
-            "path": detection["path"],
-            "version": detection["version"],
-            "requires_explicit_provider_selection": detection["requires_explicit_provider_selection"],
-            "auto_installable": name in LOCALLY_INSTALLABLE,
-        })
-    try:
-        digest = contract_digest()
-    except PolicyError:
-        digest = ""
-    return {
-        "contract_version": CONTRACT_VERSION,
-        "contract_digest": digest,
-        "capabilities": capabilities_status,
-        "detected_tools": detected,
-    }
-
-
 def main() -> int:
-    print(json.dumps(get_status(), indent=2, sort_keys=True))
+    try:
+        args = parser().parse_args()
+        args.handler(args)
+    except BrokerError as error:
+        print(json.dumps({"error": error.code, "status": "denied"}, sort_keys=True), file=sys.stderr)
+        return 2
     return 0
 
 

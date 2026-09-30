@@ -1,0 +1,13 @@
+{
+  "name": "@lazyseries/lazykimi-lsp-typescript",
+  "version": "1.3.3",
+  "private": true,
+  "description": "Locked TypeScript LSP provider for LazyKimi.",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "typescript": "7.0.2",
+    "typescript-language-server": "6.0.0"
+  }
+}

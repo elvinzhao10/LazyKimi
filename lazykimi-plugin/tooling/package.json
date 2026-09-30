@@ -2,8 +2,17 @@
   "name": "@lazyseries/lazykimi-tooling",
   "version": "1.3.3",
   "private": true,
-  "description": "LazyKimi package-owned adaptive tooling layer (node dependencies land with the T13 tooling port; the MCP status-dashboard reads the package version from this manifest).",
+  "description": "Locked package-owned tooling foundation for LazyKimi.",
   "engines": {
     "node": ">=20"
+  },
+  "scripts": {
+    "verify": "node --version"
+  },
+  "dependencies": {
+    "@ast-grep/cli": "0.45.3",
+    "@colbymchenry/codegraph": "1.6.0",
+    "@vscode/ripgrep": "1.18.0",
+    "ajv": "8.20.0"
   }
 }
