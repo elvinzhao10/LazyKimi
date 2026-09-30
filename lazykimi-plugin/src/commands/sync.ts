@@ -13,7 +13,7 @@ import {
 import { rewriteMcpPaths } from './init';
 import { readReceipt, sha256OfFile, writeReceipt } from '../lib/receipt';
 
-const PLUGIN_VERSION = '0.2.0';
+const PLUGIN_VERSION = '1.3.3';
 const MANAGED_START = '<!-- lazykimi:managed:start -->';
 const MANAGED_END = '<!-- lazykimi:managed:end -->';
 

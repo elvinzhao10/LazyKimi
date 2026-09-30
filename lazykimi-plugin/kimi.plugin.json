@@ -1,7 +1,7 @@
 {
   "name": "lazykimi",
-  "version": "0.2.0",
-  "description": "Kimi-native evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.",
+  "version": "1.3.3",
+  "description": "LazyKimi evidence-gated planning, execution, and review workflows for Kimi hosts.",
   "author": "LazyKimi contributors",
   "homepage": "https://github.com/elvinzhao10/LazyKimi",
   "license": "MIT",
@@ -14,8 +14,8 @@
   ],
   "interface": {
     "displayName": "LazyKimi",
-    "shortDescription": "Evidence-led agent workflow harness for Kimi hosts",
-    "longDescription": "LazyKimi recreates the LazyBuddy/LazyTrae evidence-led agent workflow harness design as a Kimi-native package. Primary host: Kimi Code CLI. Secondary host: Kimi Work (skills import only).",
+    "shortDescription": "Evidence-gated planning, execution, and review workflows for Kimi hosts",
+    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.3. Primary host: Kimi Code CLI (plugin manifest and project init routes). Secondary host: Kimi Work (skills import only).",
     "developerName": "LazyKimi contributors",
     "websiteURL": "https://github.com/elvinzhao10/LazyKimi"
   },

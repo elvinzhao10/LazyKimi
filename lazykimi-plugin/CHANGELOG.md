@@ -5,6 +5,62 @@
 > `README.md`, `AGENTS.md`, and `lazykimi-plugin/README.md`; a copied package
 > should use its local `README.md`.
 
+## v1.3.3 — Full family parity port with LazyZCode v1.3.3 (2026-09-29)
+
+- **Family alignment jump 0.x → 1.3.3.** LazyKimi adopts the LazySeries
+  family version so shared contracts can be pinned byte-identically against
+  LazyZCode v1.3.3 (released 2026-09-29). The version number now denotes
+  family contract parity, not elapsed local development time; the previous
+  0.2.0/0.3.0 drift is reconciled below and in the v0.3.0 entry.
+- **Agents:** replaced the 11 Greek-myth agents
+  (`lazykimi-{sisyphus,metis,hephaestus,oracle,momus,prometheus,atlas,
+  cleaner,explorer,librarian,migration-planner}`) with the 13 family role
+  agents (`lazykimi-{orchestrator,planner,implementer,verifier,reviewer,
+  security-auditor,qa-executor,context-indexer,context-miner,explorer,
+  librarian,gate-reviewer,migration-planner}`) carrying lazyzcode v1.3.3
+  semantics on Kimi's coder/explore/plan/main dispatch channels, plus the
+  `validate-agent-frontmatter.js` gate.
+- **Commands:** grew 9 → 20 to the family canonical set (added
+  lazy-librarian, lazy-migration-planner, lazy-new-run, lazy-offboard,
+  lazy-onboard, lazy-resume, lazy-reviewer, lazy-status, lazy-ultrawork,
+  lazy-update, lazy-verifier, lazy-verify; retired the
+  lazy-remove-ai-slops command — it remains available as a skill).
+- **Skills:** grew 17 → 19 (renamed lazy-lcx-report-bug → lazy-report-bug;
+  added lazy-review-work and lazy-ultrawork) and ported the v1.3.3 skill
+  semantics (plan format with `## Final Verification Wave`, dispatch
+  records, DoneClaim protocol, goal tiers, selection-only adaptive layer).
+- **Contracts:** copied the family-shared byte-identical contract base from
+  lazyzcode v1.3.3 (shared semantics, adaptive harness, automatic tooling,
+  capability readiness v1/v2, evaluator pair, canonical schemas, fixtures)
+  with `cp`; added the Kimi per-host contracts (marketplace route contract
+  with the three Kimi routes, hook consumers for the 16 events, lifecycle
+  schemas, marketplace receipt schema) and the
+  `lazykimi-regenerate-marketplace-contract.js` inventory script.
+- **Package support:** ported `rules/`, `templates/`, `schemas/`, and
+  `assets/` (+ truthful asset source manifest) to the family shape.
+- Later waves (hooks hardening, 6-server/32-tool MCP surface, `.lazykimi/`
+  run-state + loop scripts, tooling layer, lifecycle machinery, verify
+  suites, docs, CI, host verification) land on this branch and are
+  documented in their own sections as they ship.
+
+## v0.3.0 (unreleased)
+
+> Reconciled from git history 2026-07-20; manifests were never bumped —
+> shipped manifests remained 0.2.0. The three commits below were verified
+> through the v0.3.0 capability hardening plan; the version string "0.3.0"
+> never shipped in `kimi.plugin.json`/`package.json`.
+
+- `64a0501` (feat): capability hardening — `.kimi-code/rules/lazykimi.md`
+  project rules; `sync`, `handoff`, `completion-status` CLI commands;
+  optional-MCP enable/disable lifecycle; dynamic rule matching in
+  post-tool-use; post-compact recovery in pre-compact/session-start; v003
+  regression expansion (SSRF, path traversal, hooks, evidence gates);
+  `.lazykimi/logs/` seeding; doctor required-vs-optional MCP validation;
+  verify evidence-gate skip for fresh targets; sync preserving
+  user-managed blocks.
+- `5ab1987` (docs): added the v0.3.0 capability hardening plan.
+- `69450fd` (docs): added v0.3.0 verification evidence and review report.
+
 ## v0.2.0 — Spec compliance + Kimi Work support (2026-07-18)
 
 - Moved plugin manifest from `.kimi-code/plugin.json` to `kimi.plugin.json`

@@ -34,7 +34,7 @@ const aliases: Record<string, string> = {
 };
 
 function printUsage(): void {
-  console.log(`LazyKimi CLI v0.2.0 -- Kimi-native evidence-led agent workflow harness
+  console.log(`LazyKimi CLI v1.3.3 -- Kimi-native evidence-led agent workflow harness
 
 Usage: lazykimi <command> [options]
 

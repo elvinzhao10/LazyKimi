@@ -5,7 +5,7 @@ import { readJson, isObject } from '../lib/json';
 import { isPluginSourceRoot } from '../lib/paths';
 import { validateMcpServers, REQUIRED_MCP_SERVERS } from '../lib/mcp-validation';
 
-const PLUGIN_VERSION = '0.2.0';
+const PLUGIN_VERSION = '1.3.3';
 const EXPECTED_SKILLS = 17;
 const EXPECTED_AGENTS = 11;
 const EXPECTED_HOOKS = 16;

@@ -94,7 +94,7 @@ LazyKimi supports **Kimi Code CLI** (primary) and **Kimi Work** (secondary).
 The `lazykimi` companion CLI supplies the installer, verification gate, and
 hook installer. This setup is verified on macOS only.
 
-The current package version is `0.2.0`.
+The current package version is `1.3.3`.
 
 ### `onboard` protocol
 

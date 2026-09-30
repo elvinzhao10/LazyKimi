@@ -1,7 +1,7 @@
 import { runCompletionChecks } from '../lib/completion';
 import { detectTargetRoot } from '../lib/paths';
 
-const PLUGIN_VERSION = '0.2.0';
+const PLUGIN_VERSION = '1.3.3';
 
 function pad(text: string, width: number): string {
   return text.length > width ? text.slice(0, width - 1) + '…' : text.padEnd(width);

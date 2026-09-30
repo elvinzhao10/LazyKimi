@@ -1,0 +1,73 @@
+# LazyKimi v1.3.3 — full family parity port
+
+**Status:** v1.3.3 release. This release aligns LazyKimi with LazyZCode
+v1.3.3 at family contract parity. Local package checks gate the release;
+fresh Kimi host activation remains pending (see Host capability matrix).
+
+## Eval-driven fixes
+
+- Version drift repaired: the shipped manifests said 0.2.0 while git
+  history contained a verified-but-unreleased 0.3.0 hardening round. The
+  v0.3.0 work is now reconciled honestly in CHANGELOG (history preserved,
+  never rewritten) instead of being silently folded into a new version.
+- The 0.x planning leftovers (LazyTrae-managed blocks, untracked planning
+  infra, stale runtime copies) are retired; the repository now contains
+  only LazyKimi product plus an explicitly optional, git-ignored `sources/`
+  reference area.
+
+## Measured efficiency
+
+No token, latency, or cost improvement has been measured for this release.
+All claims in this release are package-level; no host-session measurements
+exist yet.
+
+## Host capability matrix
+
+| Host | Package route | Current session |
+| --- | --- | --- |
+| Kimi Code CLI | Plugin manifest route (16 inline hooks, inline mcpServers) and project init route (`lazykimi init` + `install-hooks.sh`) | Pending live observation |
+| Kimi Work | Skills import only (`install-kimi-work.sh`) | Pending live observation |
+
+HOST READINESS: PENDING. Package checks prove files and declarations, not
+plugin loading, hook firing, or MCP connections.
+
+## Migration and upgrade
+
+- **0.2.0 → 1.3.3:** this is a family-alignment jump, not twenty-one minor
+  releases of local development. Review the CHANGELOG v1.3.3 entry for the
+  component-by-component port summary. The 11 Greek-myth agents are gone;
+  update any dispatch references to the 13 role agents. The
+  `lazy-remove-ai-slops` slash command is retired (the skill remains). The
+  run-ledger MCP surface changes to the family 9-tool set (see CHANGELOG
+  for the dropped tools and their command equivalents).
+- **0.3.0 drift:** an unreleased v0.3.0 hardening round existed only in git
+  history (commits `64a0501`, `5ab1987`, `69450fd`); shipped manifests
+  never left 0.2.0. If you ran that unrevised tree, treat its behavior as
+  superseded by v1.3.3.
+- Re-run `lazykimi init` after upgrading so project assets
+  (`.kimi-code/`, `.lazykimi/`) and the rewritten `__KIMI_PLUGIN_ROOT__`
+  MCP paths refresh from the new package.
+
+## Known risks
+
+- Kimi host behaviors the package relies on (env stanza in `mcp.json`,
+  PreToolUse matcher tool names, plugin-manifest deny semantics, effort
+  scale) are documented-untested until the host verification pass records
+  observation receipts; every unobserved item stays HOST READINESS:
+  PENDING.
+- The project route's "critical 8" TOML hooks and the manifest route's 16
+  inline hooks overlap; installing both routes simultaneously is not
+  supported and may double-fire events.
+
+## Rollback
+
+Use the previous verified checkout (v0.2.0 tag state) and re-run
+`lazykimi init` in each project that adopted v1.3.3 assets. Project-local
+`.lazykimi/` run state is preserved by uninstall; remove the eight
+`[[hooks]]` TOML entries referencing `.kimi-code/hooks/` from
+`~/.kimi-code/config.toml` if the project route was installed.
+
+## Prior release notes
+
+See `lazykimi-plugin/CHANGELOG.md` for the full dated history, including
+the reconciled v0.3.0 (unreleased) entry.
