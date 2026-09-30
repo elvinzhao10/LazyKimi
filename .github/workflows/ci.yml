@@ -53,6 +53,8 @@ jobs:
         run: npm install --no-audit --fund=false && npm run build
       - name: Run package verification
         run: bash lazykimi-plugin/scripts/lazykimi-verify.sh
+      - name: Run product-naming guard
+        run: node scripts/check-product-naming.js
       - name: Run publication verification
         run: bash lazykimi-plugin/tests/publication-regression.sh
 

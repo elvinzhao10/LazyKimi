@@ -1,0 +1,1941 @@
+{
+  "formerDisplayNames": [
+    {
+      "path": ".github/workflows/paired-contract-parity.yml",
+      "text": ".lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Paired parity workflow names the sibling repositories it checks out for comparison."
+    },
+    {
+      "path": ".github/workflows/paired-contract-parity.yml",
+      "text": "lazytrae",
+      "count": 7,
+      "classification": "source-identity",
+      "reason": "Paired parity workflow names the sibling repositories it checks out for comparison."
+    },
+    {
+      "path": ".github/workflows/paired-contract-parity.yml",
+      "text": "lazyzcode",
+      "count": 8,
+      "classification": "source-identity",
+      "reason": "Paired parity workflow names the sibling repositories it checks out for comparison."
+    },
+    {
+      "path": "AGENTS.md",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "README.md",
+      "text": "lazybuddy",
+      "count": 7,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "README.md",
+      "text": "lazytrae",
+      "count": 7,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "README.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "RELEASE_NOTES.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-evaluation.md",
+      "text": "codebuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-evaluation.md",
+      "text": "lazybuddy",
+      "count": 8,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-evaluation.md",
+      "text": "lazytrae",
+      "count": 8,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-evaluation.md",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/.kimi-code/AGENTS.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/.lazykimi/schemas/README.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "atlas",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "hephaestus",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "lazyzcode",
+      "count": 5,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "metis",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "momus",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "oracle",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "prometheus",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CHANGELOG.md",
+      "text": "sisyphus",
+      "count": 1,
+      "classification": "old-release-note",
+      "reason": "Historical changelog entries are immutable history."
+    },
+    {
+      "path": "lazykimi-plugin/CONTRIBUTING.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/LICENSE",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Legal attribution keeps the upstream product lineage verbatim."
+    },
+    {
+      "path": "lazykimi-plugin/LICENSE",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Legal attribution keeps the upstream product lineage verbatim."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Legal attribution keeps the upstream product lineage verbatim."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Legal attribution keeps the upstream product lineage verbatim."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Legal attribution keeps the upstream product lineage verbatim."
+    },
+    {
+      "path": "lazykimi-plugin/README.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/README.md",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/README.md",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-indexer.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-indexer.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-indexer.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-miner.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-miner.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-context-miner.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-explorer.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-explorer.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-explorer.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-gate-reviewer.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-gate-reviewer.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-gate-reviewer.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-librarian.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-librarian.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-librarian.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-migration-planner.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-migration-planner.md",
+      "text": "lazyzcode",
+      "count": 6,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-migration-planner.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-orchestrator.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-orchestrator.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-orchestrator.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-planner.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-planner.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-planner.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-reviewer.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-reviewer.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-reviewer.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-security-auditor.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-security-auditor.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/agents/lazykimi-security-auditor.md",
+      "text": "zcode",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Maps-to-Kimi lineage header credits the lazyzcode agent this role was ported from."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/adaptive-harness-contract.v1.schema.json",
+      "text": ".trae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/adaptive-harness-contract.v1.schema.json",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/execution-context-security.js",
+      "text": "lazybuddy",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/execution-context-security.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/forged-authority.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/forged-authority.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/forged-observed-pending-freshness.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/forged-observed-pending-freshness.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/malformed-event.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/malformed-event.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/raw-prompt.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/raw-prompt.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/secret-payload.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/secret-payload.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/stale-onboarding-receipt.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/stale-onboarding-receipt.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/unsupported-event.json",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/unsupported-onboarding-receipt.json",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-canonical-event.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-canonical-event.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-generated-mirror.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-generated-mirror.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-host-observation.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-host-observation.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-onboarding-receipt.json",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/host-evidence-v1/valid-onboarding-receipt.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/lifecycle-v1/identity-invalid.json",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/lifecycle-v1/ownership-invalid.json",
+      "text": ".trae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/lifecycle-v1/ownership-invalid.json",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/outcome-evaluation-v1/manifest.json",
+      "text": "codebuddy",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/readiness-v2/missing-evidence.json",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/readiness-v2/unknown-field.json",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/readiness-v2/unknown-version.json",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/readiness-v2/valid-package.json",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/v017/readiness-records.json",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/v017/readiness-records.json",
+      "text": "lazytrae",
+      "count": 5,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/v018/readiness-records.json",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/fixtures/v018/readiness-records.json",
+      "text": "lazytrae",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-event-vocabulary.v1.json",
+      "text": "zcode",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence-defs.v1.schema.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence-defs.v1.schema.json",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence-defs.v1.schema.json",
+      "text": "zcode",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence.v1.js",
+      "text": "codebuddy",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence.v1.js",
+      "text": "lazybuddy",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence.v1.js",
+      "text": "lazytrae",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence.v1.js",
+      "text": "lazyzcode",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-host-evidence.v1.js",
+      "text": "zcode",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/model-routing-policy.v1.json",
+      "text": "codebuddy",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/model-routing-policy.v1.json",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/model-routing.js",
+      "text": "codebuddy",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/model-routing.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/execution-context-contract.test.js",
+      "text": "lazybuddy",
+      "count": 14,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/execution-context-contract.test.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/execution-context-contract.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/model-routing.test.js",
+      "text": "codebuddy",
+      "count": 9,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/model-routing.test.js",
+      "text": "zcode",
+      "count": 4,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/paired-candidate-contract.test.js",
+      "text": "lazytrae",
+      "count": 6,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/paired-candidate-contract.test.js",
+      "text": "lazyzcode",
+      "count": 26,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/paired-candidate-contract.test.js",
+      "text": "zcode",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/v122-harness-semantic-parity.test.js",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/v122-harness-semantic-parity.test.js",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/tests/v122-harness-semantic-parity.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/validate-paired-candidate.js",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/validate-paired-candidate.js",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/contracts/validate-paired-candidate.js",
+      "text": "zcode",
+      "count": 3,
+      "classification": "stable-machine-id",
+      "reason": "Family contract content pinning cross-repo machine identifiers."
+    },
+    {
+      "path": "lazykimi-plugin/docs/06-capabilities-and-approvals.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/09-test-and-release-verification.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/09-test-and-release-verification.md",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/09-test-and-release-verification.md",
+      "text": "lazyzcode",
+      "count": 6,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/09-test-and-release-verification.md",
+      "text": "zcode",
+      "count": 13,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/README.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/README.md",
+      "text": ".trae",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/README.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/README.md",
+      "text": "lazytrae",
+      "count": 8,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/README.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-bugfix-and-cli-hardening.md",
+      "text": ".trae",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-bugfix-and-cli-hardening.md",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": ".trae",
+      "count": 10,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "atlas",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "hephaestus",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "lazybuddy",
+      "count": 64,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "lazytrae",
+      "count": 58,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "metis",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "momus",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "oracle",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "prometheus",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-recreate.md",
+      "text": "sisyphus",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-spec-compliance.md",
+      "text": ".trae",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-spec-compliance.md",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-spec-compliance.md",
+      "text": "lazybuddy",
+      "count": 14,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-spec-compliance.md",
+      "text": "lazytrae",
+      "count": 13,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-spec-compliance.md",
+      "text": "oracle",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": ".trae",
+      "count": 8,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": "lazytrae",
+      "count": 22,
+      "classification": "old-note",
+      "reason": "Salvaged v0.x planning artifacts are immutable historical records."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/hook-policy.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/model-routing.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/permission-record.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/post-tool-use-failure.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/post-tool-use.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/pre-tool-use.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/session-start.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/stop-gate.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/subagent-stop.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/hooks/user-prompt-submit.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/kimi.plugin.json",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/mcp/code-intel/server.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Port lineage comment or family identifier in the adapted surface."
+    },
+    {
+      "path": "lazykimi-plugin/mcp/docs/server.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Port lineage comment or family identifier in the adapted surface."
+    },
+    {
+      "path": "lazykimi-plugin/package.json",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/package.json",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/rules/lazykimi.md",
+      "text": "oracle",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Lineage text names the sibling packages this port derives from."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/efficiency-baseline-contract.js",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/efficiency-baseline-contract.js",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-contract-check.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-docs-check.sh",
+      "text": "hephaestus",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-docs-check.sh",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-docs-check.sh",
+      "text": "prometheus",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-docs-check.sh",
+      "text": "sisyphus",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-docs-check.sh",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-hook-pipeline-test.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-kimi-preparation-check.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-kimi-preparation-check.sh",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-load-check.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-mcp-test.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-package-verify.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-plugin-doctor.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-security-check.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-smoke-test.sh",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lazykimi-verify.sh",
+      "text": "lazyzcode",
+      "count": 4,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/marketplace-routes.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/ownership.js",
+      "text": ".trae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/ownership.js",
+      "text": "lazytrae",
+      "count": 4,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/ownership.js",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/paths.js",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/lifecycle/paths.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/loop/run-cycle.sh",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/paired-live-test-lib.js",
+      "text": "lazytrae",
+      "count": 5,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/paired-live-test-lib.js",
+      "text": "lazyzcode",
+      "count": 9,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/paired-live-test-lib.js",
+      "text": "zcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/release-version-classifier.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/validate-agent-frontmatter.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/verification-risk-policy.js",
+      "text": "zcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/verify-supported-floor.mjs",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/src/lib/completion.ts",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Port lineage comment or family identifier in the adapted surface."
+    },
+    {
+      "path": "lazykimi-plugin/src/lib/mcp-validation.ts",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Port lineage comment or family identifier in the adapted surface."
+    },
+    {
+      "path": "lazykimi-plugin/tests/agent-frontmatter-policy.test.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/agent-frontmatter-policy.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/completion-assessment.test.js",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/efficiency-baseline.test.js",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/fixtures/efficiency/evals/lazykimi-liveeval/lazykimi/raw/direct/adaptive-directive.json",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/hook-lifecycle-pipeline.test.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/hook-lifecycle-pipeline.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/kimi-receipt-path.test.js",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/kimi-receipt-path.test.js",
+      "text": "zcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/lifecycle-bootstrap.test.js",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/lifecycle-core.test.js",
+      "text": ".trae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/lifecycle-core.test.js",
+      "text": "lazytrae",
+      "count": 6,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/marketplace-route-contract.test.js",
+      "text": "zcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/publication-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_explicit_parity.py",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_installed_entry.py",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_installed_entry.py",
+      "text": "zcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_installed_state.py",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_installed_state.py",
+      "text": "zcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_adaptive_streamlined_context.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_boundary_parsing.py",
+      "text": "claude_plugin_root",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_native_continuation.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_plan_reconcile.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_lazykimi_verification_tiers.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v001-package-boundary-regression.sh",
+      "text": ".trae",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v001-package-boundary-regression.sh",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v001-security-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v001-ssrf-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v003-mcp-path-traversal-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-automatic-tooling-contract-parity.sh",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-automatic-tooling-contract-parity.sh",
+      "text": "lazyzcode",
+      "count": 19,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-codegraph-fixture-cleanup-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-codegraph-install-timeout-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-codegraph-lifecycle-caller-survival-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-codegraph-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-codegraph-uninstall-pid-identity-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-execution-context-hardening-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-lifecycle-contract-parity.sh",
+      "text": "lazyzcode",
+      "count": 7,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-lifecycle-entrypoint-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v103-tooling-lifecycle-regression.sh",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v110-machine-status.test.js",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v110-machine-status.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v120-lifecycle-ownership.test.js",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v120-release-version-classification.test.js",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v2-lifecycle-contract-parity.sh",
+      "text": ".trae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v2-lifecycle-contract-parity.sh",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v2-lifecycle-contract-parity.sh",
+      "text": "lazyzcode",
+      "count": 11,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/v2-lifecycle-contract-parity.sh",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/verification-risk-entrypoint.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tests/verification-risk-policy.test.js",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_adaptive_snapshot.py",
+      "text": ".trae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_adaptive_snapshot.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_capability_readiness.py",
+      "text": "codebuddy",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_capability_readiness.py",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_capability_readiness.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_verification_tiers.py",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/lazykimi_verification_tiers.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_explanation.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_snapshot.py",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_w4_1_explicit_override.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_w4_3_capability_fallback.py",
+      "text": "lazytrae",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_w4_3_capability_fallback.py",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_w4_6_evidence_freshness.py",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "lazykimi-plugin/tooling/test_lazykimi_adaptive_w4_6_evidence_freshness.py",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "stable-machine-id",
+      "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    }
+  ],
+  "stableIdentityFiles": [
+    {
+      "path": "lazykimi-plugin/contracts/lazyseries-shared-semantics.v1.json",
+      "ids": {
+        "lazy-series.shared-semantics": 1
+      }
+    }
+  ],
+  "currentHostPages": [
+    "lazykimi-plugin/docs/reference/host-routes.md",
+    "lazykimi-plugin/docs/reference/hook-policy.md"
+  ]
+}

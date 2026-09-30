@@ -36,6 +36,7 @@ HOOK_RESULT="skipped"
 LOAD_RESULT="skipped"
 CONTRACT_RESULT="skipped"
 CONTRACT_TESTS_RESULT="skipped"
+PRODUCT_NAMING_RESULT="skipped"
 AUTOMATIC_TOOLING_REGRESSIONS_RESULT="fail"
 REGRESSION_INVENTORY_RESULT="fail"
 NODE_TESTS_RESULT="fail"
@@ -246,6 +247,7 @@ run_regression_inventory() {
         "v103-mcp-params-regression.sh"
         "v103-mcp-profile-regression.sh"
         "v103-plan-format-compat.sh"
+        "v104-product-naming-regression.sh"
     )
     local lifecycle_tests=(
         "v103-loop-scripts-regression.sh"
@@ -495,13 +497,29 @@ if [ "$VERIFY_SUITE" != "lifecycle" ]; then
     run_hook_pipeline_check hook_pipeline "${SCRIPTS_DIR}/lazykimi-hook-pipeline-test.sh" HOOK_RESULT
     run_check load_check "${SCRIPTS_DIR}/lazykimi-load-check.sh" LOAD_RESULT
     run_check automatic_tooling_contract "${SCRIPTS_DIR}/lazykimi-contract-check.sh" CONTRACT_RESULT
+
+    # Product-naming guard (T20): lives at the repo root, one level above the
+    # plugin tree; enforces the sibling-product and retired-name policy with
+    # hash-based family-contract exemptions.
+    naming_result_file="$(mktemp "${TMPDIR:-/tmp}/lazykimi-naming.XXXXXX")"
+    if "$PYTHON_BIN" "$RUNNER" --label "product_naming" --timeout "$VERIFY_TIMEOUT" --result-file "$naming_result_file" -- \
+        node "${PROJECT_ROOT}/scripts/check-product-naming.js"; then
+        PRODUCT_NAMING_RESULT="pass"
+    else
+        PRODUCT_NAMING_RESULT="fail"
+        ALL_PASS=false
+        print_failure_tail "$naming_result_file"
+        printf 'FAIL: Product naming guard exited nonzero\n' >&2
+    fi
+    record_check "product_naming" "$naming_result_file"
+    rm -f "$naming_result_file"
 fi
 run_regression_inventory
 run_contract_tests
 run_language_tests
 
 # Build compact JSON summary
-json="{\"suite\":\"${VERIFY_SUITE}\",\"doctor\":\"${DOCTOR_RESULT}\",\"smoke\":\"${SMOKE_RESULT}\",\"docs\":\"${DOCS_RESULT}\",\"security\":\"${SECURITY_RESULT}\",\"mcp_test\":\"${MCP_RESULT}\",\"hook_pipeline\":\"${HOOK_RESULT}\",\"load_check\":\"${LOAD_RESULT}\",\"automatic_tooling_contract\":\"${CONTRACT_RESULT}\",\"contract_tests\":\"${CONTRACT_TESTS_RESULT}\",\"regression_inventory\":\"${REGRESSION_INVENTORY_RESULT}\",\"shell_regressions\":\"${AUTOMATIC_TOOLING_REGRESSIONS_RESULT}\",\"node_tests\":\"${NODE_TESTS_RESULT}\",\"python_tests\":\"${PYTHON_TESTS_RESULT}\",\"checks\":${CHECK_DETAILS},\"all_pass\":${ALL_PASS}}"
+json="{\"suite\":\"${VERIFY_SUITE}\",\"doctor\":\"${DOCTOR_RESULT}\",\"smoke\":\"${SMOKE_RESULT}\",\"docs\":\"${DOCS_RESULT}\",\"security\":\"${SECURITY_RESULT}\",\"mcp_test\":\"${MCP_RESULT}\",\"hook_pipeline\":\"${HOOK_RESULT}\",\"load_check\":\"${LOAD_RESULT}\",\"automatic_tooling_contract\":\"${CONTRACT_RESULT}\",\"product_naming\":\"${PRODUCT_NAMING_RESULT}\",\"contract_tests\":\"${CONTRACT_TESTS_RESULT}\",\"regression_inventory\":\"${REGRESSION_INVENTORY_RESULT}\",\"shell_regressions\":\"${AUTOMATIC_TOOLING_REGRESSIONS_RESULT}\",\"node_tests\":\"${NODE_TESTS_RESULT}\",\"python_tests\":\"${PYTHON_TESTS_RESULT}\",\"checks\":${CHECK_DETAILS},\"all_pass\":${ALL_PASS}}"
 
 echo "$json"
 

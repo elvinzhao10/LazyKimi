@@ -126,9 +126,11 @@ and `scripts/assets/` fixture libraries. Existing `v001`–`v003` regressions
 keep their numbers; ports new in v1.3.3 use the `v103*` family prefix.
 
 Current committed inventory: 32 node:test files, 26 pytest files (15 in
-`tests/`, 11 in `tooling/`), and 40 bash regressions (24 historical `v001`–
-`v003` + 16 `v103`/`v2`/publication ports), of which the paired-only parity
-checks and the publication regression run outside the normal suite selector.
+`tests/`, 11 in `tooling/`), and 41 bash regressions (24 historical `v001`–
+`v003` + 17 `v103`/`v2`/`v104`/publication ports), of which the paired-only
+parity checks and the publication regression run outside the normal suite
+selector. The repo-root product-naming guard also runs as a first-class
+verify phase (`product_naming`) in the `core` and `all` suites.
 
 Verify suites stay `all | core | lifecycle`. LazyZCode's fourth `language`
 suite is intentionally NOT ported as a selector: its content (package node
