@@ -1,8 +1,8 @@
 ---
 name: lazy-frontend
-description: "Frontend development best practices for accessible, responsive, performant UI."
+description: "Frontend development best practices. Use for UI, web frontend, and client-side implementation work. Triggers: frontend, UI, component, page, layout, style, CSS, React, Vue, web, browser."
 type: prompt
-whenToUse: "Use for UI, web frontend, and client-side implementation work. Triggers: frontend, UI, component, page, layout, style, CSS, React, Vue, web, browser."
+whenToUse: "Use for UI, web frontend, and client-side implementation work."
 ---
 
 # frontend
@@ -55,12 +55,7 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 6. **Naming: PascalCase for components, camelCase for props and state.**
 7. **Component file = component name.** One component per file, or one directory with index.
 
-### 4. Module Exports
-
-1. **Use named exports only. Never default exports.** This keeps component imports greppable and refactor-safe across the codebase.
-2. Re-export the public component surface from a barrel `index.ts` when a directory groups related components.
-
-### 5. State Management
+### 4. State Management
 
 1. **Local state first.** Use component state before reaching for global state.
 2. **Separate concerns:** UI state (isModalOpen), data state (user, items), URL state (route, query).
@@ -69,7 +64,7 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 5. **Immutability.** Never mutate state directly — always create new references.
 6. **Side effects are isolated.** Use effects/ lifecycle hooks, not in render.
 
-### 6. Performance
+### 5. Performance
 
 1. **Minimize re-renders.** Only re-render what changed.
 2. **Lazy load what's not immediately needed.** Code splitting, route-based splitting.
@@ -79,16 +74,16 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 6. **Avoid layout thrashing.** Batch DOM reads, then writes.
 7. **Bundle size matters.** Audit dependencies. Tree-shake.
 
-### 7. Styling
+### 6. Styling
 
 1. **Follow the existing styling approach** in the codebase.
-2. **Use a consistent naming convention.** BEM, utility classes, CSS modules — pick one and stick to it.
+2. **Use a consistent naming convention.** BEM, utility classes, CSS modules — pick one and stick with it.
 3. **No magic numbers.** Use design tokens / variables for colors, spacing, typography.
 4. **Avoid `!important`.** If you need it, something is wrong with the cascade.
 5. **Keep specificity low.** Flat selectors are easier to override.
 6. **Mobile-first media queries.** `min-width`, not `max-width`.
 
-### 8. Testing
+### 7. Testing
 
 1. **Component tests** test behavior, not implementation.
 2. **Test the user-visible behavior**, not internal state.
@@ -97,7 +92,7 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 5. **E2E tests** cover critical user flows end-to-end.
 6. **Test on real browsers and devices**, not just emulators.
 
-### 9. Browser Compatibility
+### 8. Browser Compatibility
 
 1. **Know your target browsers.** Check analytics if available.
 2. **Use progressive enhancement.** Core functionality works everywhere; enhancements layer on top.
@@ -122,7 +117,6 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 - [ ] Components are well-typed (TypeScript/PropTypes)
 - [ ] No prop drilling through 3+ levels
 - [ ] Side effects are in the right place
-- [ ] Named exports only — no default exports
 
 ## Allowed Edits
 
@@ -142,7 +136,6 @@ Build user interfaces that are accessible, fast, responsive, and maintainable. F
 - Do NOT use `!important` to override styles.
 - Do NOT ship with console.log or debug statements.
 - Do NOT add large dependencies without checking bundle size impact.
-- Do NOT use default exports — use named exports.
 
 ## Verification Gates
 

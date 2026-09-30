@@ -1,21 +1,21 @@
 ---
 name: lazy-coding-agent-sessions
-description: "Find, read, list, search, inspect, or reconstruct coding-agent sessions across Kimi Code CLI and other platforms."
+description: "Find, read, list, search, inspect, or reconstruct coding-agent sessions across Kimi Code CLI and other platforms. Covers session tracking, transcript search, session history, token usage, and subagent sessions. Use when asked about past sessions, session IDs, or reconstructing prior work. Triggers: coding agent sessions, session history, session ID, read session, find session, transcript search, what did I work on, did we already do this, reconstruct past work."
 type: prompt
-whenToUse: "Use when asked about past sessions, session IDs, or reconstructing prior work. Covers session tracking, transcript search, session history, token usage, and subagent sessions. Triggers: coding agent sessions, session history, session ID, read session, find session, transcript search, what did I work on, did we already do this, reconstruct past work."
+whenToUse: "Use when past coding-agent sessions must be found, read, or reconstructed (session IDs, transcripts, token usage, prior work)."
 ---
 
 # coding-agent-sessions
 
 Find and inspect coding-agent sessions across Kimi Code CLI and other platforms before answering from memory. Use LazyKimi's session tracking state as the primary store; fall back to platform-native transcript files when available.
 
-## Global Kimi Code CLI fallback
+## Host-native session fallback
 
 This installed skill is self-contained. It does not require a helper script or reference bundle. Use the local paths listed below when they are available; for an unlisted platform, ask the user for its documented transcript location before searching.
 
 ## Purpose
 
-Reconstruct past sessions so agents can answer "what did we already do" questions without relying on memory. The LazyKimi sessions store (`.lazykimi/state/sessions.json`) is the primary source; platform transcript files supplement when the user asks about non-Kimi Code CLI sessions.
+Reconstruct past sessions so agents can answer "what did we already do" questions without relying on memory. The LazyKimi sessions store (`.lazykimi/state/sessions.json`) is the primary source; platform transcript files supplement when the user asks about non-Kimi sessions.
 
 ## Required Context to Inspect
 
@@ -28,7 +28,7 @@ Reconstruct past sessions so agents can answer "what did we already do" question
 
 ### 1. List Recent Sessions (Kimi Code CLI)
 
-Read `.lazykimi/state/sessions.json` to inspect tracked Kimi Code CLI sessions:
+Read `.lazykimi/state/sessions.json` to inspect tracked Kimi sessions:
 
 ```
 Read .lazykimi/state/sessions.json
@@ -55,14 +55,14 @@ To reconstruct what happened in a session:
 - Read `.lazykimi/state/active-loop.json` for goal and criterion statuses.
 - Read `.lazykimi/evidence/` files named after the work for verification results.
 
-### 4. Cross-Platform Search (Non-Kimi Code CLI Sessions)
+### 4. Cross-Platform Search (Non-Kimi Sessions)
 
 When the user asks about sessions from other coding agents:
 - Use Grep/Glob only in the user's approved local path.
+- For Kimi Code CLI native transcripts: under `~/.kimi-code/` (exact layout pending the host verification pass; treat as documented-untested).
 - For Codex: `.codex/state_*.sqlite`, rollout JSONL files.
 - For Claude: `~/.claude/projects/`, `~/.claude/transcripts/`.
 - For OpenCode: `~/.opencode/`, `~/.local/share/opencode/`.
-- For Trae: the Trae plugin state directory and session artifacts, when the user explicitly points at a Trae workspace (consult that platform's documented storage path before searching).
 - For another platform: ask the user for the official local storage path, or consult that platform's official documentation before searching.
 
 ### 5. Reconstruct Past Work
@@ -98,7 +98,7 @@ Combine session metadata with evidence to reconstruct what was done:
 
 ## Failure Handling
 
-- If `.lazykimi/state/sessions.json` is empty or absent: report that no Kimi Code CLI sessions have been tracked yet.
+- If `.lazykimi/state/sessions.json` is empty or absent: report that no Kimi sessions have been tracked yet.
 - If a platform transcript path is not found: report the missing path and suggest manual location.
 - If session metadata is incomplete: report what is available and note what is missing.
 - If the user asks about an unlisted platform: report the unknown storage path and ask for the platform's documented location.

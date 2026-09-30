@@ -1,245 +1,177 @@
 ---
 name: lazy-ulw-loop
-description: "Long-horizon execution loop with ultrawork mode. Decomposes work into systematic, evidence-bound steps and runs until verified completion."
+description: "Verified completion loop for open-ended Kimi tasks. Creates goals with binding success criteria, decomposes into evidence-bound steps, runs until all criteria have proof."
 type: prompt
-whenToUse: "Use for durable goal execution, evidence-led work, manual QA, or checkpointed long-running delivery. Triggers: ulw-loop, ulw, ultrawork, durable execution, evidence-led work."
+whenToUse: "Use when an open-ended task must loop until every binding success criterion has real-surface proof."
 ---
-ULTRAWORK MODE ENABLED!
 
 # ulw-loop
 
-Long-horizon execution loop that decomposes work into systematic, evidence-bound steps and runs until verified completion through a single Kimi Code CLI-native workflow.
+> **Maps to Kimi:** the /lazy-ulw-loop command with goal/evidence bookkeeping in `.lazykimi/ulw-loop/`.
 
-
-## Mandatory First Line
-
-**The first user-visible line of output this turn MUST be exactly:**
-
-```
-ULTRAWORK MODE ENABLED!
-```
+> **earlier host implementation source:** `local project documentation`
 
 ## Purpose
 
-Deliver EXACTLY what the user asked, end-to-end working, proven by captured evidence: a failing-first proof that went RED->GREEN through the cheapest faithful channel, plus real-surface proof sized by the tier below. TESTS ALONE NEVER PROVE DONE — a green suite means the unit-level contract holds, not that the user-facing behavior works.
+Run a goal-driven verified completion loop: define binding success criteria with real-surface evidence requirements, decompose into bounded work cycles, verify each cycle with observable proof, and run until all criteria are met or the iteration cap is reached. This skill is designed for open-ended tasks where "done" must be proven, not claimed.
 
-## Required Context to Inspect
+## Trigger Conditions
 
-- The task brief or goal.
-- `AGENTS.md` and `.kimi-code/rules/lazykimi.md`.
-- The loop state file: `.lazykimi/state/active-loop.json`.
-- The evidence directory: `.lazykimi/evidence/`.
-- The ultrawork notepad (if running): persists across turns.
+- User invokes `/lazy-ulw-loop "task" [--completion-promise=TEXT]`
+- User says "ulw", "loop this", "keep working until verified"
+- Any task where quality requires evidence-backed completion
 
-## Tier Triage (classify ONCE at bootstrap; record tier + one-line justification in the notepad; ratchet up only)
+## Required Context
 
-Default is LIGHT. Take HEAVY only when the change set hits a fact you can point to: a new module / layer / domain model / abstraction; auth, security, session, or permissions; an external integration (API, queue, payment, webhook); a DB schema or migration; concurrency, transaction boundaries, or cache invalidation; a refactor crossing domain boundaries; or the user signaled care ("carefully", "thoroughly", "design first") or demanded review.
+- Read `.lazykimi/ulw-loop/<session-id>/goals.json` if resuming
+- Read `kimi.md` for project conventions
+- Read `.lazykimi/rules/lazykimi-verification.md` for evidence standards
 
-When unsure, take HEAVY. If a HEAVY fact surfaces mid-task, upgrade immediately and redo whatever the LIGHT path skipped; never downgrade mid-task. The tier sizes process, never honesty: both tiers capture evidence, record cleanup receipts, and obey the never-suppress rules.
+## Tool Access
 
-**LIGHT** — a narrow change inside existing layers (one-spot bugfix, a method or endpoint following an existing pattern, a validation rule, a query tweak, copy/constants): plan directly in the notepad; 1-2 success criteria (happy path + the riskiest edge); one real-surface proof of the user-visible deliverable, where auxiliary surfaces are first-class for CLI- or data-shaped work; self-review recorded in the notepad instead of the reviewer loop.
+- Allowed: Read, Grep, Glob, Bash (verification), Agent (spawn workers)
+- Write: ONLY to `.lazykimi/ulw-loop/` and evidence paths
+- **Never:** Write product code directly; always delegate to subagents
 
-**HEAVY** — anything a fact above names: the `plan` agent decides waves; 3+ success criteria (happy, edge, regression, adversarial risk), each with its own channel scenario and both evidence pieces; reviewer loop until unconditional approval.
+## Step-by-Step Procedure
 
-## Bootstrap (DO ALL FIVE BEFORE ANY OTHER WORK — NO SKIPPING)
+### Bootstrap
 
-### 0. Survey the skills, then size the work
+1. **Survey loaded skills.** Read descriptions; decide which skills apply; name them with one-line reasons.
+2. **Tier triage.** Classify as LIGHT (narrow change) or HEAVY (new module, auth, external integration, DB schema, cross-domain refactor). Default is LIGHT; upgrade on HEAVY facts.
+3. **Create goals.** Define binding success criteria with:
+   - The user-visible deliverable and tier justification
+   - Success criteria (LIGHT: 1-2, HEAVY: 3+) covering happy path, edges, boundaries, error paths
+   - Each criterion names its exact scenario: literal command, page action, payload, and binary observable
+   - Record goals to `.lazykimi/ulw-loop/<session-id>/goals.json`
 
-First, survey the loaded skill list and read the description of each loosely relevant skill. Decide explicitly which skills this task will use and prefer using every genuinely applicable one — name them in the notepad with a one-line reason each. Skipping a skill that fits the task is a defect.
-
-Then run Tier triage (above) on the change set and record the tier. HEAVY: spawn the `plan` agent (Prometheus) with the gathered context, follow its wave order and parallel grouping exactly, and run the verification it specifies. LIGHT: plan directly in the notepad.
-
-### 1. Create the goal with binding success criteria
-
-Register the goal with Kimi Code CLI's `/goal <objective>` (persistent autonomous goals) — the registered goal is the binding contract for the whole run, and skipping it is a defect. If no `/goal` surface is available on this host, open your reply with a `# Goal` block (treated as binding) using exactly the objective. Do not include status. Goals are unlimited; never invent a numeric budget or limit.
-
-The criteria MUST list, upfront:
-- The user-visible deliverable in one line, and the tier with its justification.
-- Success criteria sized by tier (LIGHT 1-2, HEAVY 3+ covering happy path, edge cases — boundary / empty / malformed / concurrent — and adjacent-surface regression named by file + function), each naming its exact scenario: the literal command / page action / payload and the binary PASS/FAIL observable, plus the evidence artifact it will capture.
-- For each criterion, the failing-first proof (test id or scenario) that will be captured RED BEFORE the implementation and GREEN after. Evidence added after the green code does NOT satisfy this.
-
-These scenarios are the contract. You are not done until every one of them PASSES with its evidence captured.
-
-### 2. Open the durable notepad
-
-Create a notepad file with `the host terminal`: `NOTE=$(mktemp -t ulw-$(date +%Y%m%d-%H%M%S).XXXXXX.md)`. Echo the path. Initialise it with these sections and APPEND (never rewrite) as you work:
+### Execution Loop
 
 ```
-# Ultrawork Notepad — <one-line goal>
-Started: <ISO timestamp>
-
-## Plan (exhaustively detailed)
-<every step you will take, in order, broken to atomic actions>
-
-## Success criteria + QA scenarios
-<copied from the goal>
-
-## Now
-<the single step in progress>
-
-## Todo
-<every remaining step, ordered>
-
-## Findings
-<every non-obvious fact discovered, with file:line refs>
-
-## Learnings
-<patterns / pitfalls / principles to remember next turn>
+LOOP:
+  1. Read goals.json → find first unverified criterion
+  2. If no unverified: exit loop → completion
+  3. Decompose criterion into bounded work cycles
+  4. Delegate implementation to subagents (NEVER implement directly)
+  5. Wait for all subagents to complete
+  6. For each completed subagent:
+     a. Collect DoneClaim
+     b. Run AdversarialVerify (independent verifier subagent)
+     c. If confirmed → record FullyDone → update criterion status
+     d. If not confirmed → re-dispatch with feedback
+  7. Record evidence via evidence channels (see below)
+  8. Increment iteration count
+  9. If same-criterion failures >= 3: escalate to user, record `failure_escalation` event
+  10. If current-goal cycles >= 5: mark goal paused, move to next goal
+  11. If iteration >= cap (500 ultrawork / 100 normal): exit → incomplete
+  12. After every N criteria: create checkpoint
+  13. GOTO 1
 ```
 
-Append each finding, decision, command, RED/GREEN capture, and QA artifact path the moment it happens. Update `## Now` and `## Todo` on every transition. Append-only — never rewrite. This notepad is your durable memory and it OUTLIVES the context window. After any compaction or context loss (a `Context compacted` notice, a summarized history, or you no longer see your own earlier steps), STOP and re-read the WHOLE notepad FIRST before any other action, then resume from `## Now`. Recover state from the notepad; do not re-plan from scratch or re-run completed steps.
+### Evidence Channels
 
-### 3. Register obsessive todos via an available host capability
+Run real-surface proof through the correct channel:
+1. **HTTP call:** `curl -i` against live endpoint; capture status + headers + body
+2. **tmux:** `tmux new-session`, drive with `send-keys`, dump via `capture-pane`
+3. **Browser:** Use Kimi's built-in browser automation; capture screenshot + action log
+4. **CLI/data:** stdout, DB state diff, parsed config dump — first-class for CLI-shaped criteria
 
-The todo tool is Kimi Code CLI `an available host capability` — your live, user-visible checklist. Translate every action from the plan into one todo step — one step per atomic work unit: an edit plus its verification, a QA scenario run, a teardown. Keep each step small enough to finish within a few tool calls.
+**Auxiliary surfaces** (CLI stdout, DB diff, config dump) are first-class evidence for CLI/data-shaped criteria. `--dry-run` and "should respond" are NEVER evidence.
 
-Call `an available host capability` on EVERY state transition — the instant a step starts (mark it `in_progress`) and the instant it finishes (mark it `completed` and the next `in_progress`). Exactly ONE `in_progress` at a time. Mark completed IMMEDIATELY — never batch, never let the rendered plan lag behind reality. Add newly discovered steps the moment they surface instead of waiting for the next pass. Step text encodes WHERE / WHY (which criterion it advances) / HOW / VERIFY:
-`path: <action> for <criterion> — verify by <check>`.
+### Non-Negotiables
 
-GOOD pair (test-first, ordered):
-  `foo.test.ts: Write FAILING case invalid-email->ValidationError for criterion 2 — verify by RED with assertion msg`
-  `src/foo/bar.ts: Implement validateEmail() RFC-5322-lite for criterion 2 — verify by foo.test.ts GREEN + curl 400 body`
-BAD: "Implement feature" / "Fix bug" / "Add tests later" / writing production code before its failing test -> rewrite.
+- Every success criterion needs observable evidence from a real surface
+- Tests alone NEVER prove done — need at least one real-surface proof
+- Record evidence only after cleanup receipts are available
+- Delegate code edits/tests/fixes/QA to subagents — root never implements
+- After compaction/context loss: re-read goals + ledger FIRST, then resume
+- Use `git-master` skill for git-tracked edits
 
-### 4. Write initial loop state
+## Expected Output Artifacts
 
-Write the goal and success criteria to `.lazykimi/state/active-loop.json` under the `goals` array. Set `active_goal_id` to the new goal. This persists the loop state across sessions.
-
-## Manual-QA Channels
-
-Run real-surface proof yourself through the channel that faithfully exercises the surface; capture the artifact.
-
-| Channel | Tool | Artifact |
-|---------|------|----------|
-| HTTP call | `curl -i` against live endpoint (or the host terminal) | Status line + headers + body |
-| Terminal | `the host terminal` with exact command | Terminal output |
-| Browser | Kimi Code CLI Preview (an available host capability) or agent-browser skill | Screenshot + action log |
-| CLI | CLI command with arguments via the host terminal | Exit code + stdout/stderr |
-| Data | DB query, config dump, file read | Diff or parsed output |
-
-For EVERY scenario name the exact tool and the exact invocation upfront: the literal command / API call / page action with its concrete inputs (URL, payload, keystrokes, selectors) and the single binary observable that decides PASS vs FAIL. "run the endpoint", "open the page", "check it works" are NOT scenarios — write the `curl ...`, the `send-keys ...`, the Browser action, the `page.click(...)`, the expected status/text.
-
-Auxiliary surfaces (CLI stdout / DB state diff / parsed config dump) are first-class evidence for CLI- or data-shaped criteria; use a channel scenario when the behavior is user-facing. `--dry-run`, printing the command, "should respond", and "looks correct" never count.
-
-## Finding Things (lead with these, parallel-flood the first wave)
-
-Never guess from memory — locate with the right tool, and re-read before you claim or change. Fire 3+ independent lookups in one action; serialize only when one output strictly feeds the next.
-
-- Repo-wide inspection, CLI smoke tests, git/history, bounded command output -> use the host terminal directly: `rg`, `rg --files`, `cat`, and `git`. Narrow huge output before reading it.
-- Semantic code questions -> an available host capability (Kimi Code CLI's semantic search). Use this for "how/where/what" questions.
-- Text / strings / comments / logs -> Grep. File-name discovery -> Glob. Verbatim content -> Read.
-- History -> `git log` / `git blame` / `git show` via the host terminal.
-
-When discovery needs multiple angles or the module layout is unfamiliar, delegate to the `explorer` subagent (read-only codebase search, absolute-path results). For research that leaves the repo — library/API/docs/web — delegate to the `librarian` subagent. Spawn them via the Task tool with `subagent_type: "search"` and keep doing root work while they run.
-
-## Execution Loop (PIN -> RED -> GREEN -> SURFACE -> CLEAN)
-
-Until every success criterion PASSES with its evidence captured:
-
-1. **Pick next criterion** -> mark in_progress -> update notepad `## Now`.
-2. **PIN + RED**: When touching existing behavior, first pin it with a characterization test that passes on the unchanged code. Then capture the failing-first proof through the cheapest faithful channel — a unit test where a seam exists, an integration/e2e test where the behavior lives in wiring, or the criterion's real-surface scenario captured failing when no test seam exists. It must fail for the RIGHT reason (not a syntax error, not a missing import). Paste RED output into the notepad. No production code yet.
-3. **GREEN**: Write the SMALLEST production change that flips RED->GREEN. Re-run the proof. Capture GREEN output. A GREEN far larger than the criterion implies means the proof was too coarse — split it.
-4. **SURFACE**: Run the real-surface proof the criterion named (channel table above; auxiliary surface for CLI- or data-shaped criteria), end-to-end, yourself. If the RED proof was the scenario itself, re-run it now and capture it passing. Paste the artifact path into the notepad.
-5. **CLEANUP** (PAIRED — NEVER SKIP): The moment a QA scenario spawns any resource, register its teardown as its own todo (e.g. `cleanup: kill server pid for criterion 2 — verify kill -0 fails`). Every runtime artifact the QA spawned in step 4 MUST be torn down before this step completes: server PIDs (`kill <pid>`; verify `kill -0` fails), tmux sessions (`tmux kill-session -t ulw-qa-<criterion>`; verify with `tmux ls`), browser contexts (`.close()`), containers (`docker rm -f`), bound ports (`lsof -i :<port>` empty), temp files / dirs (`rm -rf` the `mktemp` paths), QA-only env vars. Append a one-line cleanup receipt to the notepad next to the artifact, e.g. `cleanup: killed 12345; tmux kill-session ulw-qa-foo; rm -rf /tmp/ulw.aB12cD`. No receipt -> criterion stays in_progress.
-6. **Verify**: LSP diagnostics clean on changed files + full test suite green (no skipped, no xfail added this turn).
-7. **Mark completed**. Append non-obvious findings / learnings.
-8. After each increment, re-run every criterion's scenario. Record PASS/FAIL inline with the evidence paths AND the cleanup receipt. Loop until all PASS.
-
-Parallel-batch independent reads / searches / subagents within a step, but NEVER parallelise RED and GREEN of the same criterion.
-
-## Subagent Reliability (Kimi Code CLI Adaptation)
-
-Every Task tool subagent invocation is self-contained and starts with `TASK: <imperative assignment>`, then names `DELIVERABLE`, `SCOPE`, and `VERIFY`. State that it is an executable assignment, not a context handoff. The Kimi Code CLI Task tool provides independent context by default. Paste only the context the child needs.
-
-### Kimi Code CLI vs Codex Subagent Differences
-
-- **Synchronous execution**: Kimi Code CLI's Task tool is synchronous — the parent waits for the subagent to return. Plan around this by doing independent root work before spawning, and processing the result when it returns.
-- **No named-role routing**: The Kimi Code CLI Task tool accepts `subagent_type` (e.g., `search`, `general_purpose_task`) but cannot select a named role by configuration. Paste the role requirements into the task description and judge the result from delivered evidence. Never claim a specific role was selected unless runtime evidence confirms it.
-- **Result is a single message**: The subagent returns one final summary. There is no mailbox or incremental updates. Structure the task description to request a complete deliverable in the final response.
-
-### Swarm Fan-Out (Kimi Code CLI `/swarm`)
-
-When a wave admits 3+ fully independent tasks with no shared mutable state, you may fan them out via Kimi Code CLI's `/swarm <task>` (300-agent swarm) instead of sequential Task calls. `/swarm` is an execution-channel option for parallel waves; it never relaxes the RED-before-GREEN rule, the evidence contract, or the cleanup receipts. The wave's success criteria and evidence paths remain binding regardless of channel.
-
-### Subagent-Dependent Transition Barrier
-
-Do not mark a `an available host capability` step `completed` while a Task subagent result for that step has not been integrated. Do not start dependent implementation until the audit, research, or review result is integrated or explicitly recorded as inconclusive. Do not generate a plan before spawned research lanes that feed the plan have returned or been closed as inconclusive.
-
-## Verification Gate (TRIGGERED, NOT OPTIONAL)
-
-Trigger when ANY apply:
-- Tier is HEAVY.
-- User demanded strict, rigorous, or proper review.
-
-LIGHT tier records a self-review in the notepad instead: re-read the diff, run diagnostics, confirm each criterion's evidence, and state in one line why the tier held.
-
-Procedure (NON-NEGOTIABLE):
-1. Spawn a Task subagent with a self-contained reviewer assignment. The Kimi Code CLI Task tool cannot select a TOML-backed reviewer role, so paste the reviewer requirements into the task description. Pass: goal, success-criteria, scenario evidence, full diff, notepad path.
-2. Treat the reviewer's verdict as binding. There is NO "false positive". Every concern is real. Do not argue. Do not minimise. Do not explain it away.
-3. Fix every issue. Re-run the FULL scenario QA. Capture fresh evidence. Update notepad.
-4. Re-submit to the SAME reviewer. Loop until you receive an UNCONDITIONAL approval ("looks good but..." = REJECTION).
-5. Only on unconditional approval may you declare done. Stopping early IS failure.
-
-## Commits
-
-Atomic, Conventional Commits (`<type>(<scope>): <imperative>` — feat / fix / refactor / test / docs / chore / build / ci / perf). One logical change per commit; each commit builds + tests green on its own. No WIP on the final branch. If a plan file exists, final commit footer: `Plan: .lazykimi/plans/<slug>.md`. Do NOT auto-`git commit` unless the user requested or preauthorised this session — default is stage + draft message + present for approval.
-
-## Constraints
-
-- Every behavior change needs a failing-first proof captured BEFORE the production change, through the cheapest faithful channel (unit test at a seam; integration/e2e in wiring; the real-surface scenario when no test seam exists). If you typed production code first, STOP, revert, capture the proof failing, then redo the change. Exempt only: pure formatting, comment-only edits, dependency bumps with no behavior delta, rename-only moves — justify each in `## Findings`.
-- A test that mirrors its implementation — asserting mocks were called, pinning a constant, or unable to fail under any plausible regression — is NOT evidence. Prefer a real-surface proof with no new test over a tautological test.
-- Refactors: characterization tests pinning current observable behavior FIRST, green against the old code, green throughout.
-- Smallest correct change. No drive-by refactors.
-- Never suppress lints / errors / test failures. Never delete, skip, `.only`, `.skip`, `xfail`, or comment out tests to green the suite.
-- Never claim done from inference — only from captured evidence.
-- Parallel tool calls for any independent work.
-
-## Output Discipline
-
-- First line literally: `ULTRAWORK MODE ENABLED!`
-- After bootstrap: 1-2 paragraph plan summary + notepad path.
-- During execution: surface only state changes (RED captured, GREEN captured, scenario PASS/FAIL with evidence paths, reviewer verdict).
-- Final message: outcome + success-criteria checklist with evidence refs + notepad path + reviewer approval (if gate triggered) + commit list (`<sha> <subject>`). No file-by-file changelog unless asked.
-
-## Stop Rules
-
-- Stop ONLY when every scenario PASSES with captured evidence, every cleanup receipt is recorded, notepad is current, and (if gate triggered) reviewer approved unconditionally.
-- Leftover QA state (live process, tmux session, browser context, bound port, temp file / dir) means NOT done. Tear it down, record the receipt, then continue.
-- After 2 identical failed attempts at one step, surface what was tried and ask the user before another retry.
-- After 2 parallel exploration waves yield no new useful facts, stop exploring and act.
-
-## Allowed Edits
-
-- Write to `.lazykimi/state/active-loop.json`.
-- Write evidence files to `.lazykimi/evidence/`.
-- Create and edit the ultrawork notepad.
-- Delegate code edits to subagents.
-- Run verification commands.
-
-## Forbidden Behavior
-
-- Never mark a step complete while a child agent owns evidence for that step.
-- Never suppress lints, errors, or test failures. Never delete, skip, or comment out tests.
-- Never claim done from inference — only from captured evidence.
-- Never parallelize RED and GREEN of the same criterion.
-- Never leave QA state (live process, tmux session, browser context, bound port, temp file) running. Tear it down, record the receipt.
-- After 2 identical failed attempts at a step, surface what was tried and ask.
+- `.lazykimi/ulw-loop/<session-id>/goals.json` — goal definitions with criteria
+- `.lazykimi/ulw-loop/<session-id>/evidence/` — per-goal evidence artifacts
+- Iteration tracking: per-goal cycles (max 5), per-criterion failures (max 3 before escalation), overall iterations (cap 500 ultrawork / 100 normal)
 
 ## Verification Gates
 
-1. **Plan reread**: Every criterion has evidence captured.
-2. **Automated verification**: Tests green, lint clean, typecheck passes.
-3. **Manual-QA**: Real-surface artifact captured for every criterion.
-4. **Adversarial QA**: Edge cases and regression scenarios exercised.
-5. **Cleanup**: All QA resources torn down, receipts recorded.
+1. Every criterion has real-surface evidence (not claims)
+2. AdversarialVerify confirms every DoneClaim before FullyDone
+3. Cleanup receipts recorded for all QA resources
+4. Iteration caps respected (5 per-goal, 3 same-failure, 500/100 overall)
+5. Same-criterion failures escalated at 3; goals paused at 5 cycles
 
-## Failure Handling
+## Failure Behavior
 
-- If a subagent fails: investigate, record the reason, respawn with narrowed scope.
-- If verification fails: diagnose, fix, rerun.
-- After 2 identical failed attempts: surface what was tried and ask the user.
-- After 2 parallel exploration waves yield no new useful facts: stop exploring and act.
+- Stall detection: 10+ iterations without progress → warn; 20 → abort
+- Iteration cap reached (per-goal, per-failure, or overall): pause; record `run_paused` event; ask user whether to continue
+- State corruption: restore from checkpoint
+- Criterion unreachable: mark as incomplete; move to next
 
-## Handoff Target
+## Handoff Format
 
-After loop completion, produce a handoff summary with `handoff`. If the loop is part of a larger plan, hand off to `start-work` for the next plan phase.
+```
+ULW-LOOP: {complete | incomplete}
+  Criteria: N/N verified
+  Iterations: {count}
+  Evidence: {artifact paths}
+  Adversarial checks: {summary}
+```
+
+## State Ledger Integration (v0.7)
+
+The ulw-loop now integrates with the state/ and loop/ scripts for durable iteration management and failure recovery.
+
+- **Loop iteration:** Each cycle begins by calling `lazykimi-plugin/scripts/loop/run-cycle.sh <run_id>`. This script increments `state.json`'s `iteration.count`, checks per-goal `iteration.per_goal_max` (5) and per-criterion `iteration.per_failure_max` (3), and checks the `iteration.max` cap (500 for ultrawork, 100 for normal). It writes a `cycle_start` event to `events.jsonl`. When any cap is exceeded, the script exits with code 2, causing the loop to stop with an `incomplete` status. Per-criterion same-failure counts trigger escalation via `lazykimi-plugin/scripts/loop/escalate.sh <run_id> <criterion>` when the threshold is reached.
+- **Failure classification:** When a cycle fails, the loop calls `lazykimi-plugin/scripts/loop/classify-failure.sh <run_id> <error_output>` to analyze the failure. The script classifies it into one of: `stall`, `flaky`, `unreachable`, or `corruption`, and writes a `failure_classified` event to `events.jsonl` with the classification and confidence. Based on the classification, `lazykimi-plugin/scripts/loop/create-repair-task.sh <run_id> <classification>` creates a repair task in `state.json`'s `tasks[]` array.
+- **Iteration tracking:** The loop reads `state.json`'s `iteration.count` and `iteration.max` fields at the start of every cycle. If `count >= max`, no new cycles are started and the run is finalized via `lazykimi-plugin/scripts/loop/finalize-run.sh <run_id>`.
+
+## Dynamic Steering (v0.9 hardening)
+
+Seven steering types govern how the loop handles results. Trigger conditions are checked after each cycle:
+
+1. **continue** — criterion passed AdversarialVerify with `confirmed` verdict; move to next criterion
+2. **skip_criterion** — criterion is unreachable or blocked; record reason, move to next
+3. **escalate** — 3 same-criterion failures or 5 goal cycles; pause and ask user
+4. **pause_for_review** — unexpected test suite breakage or a change touching >3 modules; spawn reviewer before continuing
+5. **split_criterion** — criterion scope grew beyond original (e.g., impl touched extra modules); decompose into smaller criteria, restart current
+6. **merge_criteria** — two criteria are verified by the same evidence; merge and mark both complete
+7. **revert_last_cycle** — cycle produced regressions or corrupted state; revert changes and re-dispatch
+
+See earlier host implementation source: full-workflow.md lines 206-220
+
+## Final Quality Gate (v0.9 hardening)
+
+Before declaring completion, run the final quality gate:
+
+1. **Re-run all verification** — every criterion's scenario, the full test suite, LSP diagnostics
+2. **Gate-reviewer approval** — spawn an independent reviewer subagent with `isolation: true`; it reviews the full goals.json, all evidence artifacts, the events.jsonl ledger, and the iteration trace
+3. **Evidence audit** — confirm every criterion has real-surface evidence (not `--dry-run`, not assertion-only); confirm all cleanup receipts are recorded
+4. Gate-reviewer must return UNCONDITIONAL approval before completion is declared
+
+See earlier host implementation source: full-workflow.md lines 183-204
+
+## Delegation Model (v0.9)
+
+family-style task sizing for subagent delegation:
+
+- **XS** (1-2 tool calls) — inline by the root; single grep/read/edit
+- **S** (3-8 tool calls, 1 file) — spawned worker with `isolation: true`
+- **M** (8-20 tool calls, 2-5 files) — spawned worker; requires `SCOPE` with explicit file list
+- **L** (20-50 tool calls, >5 files, cross-module) — HEAVY triage; spawn with `effort: high`, explicit `DELIVERABLE` per module
+- **XL** (>50 tool calls, multi-service) — decomposes into plan agent → L/M waves; spawned workers per wave
+
+**Wave-based parallelism:** When criteria are independent (no shared files, no state coupling), dispatch them as parallel waves. All workers in a wave share the same `SCOPE` but operate on disjoint files. Wait for the full wave to complete before starting the next wave.
+
+See earlier host implementation source: full-workflow.md lines 35-61
+
+## Kimi-Native Features
+
+- **Subagent spawning:** Implementation and QA delegated to Kimi sub-agent channel dispatch
+- **State persistence:** Goals and evidence stored in `.lazykimi/ulw-loop/`
+- **Hooks (v0.6+):** Stop/SubagentStop hooks re-inject the loop on continuation
+- **Checkpoints:** Periodic state snapshots in `.lazykimi/runs/<run_id>/checkpoints/`
+
+---
+
+_Adapted from earlier host implementation ulw-loop. Preserved: goal creation with binding criteria, evidence-backed completion, iteration caps, real-surface proof requirement, "tests alone never prove done" axiom. Adapted: inline loop workflow → inline skill logic + future MCP tools; `.lazykimi/ulw-loop` → `.lazykimi/ulw-loop/`; Codex subagent tools → Kimi sub-agent channel dispatch._

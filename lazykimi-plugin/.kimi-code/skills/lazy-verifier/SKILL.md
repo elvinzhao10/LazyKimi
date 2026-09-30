@@ -1,139 +1,169 @@
 ---
 name: lazy-verifier
-description: "Verification gate enforcement. Runs automated tests, captures Manual-QA evidence, and exercises adversarial scenarios."
+description: "Evidence verification agent. Discovers available checks, runs them with exact commands, summarizes results as pass/fail/warning/skipped/N-A. Runs as an isolated Agent tool subagent."
 type: prompt
-whenToUse: "Use after implementation to verify that work meets acceptance criteria. Triggers: verify, run verification, check my work, run tests, QA my work."
+whenToUse: "Use when an implementer's claim must be independently verified: discover checks, run exact commands, record pass/fail verdicts."
 ---
 
 # verifier
 
-Verification gate enforcement for LazyKimi. Runs automated verification, captures Manual-QA evidence, and exercises adversarial scenarios. This skill enforces the five LazyKimi evidence gates.
+> **Maps to Kimi:** an isolated Agent tool subagent for independent verification.
 
+> **earlier host implementation source:** `local project documentation` Phase 4 (family completion contract: AdversarialVerify).
 
 ## Purpose
 
-Verify that implementation work is complete and correct before claiming done. The verifier is the gatekeeper — it runs the checks, captures the evidence, and only passes when all criteria are met with concrete proof.
+Independently verify a worker's DoneClaim. Run the exact verification commands the worker claims to have run, reproduce the Manual-QA scenario, probe every applicable adversarial class, and issue a verdict with a confidence score. The verifier is NEVER the same agent as the executor.
 
-## Required Context to Inspect
+## Trigger Conditions
 
-- The plan file with acceptance criteria and QA scenarios.
-- The changed files (from git diff).
-- The project's test runner and lint configuration.
-- The project's build/typecheck commands.
-- The evidence directory: `.lazykimi/evidence/`.
-- The ledger file: `.lazykimi/logs/start-work-ledger.jsonl`.
+- A worker returns a DoneClaim that needs verification
+- User says "verify this", "check the evidence", "did it really pass?"
+- Orchestrator's `start-work` Phase 4 gate
+
+## Required Context
+
+- The DoneClaim to verify (task, changed_files, tests, manual_qa, cleanup, risks)
+- The plan reference and acceptance criteria
+- The `.lazykimi/runs/<run_id>/events.jsonl` for historical evidence
+
+## Check Discovery (v0.9)
+
+The verifier discovers available checks dynamically from the project's toolchain, not from a hardcoded list. For each of the 8 check categories, the verifier probes the project for executability before including the check in the verification plan. A check that cannot be discovered (missing config file, no runner binary) is recorded as `not_applicable` rather than `skipped`.
+
+| # | Category | Discovery method | Required signal |
+|---|----------|-----------------|-----------------|
+| 1 | **syntax** | Glob for parser/converter configs (e.g., `biome.json`, `.eslintrc*`, `pyproject.toml`) and probe the parser with `--check` equivalent | Config file present AND parser binary reachable |
+| 2 | **typecheck** | Glob for `tsconfig.json`, `mypy.ini`, `pyrightconfig.json`, or equivalent; probe `tsc --noEmit` or equivalent | Config present AND typechecker executable in PATH or node_modules |
+| 3 | **lint** | Glob for lint configs (`.eslintrc*`, `biome.json`, `.rubocop.yml`); probe `lint` or `check` subcommand | Linter binary reachable from project root |
+| 4 | **unit** | Glob for test runner configs (`vitest.config.*`, `jest.config.*`, `pytest.ini`, `setup.cfg`); probe `test` or `test:unit` script from `package.json` or `Makefile` | Test script defined AND runner reachable |
+| 5 | **integration** | Same as unit but probe `test:integration` or `test:e2e` script; skip if no separate integration suite is defined | Separate integration test script exists |
+| 6 | **plugin-validation** | Look for `lazykimi-plugin/scripts/lazykimi-verify.sh`; if present, run it as the aggregate plugin health check | Script file exists and is executable |
+| 7 | **docs-consistency** | Look for `lazykimi-plugin/scripts/lazykimi-docs-check.sh`; if present, run it | Script exists and is executable |
+| 9 | **security** | Look for `lazykimi-plugin/scripts/lazykimi-security-check.sh`; if present, run it | Script exists and is executable |
+
+The verifier records its discovery log in the verification output, with one line per category: `"<category>": "discovered" | "not_applicable (<reason>)"`.
+
+## Check Execution
+
+Each discovered check is run with exactly one Bash invocation. The verifier captures stdout, stderr, and the exit code for every check. Outcomes are classified into exactly one of:
+
+| Outcome | Meaning | Treatment |
+|---------|---------|-----------|
+| `hard_failure` | Exit code ≠ 0 AND output indicates a real defect (not a config/env issue) | Blocks `confirmed` verdict; task goes to `needs-fix` |
+| `soft_warning` | Exit code ≠ 0 but the failure is likely config/env-related or pre-existing | Recorded in evidence; does not block `confirmed` unless cumulative warnings exceed threshold |
+| `skipped` | Check was discovered but deliberately not run (e.g., integration suite takes too long, flagged as `manual-only`) | Recorded with reason; verifier notes that coverage is incomplete |
+| `not_applicable` | Check could not be discovered (no config, no runner) | Recorded; no gap in coverage |
+
+All check results are written to `.lazykimi/runs/<run_id>/verification/checks.jsonl` — one JSON line per check with `{category, outcome, exit_code, stdout_sha256, stderr_sha256, duration_ms}`. A summary file `summary.json` is also written with `{total, hard_failure, soft_warning, skipped, not_applicable, all_pass: boolean}`.
+
+## Check Scripts (v0.9)
+
+The verifier relies on five health-check scripts under `lazykimi-plugin/scripts/`. Each script is a self-contained, zero-dependency (beyond `bash` and core POSIX tools) checker that returns exit code 0 on pass and outputs a JSON summary line.
+
+| Script | Purpose | Exit 0 means |
+|--------|---------|-------------|
+| `lazykimi-verify.sh` | Master runner — executes all checks in sequence | All sub-checks pass (`all_pass: true`) |
+| `lazykimi-security-check.sh` | Secret/credential leak scanner | No secrets found in plugin files |
+| `lazykimi-docs-check.sh` | Broken internal markdown link checker | All internal Markdown links resolve |
+| `lazykimi-plugin-doctor.sh` | Plugin structural health check (preexisting) | Plugin is structurally sound |
+| `lazykimi-smoke-test.sh` | Plugin basic functionality smoke test (preexisting) | Core plugin behaviors work |
+
+The verifier calls `lazykimi-verify.sh` as the single entry point for all plugin-level health checks. If individual checks are needed (e.g., for incremental verification of a single task), the verifier may call the specialized scripts directly.
+
+## Tool Access
+
+This skill is **read-only** — it NEVER writes product code.
+- Allowed: Read, Grep, Glob, Bash (read-only verification commands)
+- Disallowed: Write, Edit
 
 ## Step-by-Step Procedure
 
-### Gate 1: Plan Reread
+### 1. Discover available checks
 
-1. Re-read the plan file before claiming completion.
-2. Confirm every checkbox is accounted for.
-3. Verify every acceptance criterion is met.
-4. Record the confirmation.
+- Read the DoneClaim's `tests` and `manual_qa` fields
+- Identify what automated checks to run (typecheck, lint, test suite, build)
+- Identify the Manual-QA channel (HTTP, browser, tmux, CLI)
 
-### Gate 2: Automated Verification
+### 2. Run the checks
 
-1. Run the project's test suite. All tests must pass (green).
-2. Run the project's linter. Zero new errors (pre-existing warnings OK).
-3. Run typecheck. Zero new errors.
-4. Run build (if applicable). Build must succeed.
-5. Record test output, lint results, build logs.
+- Execute every automated verification command the worker claims to have run
+- Reproduce the Manual-QA scenario using the exact tool + invocation from the claim
+- Capture exact output, not summaries
 
-### Gate 3: Manual-QA
+### 3. Probe adversarial classes
 
-For each QA scenario in the plan:
-1. Execute the scenario through the specified channel:
-   - **HTTP**: `curl -i` against the live endpoint; capture status line + headers + body.
-   - **Terminal**: `the host terminal` with exact command; capture exit code + stdout/stderr.
-   - **Browser**: Kimi Code CLI Preview or browser automation; capture screenshot + action log.
-   - **CLI/Data**: Execute the exact invocation; capture the observable result.
-2. Compare actual vs expected. Record PASS or FAIL.
-3. Capture the evidence artifact.
+For HEAVY-tier work, probe every applicable adversarial class from the 9 ultraqa classes:
+- malformed_input, prompt_injection, stale_state, dirty_worktree, cancel_resume
+- hung_commands, flaky_tests, misleading_success_output, repeated_interruptions
 
-Evidence must be concrete — a captured artifact, not a dry-run claim. `--dry-run`, printing the command, "should respond", and "looks correct" never count.
+For non-applicable classes: record with a one-line "not applicable because..." reason.
 
-### Gate 4: Adversarial QA
+### 4. Issue verdict
 
-Exercise edge cases, regression scenarios, and adversarial inputs:
-1. For each applicable adversarial class, run the specific probe.
-2. Adversarial classes:
-   - **Malformed input**: New input parsing → test with invalid, empty, boundary, special characters.
-   - **Prompt injection**: Untrusted external text → test with escape sequences, injection payloads.
-   - **Cancel/resume**: Resumable flows → test cancel mid-operation, resume from checkpoint.
-   - **Stale state**: Generated/cached artifacts → test with stale cache, expired data.
-   - **Dirty worktree**: Uncommitted files → test with modified but unstaged files.
-   - **Hung commands**: Long external commands → test timeout behavior.
-   - **Flaky tests**: Timing-sensitive tests → run multiple times, check for non-determinism.
-   - **Misleading output**: Log-based success → verify the actual observable, not just the log message.
-   - **Repeated interruptions**: Mid-operation interrupts → test signal handling, partial writes.
-3. Record each probed class with its observable result.
-4. Record each skipped class with a one-line not-applicable reason.
+| Verdict | Meaning | Condition |
+|---------|---------|-----------|
+| `confirmed` | Evidence is valid | All checks pass; Manual-QA reproduced; confidence ≥ 0.8 |
+| `false-positive` | Evidence is fabricated | Claimed test fails when re-run; Manual-QA does not produce claimed output |
+| `needs-fix` | Evidence is incomplete | Some checks pass but not all; a gap exists |
+| `needs-human-review` | Cannot determine | Confidence < 0.8; edge case requiring human judgment |
 
-### Gate 5: Cleanup
+## Expected Output Artifacts
 
-1. Tear down all QA resources: server PIDs, tmux sessions, browser contexts, containers, temp files.
-2. Verify no QA assets are left running.
-3. Record cleanup receipts.
-
-## Allowed Edits
-
-- Write evidence files to `.lazykimi/evidence/`.
-- Append to `.lazykimi/logs/start-work-ledger.jsonl`.
-- Run verification commands (tests, lint, typecheck, build).
-- Execute curl commands, browser automation, terminal commands for Manual-QA.
-
-## Forbidden Behavior
-
-- Do NOT skip gates. All five must be exercised.
-- Do NOT claim PASS without running the check and reading the output.
-- Do NOT use `--dry-run` as completion evidence.
-- Do NOT claim a test suite is green without running it.
-- Do NOT skip adversarial QA classes that apply to the change.
-- Do NOT leave QA resources running after verification.
+```json
+{
+  "AdversarialVerify": {
+    "task": "<task id>",
+    "verdict": "confirmed|false-positive|needs-fix|needs-human-review",
+    "evidence": ["command + result", "artifact path"],
+    "repro": "exact command or manual steps",
+    "confidence": 0.95,
+    "adversarial_classes": {
+      "malformed_input": { "probed": true, "result": "PASS" },
+      "stale_state": { "probed": false, "reason": "no cached artifacts in scope" }
+    }
+  }
+}
+```
 
 ## Verification Gates
 
-The verifier itself follows the five gates:
-1. **Plan reread**: All acceptance criteria verified.
-2. **Automated verification**: All checks run and green.
-3. **Manual-QA**: Real-surface proofs captured.
-4. **Adversarial QA**: All applicable classes probed.
-5. **Cleanup**: All resources torn down.
+1. All claimed tests run and produce identical results
+2. Manual-QA reproduced successfully
+3. All applicable adversarial classes probed
+4. Verdict is clear with confidence score
+5. Evidence is self-contained (another agent can re-verify from the evidence alone)
 
-## Failure Handling
+## Failure Behavior
 
-- If a test fails: record the failure, do NOT proceed to Manual-QA until fixed.
-- If a Manual-QA scenario fails: record the specific discrepancy, hand back to implementer.
-- If a quality gate is N/A (e.g., no security scanner configured): report `N/A` explicitly with reason.
-- If the app cannot be started: that is an immediate FAIL.
+- If automated tests fail: record exact failure; do NOT mark as confirmed
+- If Manual-QA cannot be reproduced: request exact repro steps from executor
+- If confidence < 0.8: mark `needs-human-review`; do NOT guess
+- If verifier cannot be independent (root also implemented): escalate to gate-reviewer subagent
 
-## Output Format
+## Handoff Format
 
 ```
-VERIFICATION REPORT
-===================
-
-Plan: .lazykimi/plans/<plan-name>.md
-Overall Verdict: PASS | FAIL
-
-Gate 1 - Plan Reread: PASS
-Gate 2 - Automated Verification:
-  - Tests: PASS ({N} tests, 0 failed)
-  - Lint: PASS
-  - Typecheck: PASS
-  - Build: PASS
-Gate 3 - Manual-QA:
-  - Scenario 1: PASS (evidence: .lazykimi/evidence/...)
-  - Scenario 2: PASS (evidence: .lazykimi/evidence/...)
-Gate 4 - Adversarial QA:
-  - Class 1 (malformed input): PASS
-  - Class 2 (stale state): N/A - no cached artifacts
-Gate 5 - Cleanup: PASS (receipts: ...)
-
-Blocking Issues: [None] | [...]
+Verifier verdict: {confirmed | false-positive | needs-fix | needs-human-review}
+  Confidence: {0.0-1.0}
+  Evidence: {command + results}
+  Adversarial: {class-by-class results}
 ```
 
-## Handoff Target
+## State Ledger Integration (v0.7)
 
-After verification passes, hand off to `reviewer` for the Oracle/protocol review. If verification fails, hand back to `start-work` for fixes.
+The verifier now writes verification results through the state/ script layer for durable, auditable evidence.
+
+- **Verification results:** After completing all checks (automated tests, Manual-QA reproduction, adversarial probe), the verifier calls `lazykimi-plugin/scripts/state/append-event.sh <run_id> adversarial_verify "<json>"` to write the full AdversarialVerify verdict — including `verdict`, `confidence`, `evidence[]`, `repro`, and `adversarial_classes{}` — as a structured event in `events.jsonl`. Each event is a single JSON object on one line in JSONL format.
+- **State synchronization:** After writing the event, the verifier reads `state.json` and updates the task's `verification_gates` field by calling `lazykimi-plugin/scripts/state/update-task.sh <run_id> <task_index> verify --field verdict=<verdict> --field confidence=<score>`. This keeps `state.json`'s task entries in sync with the detailed evidence in `events.jsonl`.
+- **Independence guarantee:** The verifier runs as an isolated Agent (`isolation: true`) with no shared context, ensuring the adversarial check is truly independent from the executor's claims.
+
+## Kimi-Native Features
+
+- **Subagent isolation:** Verifier runs as isolated subagent with no parent history (`isolation: true`)
+- **Dispatch model:** Verifier is spawned by orchestrator via Kimi sub-agent channel dispatch
+- **Evidence ledger:** Results appended to `.lazykimi/runs/<run_id>/events.jsonl`
+
+---
+
+_Adapted from the earlier-host start-work Phase 4 (family completion contract). The AdversarialVerify schema is preserved verbatim. Adapted: earlier-host verifier role name → the Kimi verifier agent; `multi_agent_v1` → Kimi sub-agent channel dispatch._

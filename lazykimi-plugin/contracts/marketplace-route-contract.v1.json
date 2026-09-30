@@ -85,14 +85,14 @@
       "kimi.plugin.json"
     ],
     "counts": {
-      "skills": 17,
+      "skills": 19,
       "commands": 20,
       "agents": 13,
       "hook_events": 16,
       "mcp_servers": 6
     },
-    "file_count": 82,
-    "inventory_sha256": "e602f70d0da93c8d928d8f1ff33b132daf35047d4cb63a724cf5a02d8afb92ea"
+    "file_count": 102,
+    "inventory_sha256": "df114206d8c3cd1255c7c105588d8a29736ed62717e09a453497cb532db88d0e"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

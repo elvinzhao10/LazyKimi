@@ -1,220 +1,223 @@
 ---
 name: lazy-init-deep
-description: "Hierarchical repo understanding and AGENTS.md generation."
+description: "Generate hierarchical project memory for the Kimi workspace. Inspects repo structure, identifies language/runtime/test/build commands, generates a .lazykimi/context/ knowledge base on top of AGENTS.md project memory."
 type: prompt
-whenToUse: "Use when onboarding a new repository, after major refactors, or when agents keep picking wrong files. Triggers: init-deep, initialize repo, generate AGENTS.md, understand this codebase."
+whenToUse: "Use when a new workspace needs hierarchical project memory (kimi.md tree plus .lazykimi/context/) or an existing one needs a memory refresh."
 ---
 
 # init-deep
 
-Generate hierarchical AGENTS.md files for a project. Root AGENTS.md + complexity-scored subdirectory AGENTS.md files.
+> **Maps to Kimi:** AGENTS.md project memory plus the writable kimi.md tree and the `.lazykimi/context/` knowledge base.
 
+> **earlier host implementation source:** `local project documentation`
 
+## Adaptive workflow layer is selection-only until the host is observed
+
+Automatic workflow selection uses existing risk and complexity signals to
+choose the smallest sufficient workflow. Until the Kimi host is observed on a
+recorded build and session, that result is **selection-only**: it does not
+claim native workflow loading, host dispatch, or MCP behavior, and
+**HOST READINESS: PENDING** remains authoritative. Never present a selected
+workflow as host-verified.
 ## Purpose
 
-Give agents local, scoped, telegraphic context before they touch code. A root AGENTS.md orients to the project; nested AGENTS.md files in high-complexity directories give scoped guidance. The first session pays for every session after it.
+Generate hierarchical project memory for the current Kimi workspace. Scores directories by complexity (file count, subdir count, code ratio, symbol density, reference centrality), generates `kimi.md` at root and subdirectory variants where warranted, and produces a `.lazykimi/context/` knowledge base for future agents.
 
-## Required Context to Inspect
+## Trigger Conditions
 
-- The repository root directory and its layout.
-- Existing AGENTS.md / CLAUDE.md / CONTEXT.md files.
-- Project config files (package.json, tsconfig.json, pyproject.toml, etc.).
-- LSP symbol inventory (if available via Kimi Code CLI built-in tools).
-- Git history (recent commits, branch structure).
-- Build/test/dev commands.
+- User types `/lazy-init-deep` in a Kimi-installed plugin, or requests project initialization in natural language
+- New workspace where no `kimi.md` exists
+- Workspace structure has changed significantly
+- User says "understand this codebase", "map this project", "create project memory"
 
-## Mandatory package load check
+## Required Context
 
-Before any repository discovery, identify the target host and run its package load check. This is required every time `lazy-init-deep` is invoked, including an existing project:
+Before generating, inspect:
+- `kimi.md` if it already exists (update mode)
+- Root directory structure (`ls -la`, `find` for file counts)
+- `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, or equivalent project manifest
+- Existing docs, README files, CONTRIBUTING files
+- Test directories and test runner configuration
+- CI/CD configuration (`.github/workflows/`, `Makefile`, etc.)
+
+## Mandatory plugin load check
+
+Before any repository discovery, resolve the plugin root and run:
 
 ```bash
-# Kimi Code CLI (single host)
-lazykimi load-check
+PLUGIN_ROOT=""
+if [ -f "$PWD/lazykimi-plugin/scripts/lazykimi-load-check.sh" ]; then
+  PLUGIN_ROOT="$PWD/lazykimi-plugin"          # copied repository root
+elif [ -f "$PWD/scripts/lazykimi-load-check.sh" ]; then
+  PLUGIN_ROOT="$PWD"                        # plugin root itself
+fi
+if [ -z "$PLUGIN_ROOT" ]; then
+  echo "LazyKimi plugin root is unavailable; reopen the copied repository or install the plugin." >&2
+  exit 1
+fi
+bash "$PLUGIN_ROOT/scripts/lazykimi-load-check.sh"
 ```
 
-This is package readiness only: it verifies skills, commands, agents, hooks, and the MCP declaration. It does not establish host discovery or a live MCP connection. Record the actual result in the final report. If project components are missing, run `lazykimi init`; use `lazykimi sync` for an existing installation. Re-run the check before continuing. Do not claim the project is initialized while the package load check fails.
+This is required every time `lazy-init-deep` is invoked, including an existing workspace. Kimi provides no environment-variable interpolation, so the root is resolved from the copied repository root or the plugin root itself; elsewhere this fails clearly instead of guessing. With no override, it tries only those two documented copied-repository/plugin-root layouts: it does not search parents, siblings, marketplaces, or the filesystem.
 
-## Optional Integration Boundary
+### Sibling-plugin checkout from an unrelated workspace
 
-The load check and any repair above handle core LazyKimi assets only: installed
-skills, commands, rules, hooks, agents, schemas, and the base LazyKimi MCP
-declaration. Do NOT run `lazykimi tooling ...`. Do NOT enable optional MCP
-capabilities or install external dependencies during InitDeep. If an optional
-tool is genuinely needed, report its explicit lifecycle command and wait for a
-separate user-triggered request before provisioning it. Leave optional capabilities unchanged unless separately explicitly requested.
+If this workspace is unrelated to a separately checked-out sibling plugin, use the plugin's **absolute** path explicitly. For example:
 
-## Required Readiness Evidence
+```bash
+PLUGIN_ROOT="/absolute/path/to/lazykimi-plugin" \
+  bash "/absolute/path/to/lazykimi-plugin/scripts/lazykimi-load-check.sh"
+```
 
-Record actual observations with these exact keys in the final report:
+Expected successful output includes `PACKAGE_READINESS=full`. Do not replace the absolute path with a parent or sibling search; without the override, only the two local layouts above are tried and the unavailable-root diagnostic is the expected result from an unrelated workspace.
 
-- `readiness_result`: the final package load-check result.
-- `readiness_host`: the host argument used for that check (`kimi-code-cli`).
-- `capability_statuses`: read-only optional-capability observations, or `not inspected` when unavailable.
-- `optional_policy`: `unchanged; no optional lifecycle invoked` unless a separate explicit request authorized it.
-- `receipt_state`: observed receipt state, or `not inspected` when no receipt check was requested.
-- `evidence_paths`: paths to the load-check output and generated AGENTS.md files.
+Run the load check first, then verify its reported skills, commands, agents, hooks, and MCP declarations before repository discovery. Record the observed package inventory in the final report. If it fails, reload or reinstall the plugin and re-run the check before continuing. Do not claim project memory initialization is complete while the plugin load check fails.
 
-Never substitute assumptions for observations. InitDeep may report package readiness, but it cannot establish host discovery or a live MCP connection.
+### InitDeep readiness evidence
+
+The load check is package readiness only: it does not prove a live host session or MCP connection. Do not enable optional capabilities, select a provider, initialize optional architecture tooling, export MCP configuration, or change optional capability state as part of InitDeep. Those actions require a separate explicit user request.
+
+Record observed, not inferred, readiness evidence in the completion report with these exact fields:
+
+```text
+readiness_result: {load-check result}
+readiness_host: {host/package readiness boundary}
+capability_statuses: {observed read-only status summary}
+optional_policy: {unchanged unless separately explicitly requested}
+receipt_state: {observed receipt/ownership state or not inspected}
+evidence_paths: {load-check output and inspected package paths}
+```
+
+## Tool Access
+
+This skill is **read-only** — it never modifies product code.
+- Allowed: Read, Glob, Grep, Bash (read-only analysis commands), WebSearch
+- Disallowed: Write, Edit (on product paths)
 
 ## Step-by-Step Procedure
 
-### Phase 1: Discovery + Analysis
+### Phase 1: Discovery + Analysis (concurrent)
 
-1. **Confirm package readiness** — run the mandatory package load check above first, verify skills, commands, agents, hooks, and the MCP declaration, then report the observed result before modifying or mapping the repository.
-2. **Fire parallel read-only exploration** — use Kimi Code CLI subagents or parallel tool calls to explore:
-   - Project structure (directory layout, file counts, code concentration).
-   - Entry points (main files, CLI entry, server bootstrap).
-   - Conventions (config files, lint rules, formatting standards).
-   - Anti-patterns (DO NOT, NEVER, DEPRECATED comments).
-   - Build/CI pipeline (.github/workflows, Makefile, CI config).
-   - Test patterns (test directories, test frameworks, coverage).
-3. **Main session analysis** — while sub-agents run:
-   - Run directory structure analysis (depth, file counts per directory, code concentration by extension).
-   - Read existing AGENTS.md / CLAUDE.md files.
-   - Use Kimi Code CLI built-in tools (an available host capability, Grep, Glob) to map symbols and references.
-4. **Collect and merge** all findings.
+1. **Confirm plugin readiness.** Run the mandatory plugin load check above and report its observed counts before mapping the workspace.
+
+2. **Fire exploration in parallel.** Spawn subagents (Kimi sub-agent channel dispatch) to map structure, entry points, conventions, anti-patterns, build/CI, and test patterns. Use `isolation: true` (no parent history) for each.
+
+3. **While subagents run**, in the main session:
+   - Run structural analysis: `find . -type d` for directory depth, `find . -type f` for file counts, code concentration by extension
+   - Read existing `kimi.md` if present
+   - Check for LSP diagnostics on key files
+
+4. **Collect subagent results.** Merge bash analysis + subagent findings.
 
 ### Phase 2: Scoring & Location Decision
 
-Score each directory using this matrix:
+Score each significant directory using this matrix:
 
 | Factor | Weight | High Threshold |
 |--------|--------|----------------|
-| File count | 3x | >20 files |
-| Subdir count | 2x | >5 subdirectories |
-| Code ratio | 2x | >70% code files |
-| Unique patterns | 1x | Has own config |
-| Module boundary | 2x | Has index.ts / __init__.py |
+| File count | 3x | >20 |
+| Subdir count | 2x | >5 |
+| Code ratio | 2x | >70% |
+| Unique patterns | 1x | Own config |
+| Module boundary | 2x | Has index file |
 | Symbol density | 2x | >30 symbols |
-| Export count | 2x | >10 exports |
-| Reference centrality | 3x | >20 references |
 
-Decision rules:
-- **Root (.)** — ALWAYS create.
-- **Score >15** — Create AGENTS.md.
-- **Score 8-15** — Create if distinct domain.
-- **Score <8** — Skip (parent covers).
+- Score >15: create `kimi.md` variant in that directory
+- Score 8-15: create if distinct domain
+- Score <8: skip (parent covers)
+- Root: ALWAYS create
 
-### Phase 3: Generate AGENTS.md
+### Phase 3: Generate kimi.md
 
-**Root AGENTS.md** (50-150 lines, telegraphic style):
-- OVERVIEW (1-2 sentences: what + core stack)
-- STRUCTURE (directory tree, non-obvious purposes only)
-- WHERE TO LOOK (task → location mapping)
-- CODE MAP (key symbols, types, locations, roles)
-- CONVENTIONS (ONLY deviations from standard)
-- ANTI-PATTERNS (explicitly forbidden in this project)
-- COMMANDS (dev/test/build)
-- NOTES (gotchas)
+Write root `kimi.md` with:
+- **OVERVIEW:** 1-2 sentence project summary + core stack
+- **STRUCTURE:** Directory tree with non-obvious purposes
+- **WHERE TO LOOK:** Task → location → notes mapping
+- **CONVENTIONS:** Only deviations from standard
+- **ANTI-PATTERNS:** Explicitly forbidden in this project
+- **COMMANDS:** dev/test/build commands
 
-**Subdirectory AGENTS.md** (30-80 lines, never repeat parent content):
-- OVERVIEW (1 line)
-- STRUCTURE (if >5 subdirs)
-- WHERE TO LOOK
-- CONVENTIONS (if different from parent)
-- ANTI-PATTERNS
+Quality gates: 50-150 lines, no generic advice, no obvious info.
 
-### Phase 4: Review & Deduplicate
+### Phase 4: Generate context knowledge base
 
-- Remove generic advice that applies to all projects.
-- Remove parent duplicates from child AGENTS.md files.
-- Trim to size limits.
-- Verify telegraphic style.
+Write to `.lazykimi/context/`:
+- `index.md` — structured project overview
+- `commands.json` — discovered dev/test/build/lint commands
+- `project-map.json` — directory → purpose, language, complexity score mapping
 
-## Allowed Edits
+### Phase 5: Review & Deduplicate
 
-- Create only missing AGENTS.md files.
-- Only write under the project root and its subdirectories.
+- Remove generic advice from all generated files
+- Remove parent duplicates from subdirectory variants
+- Trim to size limits
+- Verify telegraphic style
 
-## User-Owned AGENTS.md Safety
+### Phase 6: Create the consumer compatibility pointer
 
-Content outside every delimited `<!-- lazykimi:managed:start -->` /
-`<!-- lazykimi:managed:end -->` managed block is user-owned. Preserve it byte-for-byte,
-including malformed or unparseable content, and report its exact path; never
-delete, replace, regenerate, or edit that user-owned content automatically. A
-complete delimited managed block itself is package-owned.
+After generating or updating `kimi.md`, explicitly invoke the consumer helper once:
 
-`--create-new` only requests a destructive-recovery proposal; it is not
-authorization. Before full-file replacement, list the exact AGENTS.md files and
-obtain separate confirmation naming that same list. Before replacement, make a
-byte-for-byte backup of every confirmed original at
-`.lazykimi/backups/init-deep/<timestamp>/<relative-path>` and report each backup
-path. Leave every unlisted AGENTS.md unchanged.
+```bash
+CWD="$PWD" PLUGIN_ROOT="$PLUGIN_ROOT" \
+  node "$PLUGIN_ROOT/dist/index.js" sync
+```
 
-`lazykimi init` updates a complete delimited package-owned
-`<!-- lazykimi:managed:start -->` / `<!-- lazykimi:managed:end -->` block in AGENTS.md, or
-appends a new delimited managed block when none is present, preserving all
-existing surrounding bytes.
+The helper creates `AGENTS.md` only when it is absent and reports `AGENTS_STATUS=created`; it preserves an existing regular `AGENTS.md` byte-for-byte and reports `AGENTS_STATUS=preserved`. Do not merge, overwrite, or manually edit an existing `AGENTS.md`. Include the observed created/preserved status in the completion report.
 
-## Forbidden Behavior
+## Expected Output Artifacts
 
-- Do NOT generate AGENTS.md for node_modules, .git, dist, build, vendor directories.
-- Do NOT exceed 150 lines for root AGENTS.md or 80 lines for subdirectory.
-- Do NOT include generic advice (e.g., "write clean code", "follow best practices").
-- Do NOT repeat parent content in child AGENTS.md.
-- Do NOT skip Phase 1 discovery — never plan blind.
+- `kimi.md` at root (50-150 lines, quality-gate passing)
+- Subdirectory `kimi.md` variants where score warrants
+- `.lazykimi/context/index.md`
+- `.lazykimi/context/commands.json`
+- `.lazykimi/context/project-map.json`
 
 ## Verification Gates
 
-1. **Plan reread**: Confirm all planned AGENTS.md locations were created.
-2. **Automated verification**: Check file sizes, no empty files, no duplicates.
-3. **Manual-QA**: Read each generated AGENTS.md and verify it is telegraphic, non-generic, and scoped.
-4. **Adversarial QA**: Verify subdirectory AGENTS.md do not repeat parent content. Verify no stale information from outdated existing files.
-5. **Cleanup**: Remove any temporary notes or scratch files.
+1. `kimi.md` exists and is 50-150 lines
+2. No generic filler content (tested by checking for common phrases)
+3. Hierarchy is correct (child does not repeat parent)
+4. `.lazykimi/context/` files exist and are parseable
+5. Consumer helper completed after `kimi.md` generation, with its created/preserved result recorded
 
-## Failure Handling
+## Failure Behavior
 
-- If exploration cannot complete (e.g., no tools available for symbol analysis): proceed with file-based analysis only, note the limitation.
-- If existing AGENTS.md is corrupted or unparseable: preserve all content
-  outside complete delimited managed blocks byte-for-byte, report the exact
-  file and parse problem, and continue without full-file replacement. Offer
-  destructive recovery only through the separately confirmed, backed-up
-  process above.
-- If project is too small (<10 files): only generate root AGENTS.md.
+- If repo is too large for single-pass: document the gap and recommend `--max-depth=N`
+- If no project manifest found: note in generated files that stack was inferred
+- If scoring produces no subdirectory variants: that is valid — only root is mandatory
 
-## Output Format
+## Handoff Format
 
+After completion, report:
 ```
 === init-deep Complete ===
-
 Mode: {update | create-new}
-
-Readiness:
-  readiness_result: {PASS | repaired then PASS | FAIL}
-  readiness_host: kimi-code-cli
-  capability_statuses: {read-only observed values | not inspected}
-  optional_policy: unchanged; no optional lifecycle invoked
-  receipt_state: {observed value | not inspected}
-  evidence_paths:
-    - {load-check output path}
-    - {generated AGENTS.md path}
-
-Package readiness does not establish host discovery or a live MCP connection.
-
+Plugin load check: {PASS | repaired then PASS}
 Files:
-  [OK] ./AGENTS.md (root, {N} lines)
-  [OK] ./src/hooks/AGENTS.md ({N} lines)
-
+  [OK] ./kimi.md (root, {N} lines)
 Dirs Analyzed: {N}
-AGENTS.md Created: {N}
-AGENTS.md Updated: {N}
-
+kimi.md Created: {N}
+kimi.md Updated: {N}
+Consumer AGENTS.md: {created | preserved}
+readiness_result: {load-check result}
+readiness_host: {package readiness only; live host/MCP connection not proven}
+capability_statuses: {observed read-only status summary}
+optional_policy: {unchanged unless separately explicitly requested}
+receipt_state: {observed receipt/ownership state or not inspected}
+evidence_paths: {load-check output and inspected package paths}
 Hierarchy:
-  ./AGENTS.md
-  └── src/hooks/AGENTS.md
+  ./kimi.md
+  └── src/.../kimi.md
 ```
 
-## Handoff Target
+## Kimi-Native Features
 
-After init-deep completes, the project is ready for `ulw-plan` (planning) or `start-work` (execution). The generated AGENTS.md files provide context for all subsequent agents.
+- **Subagent spawning:** Use Kimi sub-agent channel dispatch for parallel exploration with `isolation: true` (matching earlier host implementation `fork_context: false`)
+- **Skills:** Self-referencing — this is itself a Kimi Skill
+- **Project memory:** Writes to `kimi.md` (Kimi-native project memory format)
+- **`.lazykimi/`:** Context knowledge base goes in the run state directory
+- **Load status:** `lazykimi-load-check.sh` must pass before repository discovery
 
-## Anti-Patterns
+---
 
-- **Static exploration**: Must vary exploration depth based on project size.
-- **Skipping package status**: Never begin discovery before the mandatory load check passes.
-- **Sequential execution**: Must parallelize independent discoveries.
-- **Ignoring existing**: Always read existing AGENTS.md first, even with --create-new.
-- **Over-documenting**: Not every directory needs AGENTS.md.
-- **Redundancy**: Child never repeats parent.
-- **Generic content**: Remove anything that applies to ALL projects.
-- **Verbose style**: Telegraphic or die.
+_Adapted from earlier host implementation init-deep. All semantics preserved; paths adapted to Kimi conventions. `multi_agent_v1.spawn_agent` → Kimi sub-agent channel dispatch; `AGENTS.md` → `kimi.md`; state paths → `.lazykimi/`._

@@ -1,8 +1,8 @@
 ---
 name: lazy-refactor
-description: "Safe refactoring discipline. Change code structure without changing behavior."
+description: "Safe refactoring discipline. Use when changing code structure without changing behavior. Triggers: refactor, clean up, restructure, reorganize, improve code, rename, extract, move."
 type: prompt
-whenToUse: "Use when changing code structure without changing behavior. Triggers: refactor, clean up, restructure, reorganize, improve code, rename, extract, move."
+whenToUse: "Use when changing code structure without changing behavior."
 ---
 
 # refactor
@@ -61,7 +61,7 @@ Choose the right refactoring for the job. Apply ONE refactoring at a time.
 #### Move Code (File / Module)
 1. Identify the right home for the code.
 2. Move the code to the new location.
-3. Update all imports and references. Use named exports only — never default exports — so the moved surface stays greppable.
+3. Update all imports and references.
 4. Run tests. ALL GREEN? → proceed.
 
 #### Split Function / Class
@@ -139,7 +139,6 @@ Choose the right refactoring for the job. Apply ONE refactoring at a time.
 - Do NOT refactor code without reading it first.
 - Do NOT leave dead code behind.
 - Do NOT rename things without updating all references.
-- Do NOT introduce default exports during a move/split — use named exports.
 
 ## Verification Gates
 

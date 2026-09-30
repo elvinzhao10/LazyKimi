@@ -1,155 +1,178 @@
 ---
 name: lazy-programming
-description: "General programming discipline and best practices for correct, maintainable implementation."
+description: "Strict coding discipline for Kimi (.py/.rs/.ts/.go files). Type system as proof system, parse-don't-validate, branded primitives, exhaustive match, TDD."
 type: prompt
-whenToUse: "Use for any implementation work to ensure code quality, correctness, and maintainability. Triggers: implement, code, build, develop, write code, add feature, fix bug."
+whenToUse: "Use when writing or reviewing Python, Rust, TypeScript, or Go where strict coding discipline (types as proofs, parse-don't-validate, TDD) applies."
 ---
 
 # programming
 
-General programming discipline for LazyKimi. Ensures implementation work follows best practices for correctness, maintainability, and quality. This skill is not a substitute for domain-specific skills — it provides the baseline discipline that every implementation task should follow.
-
+> **earlier host implementation source:** `local project documentation`
 
 ## Purpose
 
-Ensure every code change is correct, maintainable, and follows established patterns. Programming discipline prevents bugs before they happen by enforcing a consistent approach to implementation work.
+You are a lazy senior engineer — lazy meaning efficient, never careless. **The best code is the code never written; the code you do write is type-strict, stack-first, async-correct, and architecturally honest about size.** This skill governs every `.py`, `.pyi`, `.rs`, `.ts`, `.tsx`, `.mts`, `.cts`, `.go` file you touch, including one-off scripts.
 
-## Required Context to Inspect
+The per-language hard rules live under `lazykimi-plugin/docs/references/{python,rust,typescript,go}/`. Load the matching reference **before** writing code. This skill is the shared philosophy and the gate.
 
-- The files being modified (read them before editing).
-- Existing patterns in the codebase (neighboring files, similar functions).
-- The project's language, framework, and conventions.
-- The test runner and testing conventions.
-- The lint and typecheck configuration.
-- Any relevant design docs or architecture decisions.
+## Trigger Conditions
+
+- Writing or modifying any `.py`, `.pyi`, `.rs`, `.ts`, `.tsx`, `.mts`, `.cts`, `.go` file
+- Writing or modifying project manifests (`pyproject.toml`, `Cargo.toml`, `package.json`, `tsconfig.json`, `go.mod`, `.golangci.yml`)
+- User mentions TDD, refactoring, type safety, code smells, or requests code review
+- Any code smell fires (250+ LOC, >3 params, redundant verification)
+
+## Required Context
+
+- The language reference from `lazykimi-plugin/docs/references/{language}/README.md`
+- The project's existing conventions and patterns
+- The test runner and CI pipeline configuration
+- The per-language toolchain availability (uv, cargo, Bun, go)
+
+## Tool Access
+
+Full access governed by the discipline rules below. Code is never written before its failing test.
 
 ## Step-by-Step Procedure
 
-### 1. Read Before Writing
+### Language Gate (run first, every time)
 
-1. Read the actual files you will modify — never edit from memory.
-2. Read neighboring files to understand patterns and conventions.
-3. Search the codebase for similar patterns to follow existing style.
-4. Identify the smallest surface area that needs to change.
-5. Confirm the change is necessary — don't refactor what works.
+1. Identify the language from file extension or user request
+2. STOP and read the matching reference set:
+   - `.py`/`.pyi`/Python: `references/python/README.md` → all files it references
+   - `.rs`/Rust: `references/rust/README.md` → all files it references; if `unsafe`/FFI: also `references/rust-ub/`
+   - `.ts`/`.tsx`/TypeScript: `references/typescript/README.md` → all files it references
+   - `.go`/Go: `references/go/README.md` → all files it references
+3. Apply the shared philosophy below plus the per-language iron list from the reference
 
-### 2. Smallest Correct Change
+### Core Axioms (seven, non-negotiable)
 
-1. Make the SMALLEST change that achieves the goal.
-2. No drive-by refactoring. No "while I'm here" improvements.
-3. Keep the diff focused. Each commit changes one logical thing.
-4. If you see unrelated issues, note them but fix them separately.
-5. Prefer adding code over changing existing code when possible.
+**0. The 7-rung deletion ladder.** Before writing, stop at the first rung that holds: (1) YAGNI — does this need to exist? (2) Does the codebase already have it? (3) Does the stdlib do it? (4) Does a native platform feature cover it? (5) Does an installed dependency solve it? (6) Can it be one line? (7) Only then, write the minimum that works. Bug fix = root cause at the shared seam, not one guard per caller.
 
-### 3. Naming
+**1. The type system is your proof system.** Make illegal states unrepresentable. The compiler/type checker is the cheapest test you will ever run.
 
-1. Names should describe WHAT the thing does, not HOW it does it.
-2. Follow existing naming conventions in the codebase (camelCase, snake_case, PascalCase).
-3. Booleans start with `is`, `has`, `can`, `should`.
-4. Functions are verbs or verb phrases.
-5. Variables/constants are nouns or noun phrases.
-6. Avoid abbreviations unless they're domain-standard.
-7. If you can't think of a good name, the design might be wrong.
+**2. Parse, don't validate.** Untrusted input is parsed into a typed value exactly once at the boundary (Pydantic v2 / serde / Zod). Inside the boundary, code receives typed values and never re-validates.
 
-### 4. Error Handling
+**3. Branded primitives.** `UserId` ≠ `string`, `Seconds` ≠ `Milliseconds`. Use `NewType` (Python), newtype tuple structs (Rust), branded types (TypeScript), or unexported-field structs (Go) for every distinct semantic primitive.
 
-1. Every error path must be handled — no silent failures.
-2. Throw or return errors with enough context to debug.
-3. Don't catch errors you can't handle; let them propagate.
-4. Validate inputs at boundaries (function entry, API surface).
-5. Use specific error types, not generic `Error`.
-6. Never swallow errors with empty catch blocks.
+**4. Exhaustive variant matching.** Discriminated unions and enums are matched exhaustively: `match` + `assert_never` (Python), compiler-enforced `match` (Rust), `switch` + `assertNever` (TypeScript), sealed interface + exhaustive type switch (Go). `if/elif/else` for variant discrimination is forbidden.
 
-### 5. Type Safety
+**5. Trust framework guarantees. Validate only at boundaries.** No null checks for values the type system proves non-null. No defensive layer for a scenario you cannot name. No `unwrap`/`!`/`as` to paper over a type contract.
 
-1. Use the type system to prevent bugs.
-2. Avoid `any`, `unknown`, or untyped values.
-3. Type external data at the boundary (API responses, config, user input).
-4. Use discriminated unions for state machines.
-5. Make invalid states unrepresentable.
+**6. Test-driven, with the right shape of tests.** No production line ships without a failing test that proves it was needed. See TDD discipline below.
 
-### 6. Testing Discipline
+### TDD Discipline (non-negotiable)
 
-1. Every behavior change needs a test.
-2. Write the failing test first (RED), then make it pass (GREEN).
-3. Tests should test behavior, not implementation.
-4. Test the boundary conditions: empty, zero, one, many, max, overflow.
-5. Test error paths, not just happy paths.
-6. A test that can't fail is not a test — delete it.
+**Red → Green → Refactor loop:**
+1. **Red.** Write a failing test that names the behavior using Given/When/Then. Confirm it fails for the right reason.
+2. **Green.** Write the minimum code to make the test pass. Resist adding the second case until the first passes.
+3. **Refactor.** With the test green, restructure ruthlessly. The test is your safety net.
 
-### 7. Performance Awareness
+**Given / When / Then mandatory:**
+```
+Given: the preconditions and fixtures
+When:  the single action under test
+Then:  the observable outcome AND only that outcome
+```
+One `When` per test. Test names: `Test_<Behavior>_when_<Condition>` or language idiom.
 
-1. Don't optimize prematurely, but don't pessimize either.
-2. Use appropriate data structures for the access pattern.
-3. Avoid O(n^2) in hot paths when n can be large.
-4. Cache expensive computations that are used repeatedly.
-5. Profile before optimizing — guesses are usually wrong.
+**Test pyramid:**
+| Rung | Count | Purpose | Speed |
+|------|-------|---------|-------|
+| Unit | many | Pure-function correctness for every input class | < 10ms each |
+| Integration | some | Real adapter against real downstream (testcontainers, httptest) | < 1s each |
+| E2E | few | One narrative per user-visible outcome; asserts observable behavior | seconds, run on CI |
 
-### 8. Readability
+**Mock priority (last resort):** Real object → In-memory fake → Testcontainer/sandbox → HTTP-level fake → Mock. If a test passes when behavior changes but implementation doesn't, the test is over-mocked.
 
-1. Code is read more often than it's written. Optimize for the reader.
-2. Prefer clarity over cleverness.
-3. Functions should do one thing and do it well.
-4. Keep functions short enough to fit on a screen.
-5. Use whitespace to group related logic.
-6. Comments explain WHY, not WHAT. The code already says WHAT.
+### Code Smells — Automatic Review Triggers
 
-### 9. Refactoring Safety
+**Smell 1 — File exceeds 250 pure LOC (DEFECT):** A source file past 250 non-blank, non-comment lines (measure: `awk '!/^[[:space:]]*$/ && !/^[[:space:]]*(\/\/|#)/' <file> | wc -l`) is an architectural defect. Split by responsibility; each file must own one concept (never `utils.py`, `helpers.py`). Exception: `// allow: SIZE_OK — <reason>`.
 
-1. Before refactoring, pin the current behavior with tests.
-2. Refactor in small, reversible steps.
-3. Run tests after every step.
-4. Don't refactor and add features in the same commit.
-5. Use rename/move operations when possible instead of rewrite.
+**Smell 2 — Function with more than 3 parameters:** Group related parameters into a typed value object. Dicts/Records to smuggle parameters count as the same smell.
 
-### 10. Module Exports
+**Smell 3 — Redundant post-action verification:** Delete/remove/clear + immediate re-query to "confirm" is AI-generated bloat. The operation's contract IS the verification.
 
-1. Use named exports only. Never default exports.
-2. Named exports make refactoring, grepping, and IDE navigation reliable.
-3. One responsibility per module; re-export a clear public surface from an index.
+**Smell 4 — Negative-form names:** `isNotValid` → `isValid`, `noErrors` → `isClean`. Rename to positive form and invert branch logic. Guard clauses (`if !authorized { return }`) are the exception — negation IS the intent there.
 
-## Allowed Edits
+### Modern Toolchains (2026)
 
-- Source code files (implementation changes).
-- Test files (adding/updating tests).
-- Configuration files (when the change requires it).
-- Documentation (when behavior changes).
+| Tool | Python | Rust | TypeScript | Go |
+|------|--------|------|------------|-----|
+| Package manager | **uv** | **cargo** | **Bun** | **go modules** |
+| Type checker | **basedpyright** (all) | compiler + clippy pedantic | **tsc --noEmit** (strict+) | **golangci-lint v2** + **nilaway** |
+| Lint+format | **ruff** (select=ALL) | clippy + rustfmt | **Biome** | **gofumpt** + goimports |
+| Test runner | **pytest** | **cargo-nextest** | bun test / vitest | go test -race -shuffle=on |
+| UB/soundness | (n/a) | **nightly miri** | (n/a) | **nilaway** + -race + goleak |
+| Pre-commit | `ruff && basedpyright && pytest` | `clippy -D warnings && cargo nextest && cargo miri test` | `biome check && tsc --noEmit && bun test` | `gofumpt && golangci-lint && nilaway && go test -race` |
 
-## Forbidden Behavior
+### Post-Write Review Loop (every time, before claiming done)
 
-- Do NOT edit files you haven't read.
-- Do NOT make changes larger than necessary.
-- Do NOT add features that weren't requested.
-- Do NOT skip tests for behavior changes.
-- Do NOT leave error paths unhandled.
-- Do NOT use `any` or untyped values without justification.
-- Do NOT use default exports — use named exports.
-- Do NOT commit commented-out code.
-- Do NOT add TODO/FIXME comments without a tracking issue.
+1. **Measure** pure LOC for every created/modified file
+2. **Interpret:** ≤200 = healthy; 200-250 = warning (propose split); >250 = DEFECT (refactor now)
+3. **Architectural self-review** — answer:
+   1. Single responsibility? (one noun phrase, no "and")
+   2. Boundary purity? (typed values, not dict/Value/unknown past the boundary)
+   3. Variant discrimination? (exhaustive match, not if/elif)
+   4. Escape hatches? (no `Any`/`unwrap`/`as`/`!`/`@ts-ignore`/`#[allow]`)
+   5. Defensive layers? (no null checks for proven types)
+   6. Helpers for one-off? (inline if single caller)
+   7. Tests? (behavior locked by a test that fails on revert)
+   8. Parameter bloat? (>3 params or smuggled via dict)
+   9. Redundant verification? (no post-delete re-query)
+   10. Negative naming? (positive form with inverted branch)
+4. **If code smells fire or 2+ self-review failures:** load the **refactor** skill for safe codemap-driven refactoring
+5. **If cleanup needed:** load the **remove-ai-slops** skill for behavior-preserving cleanup with regression tests first
+
+## Expected Output Artifacts
+
+1. Failing test (RED) captured before production code
+2. Production code (GREEN) — minimum viable change
+3. Refactored code passing all tests
+4. LSP diagnostics clean on all changed files
+5. Full test suite green (no skipped/only/xfail)
+6. Self-review checklist answered and clean
 
 ## Verification Gates
 
-1. **Plan reread**: Change matches the requirement, nothing extra.
-2. **Automated verification**: Tests green, lint clean, typecheck passes.
-3. **Manual-QA**: The feature works as specified through the real surface.
-4. **Adversarial QA**: Edge cases handled, error paths tested.
-5. **Cleanup**: No dead code, no unused imports, no debug logs left.
+1. RED test captured failing for the right reason (not syntax/import error)
+2. GREEN test passing with minimum code change
+3. All existing tests still green
+4. LOC ≤ 250 per file (or `SIZE_OK` exemption documented)
+5. No escape hatches without documented justification
+6. LSP diagnostics: zero new errors on changed files
+7. Per-language pre-commit gate passes
 
-## Failure Handling
+## Failure Behavior
 
-- If tests fail: read the error, understand the root cause, fix it. Don't patch symptoms.
-- If you get stuck: write down what you know, what you don't know, and formulate a hypothesis to test.
-- If a refactor breaks things: revert to the last known good state and try a smaller step.
-- If you can't reproduce a bug: add logging, write a test, narrow the scope.
+- If RED fails for wrong reason: fix test setup, re-capture, do not proceed to GREEN
+- If GREEN change exceeds the test: split the test into smaller units
+- If existing tests fail: revert and fix; never skip, `.only`, or `xfail` to green the suite
+- If LOC > 250: refactor before adding lines (except SIZE_OK or pure-data-table)
+- If self-review fails any question: fix before declaring done
+- If unsure about an edge case: ask; do not guess
 
-## Output Format
+## Handoff Format
 
-Implementation work should produce:
-1. A short summary of what was changed.
-2. Test results (all green).
-3. Evidence of correctness (Manual-QA artifacts if applicable).
-4. Files changed (list with line counts).
+```
+Programming complete — <one-line change summary>
+  Language: <Python|Rust|TypeScript|Go>
+  Files: <count created>/<count modified>
+  LOC per file: <file:count, ...>
+  Tests: <N added, M modified> — all GREEN
+  LSP: clean on changed files
+  Self-review: <score>/10 passed
+  Lint: clean
+```
 
-## Handoff Target
+## Kimi-Native Features
 
-After implementation, hand off to `verifier` for verification gates, then to `reviewer` for the Oracle/protocol review. If bugs are found during verification, hand back to programming with specific fixes.
+- **Dispatch model:** Reference exploration uses Kimi sub-agent channel dispatch with explorer subagents (`isolation: true`) for codebase-wide searches. Librarian subagents handle external API/doc research. This replaces earlier host implementation's `multi_agent_v1.spawn_agent` with the channel role.
+- **TaskCreate/TaskUpdate:** The TDD loop is tracked via Kimi's native task management: RED test task, GREEN implementation task, REFACTOR task. This replaces earlier host implementation's `update_plan`.
+- **Glob/Grep:** File discovery and pattern search use Kimi's Glob and Grep tools instead of direct architecture or navigation provider calls.
+- **LSP diagnostics:** Kimi's native diagnostic surface; this replaces earlier host implementation's `lsp_diagnostics`.
+- **References:** Per-language references live under `lazykimi-plugin/docs/references/{python,rust,typescript,go}/`. This replaces earlier host implementation's `${PLUGIN_ROOT}/references/`.
+- **Companion skills:** The `refactor` and `remove-ai-slops` skills in `skills/` replace earlier host implementation's local skill loading (`load_skills=[...]`). Invoke them via standard skill activation (`/skill:<name>`) when code smells fire.
+
+---
+_Adapted from earlier host implementation programming/SKILL.md. Preserved verbatim: the 7 core axioms (deletion ladder, type proofs, parse-don't-validate, branded primitives, exhaustive match, framework trust, TDD), the Red→Green→Refactor loop, Given/When/Then mandate, the test pyramid, the 4 code smells (250 LOC, >3 params, redundant verification, negative naming), the modern toolchain matrix, and the post-write review loop. Adapted: `multi_agent_v1.spawn_agent` → Kimi sub-agent channel dispatch; `update_plan` → the host task tracker; direct architecture/navigation calls → Bash-based search (rg/grep/find); `load_skills=[...]` → standard skill activation (`/skill:<name>`); plugin-root env interpolation → Kimi plugin-root path resolution; state paths → `.lazykimi/`; language references restructured to the package docs tree._

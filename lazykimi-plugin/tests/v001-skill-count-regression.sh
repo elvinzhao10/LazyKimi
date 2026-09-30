@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v001-skill-count-regression.sh
-# Verify 17 skills present, each with valid YAML frontmatter (starts with ---).
+# Verify 19 skills present, each with valid YAML frontmatter (starts with ---).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
-EXPECTED=17
+EXPECTED=19
 SKILLS_DIR="$PLUGIN_ROOT/.kimi-code/skills"
 [ -d "$SKILLS_DIR" ] || fail "skills dir missing"
 

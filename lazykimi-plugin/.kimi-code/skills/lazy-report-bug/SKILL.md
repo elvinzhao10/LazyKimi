@@ -1,11 +1,11 @@
 ---
-name: lazy-lcx-report-bug
-description: "Structured bug reporting for LazyKimi issues."
+name: lazy-report-bug
+description: "Structured bug reporting for LazyKimi issues. Use when you need to report a bug or issue with the tool itself, not with the project you're working on. Triggers: report bug, bug report, issue, feedback, problem with lazykimi."
 type: prompt
-whenToUse: "Use when you need to report a bug or issue with the tool itself, not with the project you're working on. Triggers: report bug, bug report, issue, feedback, problem with lazykimi."
+whenToUse: "Use when reporting a bug or issue with the LazyKimi tool itself, not with the user's project."
 ---
 
-# lcx-report-bug
+# report-bug
 
 Structured bug reporting for LazyKimi. Ensures bug reports contain all the information needed to reproduce and fix the issue. A good bug report is specific, reproducible, and includes context.
 
@@ -19,7 +19,7 @@ Report bugs in LazyKimi itself (not in the project you're working on) in a struc
 - The bug you're seeing (what happened).
 - What you expected to happen.
 - Steps to reproduce (what you were doing).
-- Your environment (OS, Kimi Code CLI version, LazyKimi version).
+- Your environment (OS, Kimi version, LazyKimi version).
 - Error messages or logs.
 - The project you were working on (if relevant).
 
@@ -33,7 +33,7 @@ Report bugs in LazyKimi itself (not in the project you're working on) in a struc
 4. **Steps to reproduce:** Exact, numbered steps. Assume the reader knows nothing.
 5. **Environment:**
    - Operating system and version
-   - Kimi Code CLI version
+   - Kimi version
    - LazyKimi version (from `package.json` or `AGENTS.md`)
    - Node.js version (if applicable)
 6. **Impact:** How severe is this? What does it prevent you from doing?
@@ -78,7 +78,7 @@ Critical / High / Medium / Low
 
 ## Environment
 - OS: <OS and version>
-- Kimi Code CLI: <version>
+- Kimi: <version>
 - LazyKimi: <version>
 - Node.js: <version (if applicable)>
 

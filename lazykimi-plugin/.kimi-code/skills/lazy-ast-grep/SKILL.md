@@ -1,8 +1,8 @@
 ---
 name: lazy-ast-grep
-description: "Structural code search and rewriting using AST patterns."
+description: "Structural code search and rewriting using AST patterns. Use when you need to find or rewrite code by its structure, not just its text. Triggers: ast-grep, sg, structural search, codemod, find pattern, rewrite code, AST search."
 type: prompt
-whenToUse: "Use when you need to find or rewrite code by its structure, not just its text. Triggers: ast-grep, sg, structural search, codemod, find pattern, rewrite code, AST search."
+whenToUse: "Use when code must be found or rewritten by its structure rather than its text (AST codemods, structural search, symbol-shape rewrites)."
 ---
 
 # ast-grep
@@ -28,12 +28,12 @@ Search and transform code structurally. Use ast-grep when regex isn't enough: fi
 
 1. **Check ast-grep availability.** Run `sg --version`. If it is unavailable, do not install a global package. Inspect a dedicated receipt-owned tooling root instead:
    ```bash
-   lazykimi tooling status --tooling-root /absolute/lazykimi-tools
+   lazykimi tooling capability-status --tooling-root /absolute/lazykimi-tools
    ```
    Provision the pinned managed provider only when explicitly requested, then recheck its receipt-owned status:
    ```bash
    lazykimi tooling install --tooling-root /absolute/lazykimi-tools
-   lazykimi tooling status --tooling-root /absolute/lazykimi-tools
+   lazykimi tooling capability-status --tooling-root /absolute/lazykimi-tools
    ```
 2. **Check language support.** ast-grep supports: JavaScript, TypeScript, Python, Java, C, C++, C#, Go, Ruby, PHP, HTML, CSS, and more.
 3. **Understand the target code.** Read a few examples of the pattern you're looking for.
@@ -149,13 +149,6 @@ rule:
   not:
     inside:
       pattern: if (process.env.NODE_ENV === 'development') { $$$ }
-```
-
-### Convert default exports to named exports
-```yaml
-rule:
-  pattern: export default $NAME
-fix: export { $NAME }
 ```
 
 ## Allowed Edits

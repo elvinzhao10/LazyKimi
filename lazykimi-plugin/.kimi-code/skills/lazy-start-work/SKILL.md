@@ -1,155 +1,329 @@
 ---
 name: lazy-start-work
-description: "Execute a Prometheus work plan one task at a time with Boulder state, evidence ledger, and the five evidence gates."
+description: "Execute a work plan with orchestrated subagent delegation and verified completion evidence. Loads a plan, selects tasks, delegates to implementers, verifies, reviews. Maps to Kimi sub-agent channel dispatch with parallel subagent dispatch."
 type: prompt
-whenToUse: "Use after planning when the user says start work, execute plan, continue plan, or resume plan. Triggers: start work, execute plan, continue plan, resume plan, start-work."
+whenToUse: "Use when a decision-complete plan must be executed with orchestrated subagent delegation and verified completion evidence."
 ---
 
 # start-work
 
-Execute a Prometheus work plan until every top-level checkbox is complete. You are an ORCHESTRATOR — you delegate implementation to subagents, never implement yourself.
+> **Maps to Kimi:** Kimi sub-agent channel dispatch with parallel subagent dispatch; durable state in `.lazykimi/runs/`.
 
+> **earlier host implementation source:** `local project documentation`
 
+## Adaptive workflow layer is selection-only until the host is observed
+
+Automatic workflow selection uses existing risk and complexity signals to
+choose the smallest sufficient workflow. Until the Kimi host is observed on a
+recorded build and session, that result is **selection-only**: it does not
+claim native workflow loading, host dispatch, or MCP behavior, and
+**HOST READINESS: PENDING** remains authoritative. Never present a selected
+workflow as host-verified.
 ## Purpose
 
-Execute an approved plan one checkbox at a time, with durable state tracking, evidence recording, and verification gates. The orchestrator delegates ALL implementation work to subagents and verifies their results independently.
+Execute a work plan until every top-level checkbox is complete. This skill is the orchestrator — it delegates ALL implementation, test, QA, and review work to spawned subagents. The root agent NEVER writes product code, NEVER edits product files, NEVER runs QA itself. It exclusively manages plan selection, run state, decomposition, dispatch, verdicts, and evidence records.
 
-## Required Context to Inspect
+## Trigger Conditions
 
-- The approved plan file at `.lazykimi/plans/<slug>.md`.
-- The Boulder state file at `.lazykimi/state/boulder.json` (if resuming).
-- The project's AGENTS.md and `.kimi-code/rules/lazykimi.md`.
-- The evidence ledger at `.lazykimi/logs/start-work-ledger.jsonl` (if resuming).
-- Recent git history and branch state.
+- User invokes `/lazy-start-work [plan-name]`
+- User says "execute plan", "start the plan", "run the plan"
+- Stop/SubagentStop hook re-injects after continuation check (v0.6+)
+
+## Required Context
+
+Before executing:
+- Read the plan from `.lazykimi/plans/<slug>.md`
+- Read `.lazykimi/runs/<run_id>/state.json` if resuming
+- Read `kimi.md` for project conventions
+- Read `.lazykimi/rules/lazykimi-verification.md` for evidence standards
+- Treat those files as orchestrator context. Workers receive the fixed contract,
+  task delta, and artifact references below, never a copy of the full plan.
+
+## Tool Access
+
+- Allowed: Read, Grep, Glob, Write, Edit (ONLY to `.lazykimi/` and plan files), Bash (verification only), Agent (subagent spawning)
+- **Disallowed on product paths:** Write, Edit — NEVER modify product code directly
+- **Orchestrator-only constraint:** Root NEVER implements, writes tests, or runs QA. Spawn a worker for every implementation unit.
 
 ## Step-by-Step Procedure
 
-### Phase 1: Select the Plan
+### Phase 1: Select the plan
 
-1. Read `.lazykimi/state/boulder.json` if it exists.
-2. List plan files under `.lazykimi/plans/`.
-3. If a plan name was provided, select the matching plan.
-4. If exactly one active or paused Boulder work exists for this session, resume it.
-5. If exactly one plan exists, select it.
-6. If multiple plans, ask one focused selection question.
-7. **No-plan bootstrap**: If no selectable plan exists, invoke `ulw-plan` to create one first.
+1. Read `.lazykimi/runs/<run_id>/state.json` if it exists (resume)
+2. List plans under `.lazykimi/plans/`
+3. If plan-name provided: select matching plan
+4. If exactly one active/paused run exists: resume it
+5. If exactly one plan exists and no active run: select it
+6. If no selectable plan: enter **No-plan bootstrap** — invoke `ulw-plan` to create a plan, then continue
 
-### Phase 2: Create or Update Boulder State
+### Phase 2: Create or update run state
 
-Write `.lazykimi/state/boulder.json` before implementation starts:
+Write `.lazykimi/runs/<run_id>/state.json` with:
+- `schema_version: 2`
+- `run_id`, `plan_reference`, `plan_name`
+- `status: "active"`, `session_ids: ["<session_id>"]`
+- `tier: { level: "LIGHT" | "HEAVY", justification: "..." }`
+- `checkboxes: []` — one entry per plan todo
 
-```json
-{
-  "schema_version": 2,
-  "active_work_id": "<work-id>",
-  "works": {
-    "<work-id>": {
-      "work_id": "<work-id>",
-      "active_plan": ".lazykimi/plans/<plan-name>.md",
-      "plan_name": "<plan-name>",
-      "session_ids": ["kimi-code-cli:<session_id>"],
-      "status": "active",
-      "worktree_path": null
-    }
-  }
-}
+### Phase 3: Execute the next checkbox
+
+1. Find the first unchecked checkbox in the plan
+2. Classify tier (LIGHT/HEAVY) per ultrawork triage rules
+3. Decompose into atomic sub-tasks
+4. Before any dispatch, capture `git status --porcelain=v1` and the status of
+   every task-owned path without editing, staging, stashing, or cleaning. Store
+   the status digest and owned-path provenance in the execution-context record.
+5. Parse each plan-named verification command into argv, reject shell control
+   syntax or a command that would mutate user/host state, resolve its executable,
+   and perform one bounded syntax/dry-run smoke check. Persist the exact argv
+   arrays under the current run directory. On the single current `running` task
+   in `state.json`, record `execution_authority` with the run/task repo revision,
+   criterion IDs, `plan_reference` and its SHA-256, plus the command file's
+   project-relative path and SHA-256. Set the dispatch record's `plan_sha256`
+   to the plan digest and `validated_once: true`; reuse that authority.
+6. Validate the record with `node lazykimi-plugin/contracts/validate-lazyseries-record.js execution --project-root <project-root> --plan-commands-file <current-run-command-file> <record.json>`. The file option is only a hint: the validator resolves the latest non-terminal run and its single running task from `.lazykimi/runs/`, then requires the hint, state identity, plan, digests, and record to match before dispatch.
+7. **DELEGATE EVERYTHING.** Spawn worker subagents for ALL independent sub-tasks in parallel using Kimi sub-agent channel dispatch.
+8. For LIGHT: direct implementation. For HEAVY: failing-first proof then implementation.
+
+#### Compact worker contract
+
+Every dispatch uses the fixed `TASK/DELTA/REFS/VERIFY` contract. Send only:
+
+- task/run/revision identity and criterion IDs;
+- the task-specific goal delta and exact owned paths;
+- artifact references for plan, baseline, provenance, and prior accepted evidence;
+- the once-validated command argv and the Manual-QA observable;
+- constraints that differ from the referenced plan/rules.
+
+Do not paste the plan, repository overview, shared safety rules, unchanged test
+output, or prior worker prose. The worker already has the fixed agent contract.
+The dispatch record must validate against
+`contracts/lazyseries-execution-context.v1.schema.json` before Agent is called.
+
+#### Coupled implementation bundles (narrow exception)
+
+Keep independent work split and dispatched in parallel. A single worker may receive a coupled file/test bundle only when one of these makes a split unsafe:
+
+- a shared mutable interface;
+- an atomic fixture; or
+- an invalid intermediate state while the split work is incomplete.
+
+The dispatch must explicitly enumerate the coupled bundle and record all of the
+following with it: `coupled: true`; the qualifying reason; the exact
+checkbox/file scope; and why parallel decomposition is unsafe. For example:
+
+```
+COUPLED DISPATCH RECORD
+coupled: true
+reason: atomic fixture
+checkbox_scope: task-7 acceptance fixture
+file_scope: tests/fixture.json, tests/fixture.test.sh
+parallel_unsafe: either half leaves the fixture invalid for every worker
 ```
 
-### Phase 3: Execute the Next Checkbox
+This is dispatch evidence, not a ledger schema or an automated exemption.
+Coupling is never allowed for convenience, capacity, or generic multi-file
+changes. It does not allow root product edits and does not bypass the normal
+tests, Manual-QA, applicable adversarial probes, independent verifier verdict,
+or final review gates.
 
-1. Read the full plan. Find the first unchecked top-level checkbox.
-2. Classify the checkbox tier: LIGHT (narrow change inside existing layers) or HEAVY (new module, auth, external integration, DB schema, concurrency, cross-domain refactor).
-3. **DELEGATE EVERYTHING.** Use Kimi Code CLI subagents to dispatch implementation. NEVER implement yourself.
-4. Each sub-task must include:
-   - Goal and exact files/directories in scope.
-   - A failing-first proof (test or Manual-QA scenario) captured RED before production changes.
-   - Implementation constraints from the plan.
-   - Automated verification commands.
-   - One Manual-QA channel with exact tool and invocation.
-   - Adversarial QA classes that apply.
+**Each subagent task delta must include:**
+- Task/run/revision identity, criterion IDs, and exact files/directories in scope
+- For a coupled bundle only: the coupled dispatch record above, with no broader scope
+- References to the plan, baseline artifact, and project rules
+- Only task-specific constraints not present in those references
+- Once-validated automated verification argv
+- One Manual-QA channel (exact tool + exact invocation + binary observable)
+- Only applicable adversarial classes and a reference to the fixed nine-class list
 
-### Phase 4: Verify and Record Evidence
+**The 9 adversarial classes** (from earlier host implementation `start-work` source line 118; a class applies when its trigger fact holds — probe each applicable one, record non-applicable with a one-line reason):
+1. `malformed_input` — new input parsing
+2. `prompt_injection` — untrusted external text
+3. `cancel_resume` — resumable or long-running flows
+4. `stale_state` — generated or cached artifacts
+5. `dirty_worktree` — uncommitted user files in scope
+6. `hung_commands` — long external commands
+7. `flaky_tests` — new or timing-sensitive tests
+8. `misleading_success_output` — log-based success claims
+9. `repeated_interruptions` — mid-operation interrupts
 
-For each checkbox, complete all five gates before marking it done:
+### Phase 4: Verify and record evidence
 
-1. **Plan reread**: Confirm the checkbox and acceptance criteria.
-2. **Automated verification**: Run tests, typecheck, lint, build.
-3. **Manual-QA**: Capture a real artifact from a real surface (HTTP response, terminal output, browser screenshot).
-4. **Adversarial QA**: Exercise edge cases, regression scenarios, adversarial inputs.
-5. **Cleanup**: Tear down QA resources (servers, tmux sessions, browser contexts, temp files).
+For each checkbox, complete FIVE gates:
+1. **Plan reread:** Confirm checkbox and acceptance criteria
+2. **Automated verification:** Run tests, typecheck, lint, build
+3. **Manual-QA channel:** Capture real artifact (screenshot, curl output)
+4. **Adversarial QA:** Probe every applicable ultraqa class
+5. **Cleanup:** Tear down QA resources; capture receipts
 
-Append evidence to `.lazykimi/logs/start-work-ledger.jsonl`.
+Before the verifier runs tests, require `.lazykimi/runs/<run_id>/evidence/<task_id>.verification.md` with `status: in-progress` and the run/task/full HEAD/criterion identity. The verifier appends each result as it completes and writes a terminal `status: complete` verdict only after independent reproduction. A missing, in-progress, stale, or identity-mismatched report blocks the checkbox even when an agent completion notification or prose verdict says `confirmed`. Reuse green scoped receipts; run the whole matrix once at task closure. Refresh a compact `.lazykimi/context/run-digest.md` after each stage and wait on completion events instead of polling. Do not re-dispatch a worker while evidence or owned files are changing.
 
-### Phase 5: Mark Progress
+Before a new dispatch, check shell access, the dependency store, and any available quota/reset signal. Record a working dependency command once in the run digest; after a sandbox or store failure, stop heavy dispatch until the host is healthy. Narrow a timed-out search by path or symbol instead of repeating the same broad query. Do not start a heavy verifier within 60 minutes of a known quota reset. Keep the digest under 2,000 tokens and ship its path rather than the full plan. Read each target before writing it and re-read after another actor changes it.
 
-Only after verification passes:
-1. Edit the plan checkbox from `- [ ]` to `- [x]`.
-2. Re-read the plan and confirm the remaining count decreased.
-3. Append a `task-completed` ledger entry.
-4. Continue with the next checkbox. Do NOT ask whether to continue.
+Before marking a task done, compare the current HEAD and dirty paths with the dispatch, run `scripts/state/sync-plan-state.sh <run_id>` in check mode, and confirm every fold-forward ID has a landed artifact or remains an explicit blocker. Check that the plan's owner decision gates are closed for this task; a recommendation is not approval. If a task was split, update the plan's task IDs, dependencies, owner, and baseline HEAD before further dispatch. Corrections to prior ledger events must append a machine-readable superseding event naming the old event ID; do not rewrite or silently reinterpret history.
+
+Append evidence to `.lazykimi/runs/<run_id>/events.jsonl`.
+
+Classify every criterion as `static`, `runtime`, or `stateful`. A runtime
+criterion cannot pass without a real public/installed entry artifact. A
+stateful criterion additionally requires an artifact showing the before/after
+state transition. Test output or success prose is not a substitute.
+
+If a worker result is lost, accept recovery only from a terminal report with
+`status: complete`, the current run/task/repository revision, the exact current
+criterion-ID set, and readable artifact references. Missing, partial, stale, or
+identity-mismatched reports are unaccepted boundaries: preserve state and do not
+write memory. Append a memory update only after the execution-context validator
+accepts the terminal report.
+
+**Family completion contract (DoneClaim -> AdversarialVerify -> FullyDone):**
+- Worker returns `DoneClaim` → Verifier runs `AdversarialVerify` → `confirmed` → `FullyDone`
+- `confirmed` is the ONLY pass verdict
+- Verifier MUST be independent from executor
+
+### Phase 5: Mark progress
+
+Only after all 5 gates pass:
+1. Edit plan checkbox: `- [ ]` → `- [x]`
+2. Append `checkbox-completed` event to ledger
+3. Continue to next checkbox. Do NOT ask whether to continue.
 
 ### Completion
 
-When all top-level checkboxes are complete:
-1. Run the plan's final verification commands.
-2. Complete the **Global Review and Debugging Gate**:
-   - Invoke `review-work` with the final diff, changed files, and verification evidence.
-   - Run a debugging-oriented runtime audit (at least three plausible failure hypotheses).
-   - If any review lane fails, fix and rerun.
-3. Remove or mark the Boulder work as completed.
-4. Print an `ORCHESTRATION COMPLETE` block.
+When all checkboxes + Final Verification Wave are done:
+1. Run final verification commands
+2. Run the Global Review Gate (`/lazy-review-work` — 5-agent review)
+3. All review lanes must PASS
+4. Print `ORCHESTRATION COMPLETE`
 
-## Parallel Fan-Out (Kimi Code CLI `/swarm`)
+## Expected Output Artifacts
 
-When a plan wave contains 3+ independent checkboxes with no shared mutable state, you may dispatch them in parallel via Kimi Code CLI's `/swarm <task>` (300-agent swarm) instead of sequential Task calls. The orchestrator still collects each subagent's evidence and runs the five gates per checkbox — `/swarm` is an execution-channel option only, never a relaxation of the verification contract.
-
-## Allowed Edits
-
-- Write to `.lazykimi/state/boulder.json`, `.lazykimi/logs/start-work-ledger.jsonl`.
-- Edit plan file checkboxes (from `[ ]` to `[x]`).
-- Create evidence files under `.lazykimi/evidence/`.
-- Read project files, run verification commands.
-
-## Forbidden Behavior
-
-- **NO DIRECT IMPLEMENTATION BY THE ORCHESTRATOR.** Root NEVER edits product files, writes tests, or runs QA itself — a spawned subagent does.
-- No `--dry-run` as completion evidence.
-- No tests-only completion claim. A Manual-QA artifact is required.
-- No completion claim while an applicable adversarial QA class was never probed.
-- No `ORCHESTRATION COMPLETE` before the Global Review and Debugging Gate passes.
-- Never batch multiple checkboxes in a single step.
+- `.lazykimi/runs/<run_id>/state.json` — run state with completed checkboxes
+- `.lazykimi/runs/<run_id>/events.jsonl` — evidence ledger with DoneClaim + AdversarialVerify entries
+- `.lazykimi/runs/<run_id>/evidence/` — Manual-QA artifacts
+- Plan file with checkboxes marked `[x]`
 
 ## Verification Gates
 
-1. **Plan reread**: Every checkbox accounted for, acceptance criteria met.
-2. **Automated verification**: All tests green, lint clean, typecheck passes.
-3. **Manual-QA**: Real-surface proof captured for each task.
-4. **Adversarial QA**: Every applicable class probed with captured result.
-5. **Cleanup**: All QA resources torn down, receipts recorded.
+1. All plan checkboxes completed by subagents (not root)
+2. Every checkbox has DoneClaim + AdversarialVerify in events.jsonl
+3. Manual-QA artifacts exist and are verifiable
+4. 5-agent review passes all lanes
+5. `ORCHESTRATION COMPLETE` printed with artifacts and cleanup receipts
 
-## Failure Handling
+## Verification Tiers (v1.3.0)
 
-- If a subagent fails: investigate the failure, record the reason, respawn with narrowed scope.
-- If verification fails: diagnose the specific failure, fix, rerun verification.
-- If a blocker is hit: record it in Boulder state, pause, surface to user.
-- After 2 identical failed attempts: surface what was tried and ask.
+Scale ceremony to the changed boundary and risk. Select the lowest sufficient tier
+once; reuse a green receipt while its declared inputs and covered behavior stay
+unchanged (do not rerun an identical green command solely because a new phase or
+agent started). These tiers are the shared LazySeries contract (plan behavior 9),
+consumed by Buddy, Trae, and Kimi — do not fork them per host.
 
-## Output Format
+- **V0 inspect** — documentation, metadata, formatting, or inert fixture changes. Run syntax/schema/static checks only when applicable; no new test required by default.
+- **V1 focused** — localized reversible behavior. Run the smallest existing test or direct user-surface scenario covering the changed boundary.
+- **V2 integrated** — cross-module, state, parser, migration, lifecycle, or host-routing behavior. Run focused checks plus one real consumer/integration scenario.
+- **V3 comprehensive** — security/trust boundaries, release packaging, shared contract/schema changes, broad infrastructure changes, or an unexplained focused failure. Run the repository's comprehensive gate once, normally in protected CI.
+
+Selection rules: default to the lowest sufficient tier. Test count, file count, plan size, agent count, or a request being called "complex" can NEVER promote verification. Promote only for the changed boundary or observed risk. A failing focused check triggers diagnosis and reruns only itself plus the directly affected integration — it does not trigger every suite.
+
+## Failure Behavior
+
+- If a subagent's DoneClaim fails AdversarialVerify: re-dispatch with exact failure feedback
+- If a subagent times out or returns inconclusive: first validate an available
+  identity-bound terminal report; otherwise preserve memory and respawn the
+  smaller scoped task
+- If iteration cap hit: pause; record `run_paused` event
+- If state corruption: restore from latest checkpoint
+
+## Handoff Format
 
 ```
 ORCHESTRATION COMPLETE
-
-Plan: .lazykimi/plans/<plan-name>.md
-Tasks completed: {N}/{N}
-Verification: PASS
-Global Review Gate: PASS
-Cleanup: DONE
-
-Evidence:
-  - .lazykimi/evidence/verifier.md
-  - .lazykimi/evidence/reviewer.md
+  Plan: .lazykimi/plans/<slug>.md
+  Checkboxes: N/N completed
+  Verification: [commands + results]
+  Review: [5-lane verdict]
+  Artifacts: [paths]
+  Cleanup: [receipts]
 ```
 
-## Handoff Target
+## State Ledger Integration (v0.7)
 
-After `ORCHESTRATION COMPLETE`, the work is done. If the plan is part of a larger loop, hand off to `ulw-loop` for the next iteration. If finished, produce a handoff summary with `handoff`.
+The start-work orchestrator now writes all run state through the state/ and loop/ script layer.
+
+- **Phase 2 (Create state):** Calls `lazykimi-plugin/scripts/state/create-run.sh <run_id> "<objective>"` to create the run directory with `state.json`, `events.jsonl`, and all subdirectories (`evidence/`, `checkpoints/`, `verification/`, `review/`, `agent_outputs/`, `artifacts/`, `memory_updates/`). The script also initializes `status: "planning"` and `iteration.count: 0`.
+- **Phase 3 (Execute):** Calls `lazykimi-plugin/scripts/loop/next-task.sh <run_id>` to fetch the next unverified checkbox from `state.json` and mark it `in_progress`. When a task is complete, calls `lazykimi-plugin/scripts/state/update-task.sh <run_id> <task_index> done` to record completion, validation status, and evidence paths.
+- **Phase 4 (Evidence):** Calls `lazykimi-plugin/scripts/state/append-event.sh <run_id> done_claim "<json>"` to write each DoneClaim as a structured event in `events.jsonl`. After adversarial verification, calls `lazykimi-plugin/scripts/state/update-task.sh <run_id> <task_index> evidence --field verified_by=<agent> --field confidence=<score>` to attach verification metadata to the task.
+- **Phase 5 (Checkpoint):** Calls `lazykimi-plugin/scripts/state/checkpoint.sh <run_id>` every N checkboxes (default N=3) to snapshot `state.json` into `checkpoints/checkpoint-<NN>.json` for crash recovery.
+
+## Worktree Discipline (v0.9 hardening)
+
+When work involves branch/PR changes:
+- Create a git worktree: `git worktree add ../worktree-<run_id> main`
+- Verify with `git worktree list --porcelain`
+- Record `worktree_path` in `state.json`
+- All implementation happens in the worktree; review artifacts reference the worktree path
+- See earlier host implementation source: start-work Phase 2 lines 71-92
+
+## Debugging Runtime Audit (v0.9 hardening)
+
+After the 5-agent review gate and before `ORCHESTRATION COMPLETE`:
+- Name 3+ failure hypotheses for the implemented work
+- Run distinguishing checks for each hypothesis
+- Append results to `events.jsonl`
+- See earlier host implementation source: start-work Completion phase lines 176-184
+
+## DoneClaim/AdversarialVerify JSON Schema (v0.9 hardening)
+
+```json
+DoneClaim: {
+  "task": "<task id/title>",
+  "changed_files": ["absolute paths"],
+  "tests": ["exact command + result"],
+  "manual_qa": ["artifact paths"],
+  "adversarial_classes": {
+    "malformed_input": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "prompt_injection": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "cancel_resume": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "stale_state": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "dirty_worktree": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "hung_commands": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "flaky_tests": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "misleading_success_output": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "repeated_interruptions": {"probed": bool, "result": "PASS|FAIL|N-A"}
+  },
+  "cleanup": ["receipt paths"],
+  "risks": ["known risks or empty"]
+}
+AdversarialVerify: {
+  "verdict": "confirmed|false-positive|needs-fix|needs-human-review",
+  "evidence": ["command+result per claim"],
+  "repro": "exact repro command",
+  "confidence": 0.0-1.0,
+  "adversarial_classes": {
+    "malformed_input": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "prompt_injection": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "cancel_resume": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "stale_state": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "dirty_worktree": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "hung_commands": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "flaky_tests": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "misleading_success_output": {"probed": bool, "result": "PASS|FAIL|N-A"},
+    "repeated_interruptions": {"probed": bool, "result": "PASS|FAIL|N-A"}
+  },
+  "gap_analysis": {"missing_test_gap": "description or N-A"}
+}
+```
+
+See earlier host implementation source: start-work SKILL.md lines 136-160
+
+## Kimi-Native Features
+
+- **Subagent spawning:** Kimi sub-agent channel dispatch replaces `multi_agent_v1.spawn_agent`; `isolation: true` replaces `fork_context: false`
+- **`.lazykimi/runs/`:** Run state replaces `.lazykimi/boulder.json` + `.lazykimi/start-work/`
+- **Hooks:** Stop/SubagentStop hooks (v0.6) drive continuation loop
+- **State ledger:** `state.json` + `events.jsonl` are the package-owned run record; inspect the scripts that create and update them before changing their shape.
+
+---
+
+_Adapted from earlier host implementation start-work. Preserved: orchestrator-delegate discipline, 5 verification gates, family completion contract, run state, evidence ledger. Adapted: all Codex tool names → Kimi equivalents; state paths → `.lazykimi/`; plan scaffolding script → inline plan reading. The "NO DIRECT IMPLEMENTATION" rule is preserved verbatim._
