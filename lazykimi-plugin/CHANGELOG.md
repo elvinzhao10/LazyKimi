@@ -32,7 +32,10 @@
 - **Contracts:** copied the family-shared byte-identical contract base from
   lazyzcode v1.3.3 (shared semantics, adaptive harness, automatic tooling,
   capability readiness v1/v2, evaluator pair, canonical schemas, fixtures)
-  with `cp`; added the Kimi per-host contracts (marketplace route contract
+  with `cp`; the pre-existing local `automatic-tooling-contract.v1.json`
+  had drifted from the family copy and was replaced by the LazyZCode
+  version (family contract wins over local edits); added the Kimi
+  per-host contracts (marketplace route contract
   with the three Kimi routes, hook consumers for the 16 events, lifecycle
   schemas, marketplace receipt schema) and the
   `lazykimi-regenerate-marketplace-contract.js` inventory script.
