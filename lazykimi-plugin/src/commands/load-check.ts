@@ -4,8 +4,8 @@ import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginR
 import { readJson, isObject } from '../lib/json';
 
 const PLUGIN_VERSION = '1.3.3';
-const EXPECTED_SKILLS = 17;
-const EXPECTED_AGENTS = 11;
+const EXPECTED_SKILLS = 19;
+const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
 const EXPECTED_MCP = 6;
 

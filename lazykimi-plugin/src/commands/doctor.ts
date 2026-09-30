@@ -6,8 +6,8 @@ import { isPluginSourceRoot } from '../lib/paths';
 import { validateMcpServers, REQUIRED_MCP_SERVERS } from '../lib/mcp-validation';
 
 const PLUGIN_VERSION = '1.3.3';
-const EXPECTED_SKILLS = 17;
-const EXPECTED_AGENTS = 11;
+const EXPECTED_SKILLS = 19;
+const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'WARN';
@@ -50,7 +50,9 @@ function countHooks(hooksDir: string): number {
 
 function checkBoulderState(boulderPath: string): CheckResult {
   if (!existsSync(boulderPath)) {
-    return { label: '.lazykimi/state/boulder.json', status: 'FAIL', detail: 'not found' };
+    // v1.3.3: runtime state is per-project (created by `lazykimi init`), not a
+    // repo-root artifact; absence in a source checkout is not a failure.
+    return { label: '.lazykimi/state/boulder.json', status: 'PASS', detail: 'not initialized (per-project runtime state)' };
   }
   try {
     const data = readJson(boulderPath);

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v001-package-boundary-regression.sh
 # Verify the lazykimi-plugin package is self-contained within lazykimi-plugin/
-# and the .lazykimi/ evidence dir, with no escaped symlinks or parent-dir refs.
+# with no escaped symlinks or parent-dir refs (root runtime copies removed in v1.3.3).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -20,9 +20,13 @@ for d in .kimi-code agents commands hooks mcp src contracts tooling scripts; do
   [ -d "$PLUGIN_ROOT/$d" ] || fail "missing package dir: $d"
 done
 
-# 2. .lazykimi/ evidence dir exists at repo root.
-[ -d "$REPO_ROOT/.lazykimi" ] || fail ".lazykimi/ evidence dir missing at repo root"
-[ -d "$REPO_ROOT/.lazykimi/evidence" ] || fail ".lazykimi/evidence/ missing"
+# 2. Root-level runtime copies are intentionally absent (v1.3.3 repo hygiene):
+#    the shipped payload is lazykimi-plugin/.kimi-code/ + .lazykimi/schemas/.
+[ ! -e "$REPO_ROOT/.lazykimi" ] || fail "root .lazykimi/ runtime copy must not exist"
+[ ! -e "$REPO_ROOT/.kimi-code" ] || fail "root .kimi-code/ runtime copy must not exist"
+[ ! -e "$REPO_ROOT/.trae" ] || fail "root .trae/ must not exist"
+[ ! -e "$REPO_ROOT/.lazytrae" ] || fail "root .lazytrae/ must not exist"
+[ -d "$PLUGIN_ROOT/.lazykimi/schemas" ] || fail "shipped .lazykimi/schemas/ missing"
 
 # 3. No git-tracked symlink inside the plugin escapes the plugin root.
 cd "$REPO_ROOT"

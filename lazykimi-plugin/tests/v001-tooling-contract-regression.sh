@@ -27,15 +27,16 @@ python3 - "$CONTRACT" <<'PYEOF'
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as f:
     data = json.load(f)
-assert data.get("schema") == "lazykimi.automatic-tooling.contract", "schema field"
+assert data.get("schema") == "lazy-series.automatic-tooling.contract", "schema field"
 assert data.get("schema_version") == 1, "schema_version"
 assert isinstance(data.get("providers"), dict) and data["providers"], "providers"
-assert isinstance(data.get("capabilities"), list) and data["capabilities"], "capabilities"
-assert isinstance(data.get("fallback_chains"), dict), "fallback_chains"
+assert isinstance(data.get("capabilities"), dict) and data["capabilities"], "capabilities"
 perms = data.get("permissions", {})
-assert perms.get("network") == "default_deny", "network must be default_deny"
-assert perms.get("shell_exec") == "default_deny", "shell_exec must be default_deny"
-assert perms.get("filesystem_read") == "default_allow", "filesystem_read default_allow"
+assert perms.get("default") == "deny", "permissions default deny"
+assert perms.get("network") == "explicit_provider_selection", "network explicit only"
+assert perms.get("browser") == "explicit_provider_selection", "browser explicit only"
+assert perms.get("local_read") == "allowed_within_workspace", "local read within workspace"
+assert perms.get("filesystem") == "read_only_and_project_scoped", "filesystem read-only project-scoped"
 prov = data["providers"]
 # Explicit-network providers must be marked, local providers must be network:none.
 for name, cfg in prov.items():

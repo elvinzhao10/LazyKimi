@@ -105,16 +105,29 @@ export function runRegressionTests(target: string): TestResult {
   }
   let passed = 0;
   let failed = 0;
+  let skipped = 0;
   for (const script of scripts) {
     const scriptPath = path.join(testsDir, script);
-    const result = spawnSync('bash', [scriptPath], { encoding: 'utf-8', cwd: target, stdio: 'pipe' });
+    // Family parity checks take explicit roots and never infer a sibling
+    // checkout: run them only when the reference root is provided via
+    // LAZYKIMI_LAZYZCODE_ROOT; otherwise skip with a notice.
+    const args: string[] = [];
+    if (script.includes('contract-parity')) {
+      const lazyzcodeRoot = process.env.LAZYKIMI_LAZYZCODE_ROOT || '';
+      if (!lazyzcodeRoot) {
+        skipped++;
+        continue;
+      }
+      args.push('--lazyzcode-root', lazyzcodeRoot, '--lazykimi-root', path.resolve(target, '..'));
+    }
+    const result = spawnSync('bash', [scriptPath, ...args], { encoding: 'utf-8', cwd: target, stdio: 'pipe' });
     if (result.status === 0) passed++;
     else failed++;
   }
   return {
     ran: true,
     passed: failed === 0,
-    detail: `${passed} passed, ${failed} failed (${scripts.length} total)`,
+    detail: `${passed} passed, ${failed} failed, ${skipped} skipped (${scripts.length} total)`,
   };
 }
 
