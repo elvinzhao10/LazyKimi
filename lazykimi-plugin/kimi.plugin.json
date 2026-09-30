@@ -63,7 +63,7 @@
     },
     {
       "event": "PreToolUse",
-      "matcher": "Bash",
+      "matcher": "Write|Edit|Bash",
       "command": "bash ./hooks/pre-tool-use.sh",
       "timeout": 5
     },

@@ -19,7 +19,7 @@
   "events": {
     "SessionStart": { "consumer": "hooks/session-start.sh", "critical": true, "role": "session-bootstrap", "mode": "concrete", "completion_authority": false, "invalidates": [], "readiness": "SESSIONSTART_READINESS=full|degraded" },
     "UserPromptSubmit": { "consumer": "hooks/user-prompt-submit.sh", "critical": true, "role": "adaptive-intake", "mode": "concrete", "completion_authority": false, "invalidates": [] },
-    "PreToolUse": { "consumer": "hooks/pre-tool-use.sh", "critical": true, "role": "tool-permission-policy", "mode": "concrete", "completion_authority": false, "invalidates": [], "matcher": "Bash", "required_fields": ["tool_name|toolName", "tool_input.command|toolInput.command"] },
+    "PreToolUse": { "consumer": "hooks/pre-tool-use.sh", "critical": true, "role": "tool-permission-policy", "mode": "concrete", "completion_authority": false, "invalidates": [], "matcher": "Write|Edit|Bash", "required_fields": ["tool_name|toolName", "tool_input.command|toolInput.command"] },
     "PostToolUse": { "consumer": "hooks/post-tool-use.sh", "critical": true, "role": "run-event-ledger", "mode": "concrete", "completion_authority": false, "invalidates": [] },
     "PostToolUseFailure": { "consumer": "hooks/post-tool-use-failure.sh", "critical": true, "role": "failure-recovery", "mode": "concrete", "completion_authority": false, "invalidates": [] },
     "Stop": { "consumer": "hooks/stop-gate.sh", "critical": true, "role": "completion-gate", "mode": "concrete", "completion_authority": true, "invalidates": [] },

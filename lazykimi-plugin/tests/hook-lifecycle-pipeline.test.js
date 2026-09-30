@@ -72,7 +72,7 @@ test('declares exactly the sixteen Kimi hook events with one consumer each', () 
     assert.ok(entry, `${event} missing from kimi.plugin.json`);
     assert.equal(entry.command, `bash ./${consumer.consumer}`, `${event} handler drifted`);
   }
-  assert.equal(byEvent.get('PreToolUse').matcher, 'Bash');
+  assert.equal(byEvent.get('PreToolUse').matcher, 'Write|Edit|Bash');
   assert.equal(byEvent.get('SessionStart').timeout, 10);
   // The critical-8 registration split (install-hooks.sh TOML route) matches the
   // contract's critical flags exactly.

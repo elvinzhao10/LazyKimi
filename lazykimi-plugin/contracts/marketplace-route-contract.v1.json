@@ -9,7 +9,7 @@
   },
   "artifacts": {
     "lazykimi-plugin/marketplace.json": "8c808d29c676f2682e358f143445f41b95c12208e35e4618da95148f575ecc75",
-    "lazykimi-plugin/kimi.plugin.json": "321a413664b576803fdb3518a1db8710d8e4f1d4bdb485740282fcfc61c02790"
+    "lazykimi-plugin/kimi.plugin.json": "79161155e035f3b96ce538e54c9ca65cf5efbd2a0c9318df86bcea679782a42f"
   },
   "routes": {
     "kimi-plugin-manifest": {
@@ -92,7 +92,7 @@
       "mcp_servers": 6
     },
     "file_count": 108,
-    "inventory_sha256": "a6d84d77c64168eefc0121055027872fa5d2209a8ead74affad531722a152053"
+    "inventory_sha256": "a61345d10ce9bf2e828f38440aaf085754b8e0f27a7ffb6a7aa4d637d215aa58"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

@@ -82,10 +82,15 @@ items below.
 
 ## Matcher verification status (honest boundaries)
 
-- The `PreToolUse` matcher currently matches **`Bash` only**. Kimi's names for
-  its file-mutation tools (the Write/Edit equivalents) are not yet verified
-  on-host; extending the matcher is gated on that observation.
-- Interim file-write policy: read-only roles carry `disallowed: [Edit, Write]`
+- The `PreToolUse` matcher matches **`Write|Edit|Bash`**. The Write/Edit tool
+  names were confirmed from a real host session transcript (T21 item 5
+  receipt in `lazykimi-evaluation.md`: `tools.set_active_tools` and
+  `llm.tools_snapshot` list exactly `Write` and `Edit`), so the plan's T9
+  contingency ("extend once verified") has been applied on both registration
+  routes — the inline manifest entry and the TOML critical-8. Live *firing*
+  of the hook on Write/Edit events still requires an auth'd session and
+  remains `documented-untested`.
+- Defense in depth stays: read-only roles carry `disallowed: [Edit, Write]`
   agent frontmatter (a denylist encoding the intended allowlist), and the
   Stop gate re-checks scope at completion.
 - Deny semantics (exit 2) are verified for the TOML route at the protocol

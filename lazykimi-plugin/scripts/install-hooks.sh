@@ -87,24 +87,25 @@ else
   exit 1
 fi
 
-# Define the critical 8 hooks: event|matcher|script|timeout
+# Define the critical 8 hooks: event:matcher:script:timeout
 # (the 8 advisory hooks in the manifest are plugin-only and not wired here;
-# the split matches contracts/kimi-hook-consumers.v1.json)
+# the split matches contracts/kimi-hook-consumers.v1.json; the matcher is a
+# regex-like alternation, so ':' separates fields — '|' belongs to the matcher)
 HOOKS=(
-  "SessionStart||session-start.sh|10"
-  "UserPromptSubmit||user-prompt-submit.sh|5"
-  "PreToolUse|Bash|pre-tool-use.sh|5"
-  "PostToolUse||post-tool-use.sh|5"
-  "PostToolUseFailure||post-tool-use-failure.sh|5"
-  "Stop||stop-gate.sh|10"
-  "PermissionRequest||permission-request.sh|5"
-  "PermissionResult||permission-result.sh|5"
+  "SessionStart::session-start.sh:10"
+  "UserPromptSubmit::user-prompt-submit.sh:5"
+  "PreToolUse:Write|Edit|Bash:pre-tool-use.sh:5"
+  "PostToolUse::post-tool-use.sh:5"
+  "PostToolUseFailure::post-tool-use-failure.sh:5"
+  "Stop::stop-gate.sh:10"
+  "PermissionRequest::permission-request.sh:5"
+  "PermissionResult::permission-result.sh:5"
 )
 
 # Verify all 8 hook scripts exist
 MISSING=0
 for entry in "${HOOKS[@]}"; do
-  IFS='|' read -r _ _ script _ <<< "$entry"
+  IFS=':' read -r _ _ script _ <<< "$entry"
   if [ ! -f "$HOOKS_DIR/$script" ]; then
     echo "install-hooks.sh: missing hook script: $HOOKS_DIR/$script" >&2
     MISSING=$((MISSING + 1))
@@ -129,7 +130,7 @@ SKIPPED=0
 BACKED_UP=0
 
 for entry in "${HOOKS[@]}"; do
-  IFS='|' read -r event matcher script timeout <<< "$entry"
+  IFS=':' read -r event matcher script timeout <<< "$entry"
   abs_script="$HOOKS_DIR/$script"
   cmd="bash $abs_script"
 
