@@ -9,6 +9,7 @@ import { run as runTooling } from './commands/tooling';
 import { run as runSync } from './commands/sync';
 import { run as runHandoff } from './commands/handoff';
 import { run as runCompletionStatus } from './commands/completion-status';
+import { run as runLifecycle } from './commands/lifecycle';
 
 type CommandFn = (args: string[]) => number;
 
@@ -23,6 +24,7 @@ const commands: Record<string, CommandFn> = {
   tooling: runTooling,
   sync: runSync,
   handoff: runHandoff,
+  lifecycle: runLifecycle,
 };
 
 const aliases: Record<string, string> = {
@@ -49,6 +51,7 @@ Commands:
   handoff           Generate a Markdown handoff summary of active work and evidence
   mcp               Print MCP server declarations for /mcp-config import
   tooling           Query the receipt-owned tooling capability broker
+  lifecycle         Durable onboard/update/status/offboard lifecycle
 
 Aliases: i=init, d=doctor, v=verify, cs=completion-status, rm=uninstall
 

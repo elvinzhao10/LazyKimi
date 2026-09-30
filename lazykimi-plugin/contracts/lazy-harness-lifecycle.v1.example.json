@@ -16,7 +16,7 @@
       },
       {
         "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/contracts/lazy-harness-lifecycle.v1.schema.json",
-        "sha256": "ac2bc861874dd9e50806cae407cddfe01996f6f47f4cd211c85d5ed85d79c082"
+        "sha256": "f1116ae101cb040c15c6891b4b05e8faf945b09515f2916004392d61f806a3cb"
       }
     ]
   },
@@ -101,15 +101,7 @@
       "sha256": null
     }
   ],
-  "registered_project_declarations": [
-    {
-      "project_root": "/home/example/project",
-      "path": ".kimi-code/mcp.json",
-      "mode": "0644",
-      "managed_entry_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
-      "ownership_scope": "managed-entry-only"
-    }
-  ],
+  "registered_project_declarations": [],
   "receipt_path": "receipts/lazykimi-1-3-3-a1b2c3d4e5f6.json",
   "active_release": "1.3.3-a1b2c3d4e5f6",
   "previous_release": null,

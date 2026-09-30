@@ -85,8 +85,6 @@ SHARED_FILES=(
     lazyseries-host-evidence.v1.js
     lazyseries-host-observation.v1.schema.json
     lazyseries-onboarding-receipt.v1.schema.json
-    lazy-harness-active.v2.schema.json
-    lazy-harness-active.v2.schema.json.sha256
     asset-ownership-contract.v1.json
     paired-candidate-contract.v1.schema.json
     paired-candidate-contract.v1.schema.json.sha256
@@ -110,6 +108,39 @@ for f in "${SHARED_FILES[@]}"; do
     [ -f "$LK_CONTRACTS/$f" ] || fail "LazyKimi is missing shared contract file: $f"
     cmp -s "$LZ_CONTRACTS/$f" "$LK_CONTRACTS/$f" \
         || fail "family-shared contract drifted from LazyZCode: $f"
+done
+
+# Enum-extended family contract: lazy-harness-active.v2.schema.json follows the
+# family-growth pattern (each port adds its own product to the durable-root
+# product enum while keeping every sibling entry — exactly how LazyZCode added
+# itself to the LazyTrae port's enum). Everything outside that one enum must
+# stay byte-identical to LazyZCode.
+ENUM_EXTENDED_FILES=(
+    lazy-harness-active.v2.schema.json
+)
+for f in "${ENUM_EXTENDED_FILES[@]}"; do
+    [ -f "$LZ_CONTRACTS/$f" ] || fail "LazyZCode is missing enum-extended contract: $f"
+    [ -f "$LK_CONTRACTS/$f" ] || fail "LazyKimi is missing enum-extended contract: $f"
+    node - "$LZ_CONTRACTS/$f" "$LK_CONTRACTS/$f" <<'NODE' \
+        || fail "enum-extended contract drifted beyond the product enum: $f"
+const fs = require('node:fs');
+const [lzPath, lkPath] = process.argv.slice(2);
+const lz = JSON.parse(fs.readFileSync(lzPath, 'utf8'));
+const lk = JSON.parse(fs.readFileSync(lkPath, 'utf8'));
+const lzEnum = lz.properties.product.enum;
+const lkEnum = lk.properties.product.enum;
+const expected = [...lzEnum, 'LazyKimi'];
+if (JSON.stringify(lkEnum) !== JSON.stringify(expected)) {
+    console.error(`product enum mismatch: got ${JSON.stringify(lkEnum)}, want ${JSON.stringify(expected)}`);
+    process.exit(1);
+}
+delete lz.properties.product.enum;
+delete lk.properties.product.enum;
+if (JSON.stringify(lz) !== JSON.stringify(lk)) {
+    console.error('schema drifted from LazyZCode outside the product enum');
+    process.exit(1);
+}
+NODE
 done
 
 # Shared fixture trees (everything except the per-host lifecycle-v1/v2 sets).

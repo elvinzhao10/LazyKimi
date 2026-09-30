@@ -34,39 +34,6 @@
       "expected_boundary": "schema"
     },
     {
-      "id": "host-private-project-root",
-      "operation": "replace",
-      "path": [
-        "registered_project_declarations",
-        0,
-        "project_root"
-      ],
-      "value": "/home/example/.zcode/plugins/lazyzcode",
-      "expected_boundary": "schema"
-    },
-    {
-      "id": "project-root-parent-traversal",
-      "operation": "replace",
-      "path": [
-        "registered_project_declarations",
-        0,
-        "project_root"
-      ],
-      "value": "/Users/example/project/../../../Applications/Trae.app",
-      "expected_boundary": "schema"
-    },
-    {
-      "id": "project-root-workbuddy-shorthand",
-      "operation": "replace",
-      "path": [
-        "registered_project_declarations",
-        0,
-        "project_root"
-      ],
-      "value": "~/.workbuddy/project",
-      "expected_boundary": "schema"
-    },
-    {
       "id": "runtime-path-parent-traversal",
       "operation": "replace",
       "path": [
@@ -148,6 +115,40 @@
         "path"
       ],
       "value": "LazyKimi/releases/1.3.2-ec3bbbf9e170",
+      "expected_boundary": "schema"
+    },
+    {
+      "id": "project-declaration-present",
+      "operation": "replace",
+      "path": [
+        "registered_project_declarations"
+      ],
+      "value": [
+        {
+          "project_root": "/home/example/project",
+          "path": ".kimi-code/mcp.json",
+          "mode": "0644",
+          "managed_entry_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+          "ownership_scope": "managed-entry-only"
+        }
+      ],
+      "expected_boundary": "schema"
+    },
+    {
+      "id": "project-declaration-sibling-managed-entry",
+      "operation": "replace",
+      "path": [
+        "registered_project_declarations"
+      ],
+      "value": [
+        {
+          "project_root": "/home/example/project",
+          "path": ".trae/mcp.json",
+          "mode": "0644",
+          "managed_entry_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+          "ownership_scope": "managed-entry-only"
+        }
+      ],
       "expected_boundary": "schema"
     }
   ]

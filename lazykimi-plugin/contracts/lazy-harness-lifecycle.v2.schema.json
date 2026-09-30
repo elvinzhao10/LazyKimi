@@ -18,6 +18,9 @@
     },
     "product": {
       "enum": [
+        "LazyBuddy",
+        "LazyTrae",
+        "LazyZCode",
         "LazyKimi"
       ],
       "type": "string"
@@ -282,6 +285,63 @@
     "host_evidence"
   ],
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "LazyBuddy"
+          }
+        },
+        "required": [
+          "product"
+        ]
+      },
+      "then": {
+        "properties": {
+          "origin": {
+            "const": "https://github.com/elvinzhao10/LazyBuddy.git"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "LazyTrae"
+          }
+        },
+        "required": [
+          "product"
+        ]
+      },
+      "then": {
+        "properties": {
+          "origin": {
+            "const": "https://github.com/elvinzhao10/LazyTrae.git"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "product": {
+            "const": "LazyZCode"
+          }
+        },
+        "required": [
+          "product"
+        ]
+      },
+      "then": {
+        "properties": {
+          "origin": {
+            "const": "https://github.com/elvinzhao10/LazyZCode.git"
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {
