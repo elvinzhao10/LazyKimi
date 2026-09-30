@@ -53,7 +53,7 @@ if (gate === 'ALL') {
 JSEOF
 
 # Placeholder content should FAIL all gates.
-for file in plan-reread.md test-runs.md manual-qa.md oracle-review.md reviewer.md; do
+for file in plan-reread.md test-runs.md manual-qa.md adversarial-qa.md reviewer.md; do
   echo "(none yet)" > "${EVIDENCE_DIR}/${file}"
 done
 
@@ -74,7 +74,7 @@ cat > "${EVIDENCE_DIR}/manual-qa.md" <<'EOF'
 # Manual QA
 Ran the CLI and observed expected output.
 EOF
-cat > "${EVIDENCE_DIR}/oracle-review.md" <<'EOF'
+cat > "${EVIDENCE_DIR}/adversarial-qa.md" <<'EOF'
 # Adversarial QA
 - Edge case: empty input handled.
 - Regression: prior behavior preserved.

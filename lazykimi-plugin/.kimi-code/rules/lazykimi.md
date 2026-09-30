@@ -22,10 +22,10 @@
 - `/plan on` / `/plan off` — read-only planning mode; toggle off before implementing.
 
 ### Sub-Agent Channel Mapping
-- `coder` — hephaestus (implementation), cleaner (slop removal), migration-planner (migration plans).
-- `explore` — explorer (codebase search), librarian (research/memory), atlas (context recovery), metis (gap analysis).
-- `plan` — prometheus (plan author), momus (plan reviewer).
-- Main agent — sisyphus (orchestrator), oracle (verifier).
+- `coder` — implementer (bounded task execution), qa-executor (real-surface QA), migration-planner (migration plans).
+- `explore` — explorer (codebase search), librarian (research/memory), context-miner (context-mining review lane).
+- `plan` — planner (plan author), context-indexer (context index).
+- Main session — orchestrator (root coordinator) with verifier, reviewer, security-auditor, and gate-reviewer as judgment peers. Review panel (ALL-MUST-PASS): verifier, qa-executor, reviewer, security-auditor, context-miner.
 
 ### Five Mandatory Evidence Gates
 Every completion must pass all five gates before any done claim:
@@ -49,8 +49,8 @@ Every completion must pass all five gates before any done claim:
 - Evidence includes: commands run, outputs, exit status, changed files, manual checks, reviewer findings.
 - Never claim parity without evidence.
 
-### Reviewer/Oracle Review Required
-- Long-horizon completion requires Oracle pass.
+### Review Panel Required
+- Long-horizon completion requires the ALL-MUST-PASS review panel (verifier, qa-executor, reviewer, security-auditor, context-miner).
 - Reviewer must be read-only by default.
 - A child agent saying "done" does not close the work.
 

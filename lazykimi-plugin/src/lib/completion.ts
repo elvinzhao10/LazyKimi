@@ -16,7 +16,7 @@ export const EVIDENCE_FILES: Record<string, string> = {
   'plan-reread': '.lazykimi/evidence/plan-reread.md',
   'automated-verification': '.lazykimi/evidence/test-runs.md',
   'manual-qa': '.lazykimi/evidence/manual-qa.md',
-  'adversarial-qa': '.lazykimi/evidence/oracle-review.md',
+  'adversarial-qa': '.lazykimi/evidence/adversarial-qa.md',
   'cleanup': '.lazykimi/evidence/reviewer.md',
 };
 

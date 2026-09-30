@@ -107,7 +107,7 @@ function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string
     ['plan-reread.md', evidenceStub('Plan Reread')],
     ['test-runs.md', evidenceStub('Test Runs')],
     ['manual-qa.md', evidenceStub('Manual QA')],
-    ['oracle-review.md', evidenceStub('Oracle Review')],
+    ['adversarial-qa.md', evidenceStub('Adversarial QA')],
     ['reviewer.md', evidenceStub('Reviewer')],
   ];
   for (const [name, content] of files) {

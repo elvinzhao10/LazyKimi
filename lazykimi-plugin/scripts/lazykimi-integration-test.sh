@@ -53,7 +53,7 @@ fi
 # Seed stub evidence files so verify's evidence gates can pass. init only
 # creates the empty evidence/ dir; a completed workflow would populate these.
 mkdir -p "$TMP/.lazykimi/evidence"
-for f in plan-reread.md test-runs.md manual-qa.md oracle-review.md reviewer.md; do
+for f in plan-reread.md test-runs.md manual-qa.md adversarial-qa.md reviewer.md; do
   echo "- Integration test evidence stub ($f)" > "$TMP/.lazykimi/evidence/$f"
 done
 

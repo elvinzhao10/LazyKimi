@@ -2,66 +2,69 @@
 
 ## OVERVIEW
 
-LazyKimi is the Kimi-native port of the evidence-led agent workflow harness originally shipped as LazyTrae (Trae host) and LazyBuddy (CodeBuddy host). It adapts the eleven Greek-myth specialist agent roles to Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main agent, preserving the Explore -> Plan -> Implement -> Verify -> Review loop and the five mandatory evidence gates. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
+LazyKimi is the Kimi-native member of the LazySeries evidence-gated agent workflow family (at parity with LazyZCode v1.3.3). It runs the thirteen family role agents on Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main session, preserving the Explore -> Plan -> Implement -> Verify -> Review loop, the DoneClaim -> independent verification -> completion contract, and the five-agent ALL-MUST-PASS review panel. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
 
 ## AGENT ROLE CATALOG
 
-| # | Role | Greek-Myth Identity | Kimi Sub-Agent | Isolation | Recommended Model | Primary Responsibility |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | `sisyphus` | Sisyphus (orchestrator) | Main agent | Read-only | `kimi-k3` | Workflow lifecycle: plan -> implement -> verify -> review -> loop |
-| 2 | `prometheus` | Prometheus (planner) | `plan` | Read-only except plan file | `kimi-k3` | Author ONE executable work plan per request; never implements |
-| 3 | `hephaestus` | Hephaestus (implementer) | `coder` | Write-enabled (surgical) | `kimi-k2.7-code` | Deep autonomous implementation; full Explore -> Plan -> Implement -> Verify -> QA loop |
-| 4 | `oracle` | Oracle (verifier) | Main agent | Read-only | `kimi-k3` | Post-implementation review; gate enforcement; APPROVE / ITERATE / REJECT |
-| 5 | `momus` | Momus (reviewer) | `plan` | Read-only | `kimi-k3` | Plan executability review; OKAY / ITERATE / REJECT |
-| 6 | `explorer` | Explorer | `explore` | Read-only | `kimi-k2.7-code` | Codebase search; absolute paths; structured results |
-| 7 | `librarian` | Librarian | `explore` | Read-only for code; memory/docs write | `kimi-k3` | External docs research; SHA-pinned citations; project memory updates |
-| 8 | `metis` | Metis (gap analyst) | `explore` | Read-only | `kimi-k3` | Pre-planning risk analysis; contradictions, ambiguity, missing constraints |
-| 9 | `cleaner` | Cleaner | `coder` | Edit-only (no Write) | `kimi-k2.7-code` | AI-slop removal across 10 categories; behavior-preserving |
-| 10 | `atlas` | Atlas (context recovery) | `explore` | Read-only | `kimi-k3` | Reconstruct session state from `.lazykimi/` after handoff or compaction |
-| 11 | `migration-planner` | Migration Planner | `coder` | Read-only except migration plan file | `kimi-k3` | Adapt LazyKimi workflows to a foreign host platform; planning only |
+| # | Role | Kimi channel | Tool surface | Model | Primary responsibility |
+| --- | --- | --- | --- | --- | --- |
+| 1 | `orchestrator` | Main session | `.lazykimi/` state writes only | `kimi-k3` | Workflow lifecycle: plan -> dispatch -> verify -> review -> loop; never implements |
+| 2 | `planner` | `plan` | Read-only except plan artifacts | `kimi-k3` | Author ONE decision-complete family work plan per request |
+| 3 | `implementer` | `coder` | Read/Edit/Write/Bash (surgical) | `kimi-k3` | Execute one bounded task: smallest correct change + DoneClaim |
+| 4 | `verifier` | Main session | Read/Bash + run-scoped report Write | `kimi-k3` | Independent DoneClaim verification; confirmed/false-positive/needs-fix verdicts |
+| 5 | `reviewer` | Main session | Read-only | `kimi-k3` | Multi-angle review: executability mode + gap-analysis mode |
+| 6 | `security-auditor` | Main session | Read-only | `kimi-k3` | Security lane: secrets, unsafe commands, injection, permission issues |
+| 7 | `qa-executor` | `coder` | Read/Bash (+evidence writes) | `kimi-k3` | Run the application; execute test scenarios; capture real-surface evidence |
+| 8 | `context-indexer` | `plan` | Read-only | `kimi-k3` | Build/refresh `.lazykimi/context/`: project map, commands, structure index |
+| 9 | `context-miner` | `explore` | Read-only | `kimi-k3` | Context-mining review lane: git history, docs, cross-references |
+| 10 | `explorer` | `explore` | Read-only | `kimi-k3` | Codebase search; absolute paths; structured results |
+| 11 | `librarian` | `explore` | Read-only; memory/docs updates | `kimi-k3` | External docs research; SHA-pinned citations; project memory |
+| 12 | `gate-reviewer` | Main session | Read-only | `kimi-k3` | Final approval gate: re-audit evidence, reports, QA artifacts |
+| 13 | `migration-planner` | `coder` | Read/Write/Bash (adapter docs) | `kimi-k3` | Plan LazyKimi adaptations to another host; planning only |
 
 ### Sub-Agent Channel Allocation
 
-- **`coder` sub-agent**: hephaestus (deep implementation), cleaner (slop removal), migration-planner (migration plan authoring — needs coder-channel code inspection).
-- **`explore` sub-agent**: explorer (codebase search), librarian (external research + memory), atlas (context recovery), metis (gap analysis). All four are read-only for product code.
-- **`plan` sub-agent**: prometheus (plan author), momus (plan reviewer). Both read-only except the single plan file (Prometheus only).
-- **Main agent**: sisyphus (orchestrator), oracle (verifier). Both run in the top-level Kimi Code CLI session to preserve separation between orchestration and judgment.
+- **`coder` sub-agent**: implementer (bounded task execution), qa-executor (real-surface QA), migration-planner (migration plan authoring — needs coder-channel code inspection).
+- **`explore` sub-agent**: explorer (codebase search), librarian (external research + memory), context-miner (context-mining review lane). All read-only for product code.
+- **`plan` sub-agent**: planner (plan author), context-indexer (context index build/refresh). Read-only over the repository; plan artifacts land under `.lazykimi/`.
+- **Main session**: orchestrator (root coordinator), verifier, reviewer, security-auditor, gate-reviewer (judgment roles run as main-session peers to preserve separation between orchestration and judgment).
+- **Review panel (ALL-MUST-PASS)**: verifier (Goal Verifier), qa-executor (QA Executor), reviewer (Code Reviewer), security-auditor (Security Auditor), context-miner (Context Miner).
 
 ## WORKFLOW PHASES
 
-LazyKimi follows the canonical evidence-led loop. Each phase has a primary owner; Sisyphus steers transitions.
+LazyKimi follows the canonical evidence-gated loop. Each phase has a primary owner; the orchestrator steers transitions.
 
-1. **Explore (init-deep)** — `lazykimi init-deep` or `/swarm` with parallel Explorer + Librarian + Atlas. Owner: Sisyphus dispatching `explore` sub-agents. Output: hierarchical repo understanding, prior state reconstruction (Atlas), external citations (Librarian).
-2. **Plan (ulw-plan)** — `lazykimi ulw-plan` or `/plan on` then `plan` sub-agent. Owner: Prometheus. Metis runs as pre-plan risk analyst; Momus runs as plan-acceptance reviewer. Output: ONE plan file at `.lazykimi/plans/<slug>.md`.
-3. **Implement (start-work)** — `lazykimi start-work` or `/goal <objective>` for autonomous execution. Owner: Hephaestus (deep) or per-task executors via the `coder` sub-agent. Boulder state advances one task at a time. Output: changed files, commits, per-task evidence.
-4. **Verify (verifier)** — `lazykimi verify` or Oracle invocation. Owner: Oracle. Runs the five evidence gates. Output: APPROVE / ITERATE / REJECT verdict with per-gate PASS/FAIL evidence.
-5. **Review (reviewer)** — `lazykimi review-work`. Owner: Oracle (post-implementation review) and Momus (plan-vs-implementation compliance). Output: consolidated review report.
+1. **Explore (init-deep)** — `lazykimi init-deep` or `/swarm` with parallel explorer + librarian + context-indexer instances. Owner: orchestrator dispatching `explore` sub-agents. Output: hierarchical repo understanding, prior state reconstruction (context-indexer), external citations (librarian).
+2. **Plan (ulw-plan)** — `lazykimi ulw-plan` or `/plan on` then `plan` sub-agent. Owner: planner. The reviewer's gap-analysis mode runs as pre-plan risk analysis; its executability mode runs as plan-acceptance review. Output: ONE plan file at `.lazykimi/plans/<slug>.md`.
+3. **Implement (start-work)** — `lazykimi start-work` or `/goal <objective>` for autonomous execution. Owner: implementer (per-task) via the `coder` sub-agent. Boulder state advances one task at a time. Output: changed files, commits, per-task evidence.
+4. **Verify (verifier)** — `lazykimi verify` or verifier invocation. Owner: verifier. Independent DoneClaim verification plus the review panel. Output: confirmed / false-positive / needs-fix / needs-human-review verdicts with evidence.
+5. **Review (reviewer)** — `lazykimi review-work`. Owner: reviewer (post-implementation review and plan-vs-implementation compliance) with security-auditor and context-miner lanes. Output: consolidated review report.
 6. **Librarian** — Memory update. Owner: Librarian. Updates AGENTS.md managed sections, parity ledger, command index. Output: `.lazykimi/evidence/` research findings and memory-update report.
-7. **Handoff** — `/lazy-handoff`. Owner: Sisyphus. Produces a parseable handoff summary that lets the next session resume without re-discovery (Atlas reconstructs it on resume).
+7. **Handoff** — `/lazy-handoff`. Owner: orchestrator. Produces a parseable handoff summary that lets the next session resume without re-discovery (context-indexer reconstructs it on resume).
 
 ## EVIDENCE GATE REQUIREMENTS
 
-Every completion must pass all five gates. Gates are mandatory; Sisyphus cannot waive them. Oracle consolidates the gate review and issues the final verdict.
+Every completion must pass the five-gate review panel (ALL-MUST-PASS). Gates are mandatory; the orchestrator cannot waive them. The gate-reviewer consolidates the panel and issues the final verdict.
 
 | Gate | Name | Owner | Evidence Required |
 | --- | --- | --- | --- |
-| 1 | **plan-reread** | Sisyphus (at resume) / Prometheus (at creation) / Momus (at execution entry) / Atlas (at reconstruction) | Plan file re-read end-to-end; every task has References + Acceptance Criteria + QA Scenarios + Commit instruction; all referenced paths exist |
-| 2 | **automated-verification** | Hephaestus (or per-task executor) | LSP diagnostics clean on all changed files; related tests passing; full build green |
-| 3 | **manual-qa** | Hephaestus (or per-task executor) | Real-surface artifact: CLI output, HTTP response, browser screenshot, or data output — concrete, not asserted |
-| 4 | **adversarial-qa** | Oracle | Edge cases and regression scenarios executed with captured evidence |
-| 5 | **cleanup** | Cleaner | No AI-slop remains; regression tests pass identically before and after; lint and type-check clean |
+| 1 | **plan-reread** | orchestrator (at resume) / planner (at creation) / reviewer (at execution entry) / context-indexer (at reconstruction) | Plan file re-read end-to-end; every task has References + Acceptance Criteria + QA Scenarios + Commit instruction; all referenced paths exist |
+| 2 | **automated-verification** | implementer (per-task executor) | LSP diagnostics clean on all changed files; related tests passing; full build green |
+| 3 | **manual-qa** | qa-executor (or implementer) | Real-surface artifact: CLI output, HTTP response, browser screenshot, or data output — concrete, not asserted |
+| 4 | **adversarial-qa** | verifier | Edge cases and regression scenarios executed with captured evidence |
+| 5 | **cleanup** | implementer (lazy-remove-ai-slops skill) | No AI-slop remains; regression tests pass identically before and after; lint and type-check clean |
 
-A failed gate blocks completion. Oracle returns ITERATE (max 3 fixable issues) or REJECT (blocking). Sisyphus may not declare completion until all five gates are PASS.
+A failed gate blocks completion. The panel returns ITERATE (max 3 fixable issues) or REJECT (blocking). The orchestrator may not declare completion until all five gates are PASS.
 
 ## KIMI-NATIVE MODE USAGE
 
 LazyKimi maps its workflow onto Kimi Code CLI's native modes:
 
-- **`/swarm <task>`** — Parallel execution. Use for the Explore phase (multiple Explorer / Librarian / Atlas instances in parallel), for parallel task implementation when tasks are independent, or for parallel review (Oracle + Momus). Swarm members write heartbeat markers (`WORKING:` / `BLOCKED:`) and deliverable reports to `.lazykimi/team/members/<id>/`.
-- **`/goal <objective>`** — Persistent autonomous objective. Use for the Implement phase when the work is a single large objective rather than a checklist. The goal runs the full Explore -> Plan -> Implement -> Verify -> QA loop under Sisyphus's oversight. Atlas reconstructs state on goal resumption.
-- **`/plan on` / `/plan off`** — Plan mode toggle. Use to constrain the session to read-only + plan-file writes while Prometheus and Metis work. Turn off before entering the Implement phase.
+- **`/swarm <task>`** — Parallel execution. Use for the Explore phase (multiple explorer / librarian / context-indexer instances in parallel), for parallel task implementation when tasks are independent, or for parallel review (review panel lanes). Swarm members write heartbeat markers (`WORKING:` / `BLOCKED:`) and deliverable reports to `.lazykimi/team/members/<id>/`.
+- **`/goal <objective>`** — Persistent autonomous objective. Use for the Implement phase when the work is a single large objective rather than a checklist. The goal runs the full Explore -> Plan -> Implement -> Verify -> QA loop under the orchestrator's oversight. The context-indexer reconstructs state on goal resumption.
+- **`/plan on` / `/plan off`** — Plan mode toggle. Use to constrain the session to read-only + plan-file writes while the planner works. Turn off before entering the Implement phase.
 
-Sisyphus decides when to invoke each mode based on the workflow phase and task shape. Momus and Oracle may be invoked as peers inside a `/swarm` or as the closing checkpoint of a `/goal`.
+The orchestrator decides when to invoke each mode based on the workflow phase and task shape. Review-panel roles may be invoked as peers inside a `/swarm` or as the closing checkpoint of a `/goal`.
 
 ## STATE LOCATIONS
 
@@ -69,18 +72,18 @@ All LazyKimi runtime state lives under `.lazykimi/`. Configuration lives under `
 
 | Artifact | Path | Owner | Format |
 | --- | --- | --- | --- |
-| Boulder state (current task index, status) | `.lazykimi/state/boulder.json` | Sisyphus | JSON (see `boulder.schema.json`) |
-| Active loop state | `.lazykimi/state/active-loop.json` | Sisyphus | JSON (see `active-loop.schema.json`) |
-| Sessions ledger | `.lazykimi/state/sessions.json` | Sisyphus | JSON (see `sessions.schema.json`) |
-| Plan files | `.lazykimi/plans/<slug>.md` | Prometheus (author) / Momus (reviewer) | Markdown |
+| Boulder state (current task index, status) | `.lazykimi/state/boulder.json` | orchestrator | JSON (see `boulder.schema.json`) |
+| Active loop state | `.lazykimi/state/active-loop.json` | orchestrator | JSON (see `active-loop.schema.json`) |
+| Sessions ledger | `.lazykimi/state/sessions.json` | orchestrator | JSON (see `sessions.schema.json`) |
+| Plan files | `.lazykimi/plans/<slug>.md` | planner (author) / reviewer (reviewer) | Markdown |
 | Migration plans | `.lazykimi/plans/migration-<target>.md` | Migration Planner | Markdown |
 | Evidence files | `.lazykimi/evidence/<gate>.md` | Per-gate owner | Markdown |
-| Handoff summary | `.lazykimi/evidence/handoff.md` | Sisyphus | Markdown |
+| Handoff summary | `.lazykimi/evidence/handoff.md` | orchestrator | Markdown |
 | Schemas | `.lazykimi/schemas/*.schema.json` | LazyKimi CLI | JSON Schema |
 | Project config | `.kimi-code/` (this directory) | LazyKimi CLI | Markdown + JSON |
 | Agent definitions | `.kimi-code/agents/lazykimi-*.md` (or `agents/`) | LazyKimi CLI | Markdown |
 
-The boulder state file (`.lazykimi/state/boulder.json`) is the single source of truth for "where are we in the plan?" — Atlas reconstructs from it, Sisyphus advances it, Oracle reads it to verify plan compliance.
+The boulder state file (`.lazykimi/state/boulder.json`) is the single source of truth for "where are we in the plan?" — The context-indexer reconstructs from it, the orchestrator advances it, the verifier reads it to check plan compliance.
 
 ## State Schemas
 
@@ -134,7 +137,7 @@ Setup: run `bash scripts/install-kimi-work.sh` to copy the 17 `lazy-*` skills in
 - Do not add hooks that block completion; use CLI/MCP gates instead.
 - Do not modify MCP declarations without package lifecycle verification.
 - Do not collapse planner and implementer into one agent — the five evidence gates depend on the separation.
-- Do not let Sisyphus approve its own work — Oracle is the independent verifier.
+- Do not let the orchestrator approve its own work — the verifier is the independent authority.
 - Do not skip the Explore phase — never speculate about code not read.
 - Do not trust subagent self-reports without independent verification.
 - Do not declare completion without all five evidence gates PASS.

@@ -25,7 +25,7 @@ fi
 
 # Only verify implementer/coder sub-agents
 case "$agent_type" in
-  *implementer*|*coder*|*hephaestus*) ;;
+  *implementer*|*coder*|*qa-executor*) ;;
   *) exit 0 ;;
 esac
 

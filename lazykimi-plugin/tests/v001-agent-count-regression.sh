@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v001-agent-count-regression.sh
-# Verify 11 agents present (lazykimi-*.md), each non-empty.
+# Verify 13 family role agents present (lazykimi-*.md), each non-empty.
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +11,7 @@ trap cleanup EXIT
 
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
-EXPECTED=11
+EXPECTED=13
 AGENTS_DIR="$PLUGIN_ROOT/agents"
 [ -d "$AGENTS_DIR" ] || fail "agents dir missing"
 
