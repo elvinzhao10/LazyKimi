@@ -29,7 +29,14 @@ exist yet.
 | Kimi Work | Skills import only (`install-kimi-work.sh`) | Pending live observation |
 
 HOST READINESS: PENDING. Package checks prove files and declarations, not
-plugin loading, hook firing, or MCP connections.
+plugin loading, hook firing, or MCP connections. A 2026-09-30 host
+verification pass (T21) probed the real Kimi Code CLI v0.27.0 on the
+development machine: the `[[hooks]]` TOML schema, the `Write`/`Edit`
+PreToolUse tool names, and the `kimi-k3` effort scale (`low|high|max`) were
+observed at the config/transcript layer and the agent effort values were
+adapted to that scale; live-session activation remains pending (expired
+OAuth credential; see `lazykimi-evaluation.md`, "T21 host verification
+pass").
 
 ## Migration and upgrade
 

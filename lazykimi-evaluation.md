@@ -12,7 +12,10 @@ Every claim below carries one of three scopes:
 - **package** — proven by the copied package and its local checks
   (load-check, doctor, verify, regressions) on this checkout.
 - **probe** — proven by a bounded local protocol probe against a packaged
-  endpoint or script (e.g. JSON-RPC stream fixtures), still without a host.
+  endpoint or script (e.g. JSON-RPC stream fixtures), still without a host;
+  since the T21 pass, this also covers bounded probes of the real host
+  binary, host config, and past host session transcripts on this machine
+  (see "T21 host verification pass"), which still observe no live session.
 - **current-session** — observed in a live host session and recorded as an
   observation receipt. No claim in this document currently holds this scope.
 
@@ -84,6 +87,34 @@ or container-backed runner. A no-fork sandbox is not enabled by default.
 The copied repository is not a verified Kimi Work plugin installer. Package
 readiness cannot prove SessionStart, hook execution, Skills activation, a live
 session, or MCP connection.
+
+## T21 host verification pass (2026-09-30)
+
+A real Kimi Code CLI is installed on this machine: `/Users/Admin/.kimi-code/bin/kimi`
+(also on `PATH`), `kimi --version` → `0.27.0` (v0.26.0+ requirement met).
+Every item below records one of three outcomes — OBSERVED (with receipt),
+DOCUMENTED-UNTESTED (with the exact blocking reason), or FAILED-MISMATCH
+(observed behavior differs from the shipped claim; the adaptation is recorded,
+never silently invented). Live-session items are blocked by host auth: the
+stored OAuth credential is expired (`expires_at: 0`, refresh fails) and
+`kimi -p "..."` exits with
+`error: failed to run prompt: auth.login_required: OAuth provider "managed:kimi-code" requires login before it can be used.`
+Device-code re-login requires an interactive user browser action and was not
+performed. Scope for all OBSERVED items below is `probe` (bounded probes of
+the real host binary, host config, and past host session transcripts on this
+machine); no `current-session` claim is made, so **HOST READINESS: PENDING**
+stands.
+
+| # | Checklist item | Outcome | Evidence summary |
+|---|---|---|---|
+| 1 | CLI v0.26.0+, `/status`, `/mcp` six servers | OBSERVED (version/help) + DOCUMENTED-UNTESTED (session) | `kimi --version` → `0.27.0`; help exposes `-p/--prompt`, `--output-format stream-json`, `-m/--model`, `--plan`. `/status` and `/mcp` need an auth'd session (receipt above); the six-server surface keeps package-scope proof via `lazykimi-mcp-test.sh`. |
+| 2 | Plugin-manifest route (marketplace add, 16 hooks fire, inline mcpServers, sessionStart.skill) | DOCUMENTED-UNTESTED | `/plugins marketplace` is interactive+auth-gated. Package scope: `kimi.plugin.json` (16 inline hook events, inline `mcpServers`) validated by marketplace-route-check and load-check. |
+| 3 | TOML route: install critical-8, hooks fire, uninstall removes exactly those blocks | OBSERVED (structure + host validator + exact removal) + DOCUMENTED-UNTESTED (firing) | Driven in an isolated temp project. `lazykimi init` left `~/.kimi-code/config.toml` byte-untouched (`cmp` clean). `install-hooks.sh --project-root <tmp>` appended exactly 8 `[[hooks]]` blocks (absolute paths; `PreToolUse` carries `matcher = "Bash"`); real host `kimi doctor config` → `OK config.toml — All checked config files are valid` with the blocks present. Full `lazykimi uninstall --yes` from the temp project removed exactly those 8 blocks (0 references left; the 8 pre-existing v0.x blocks untouched). Residue: one trailing blank line at EOF (the remover's newline normalization); the file was restored byte-identically from a pre-test snapshot (sha256 match) and re-validated. Corroborating probe: the live host config already carried 8 v0.x-era `[[hooks]]` blocks with the same event/matcher/command/timeout schema. Hook *firing* still requires a session → documented-untested. |
+| 4 | Subagent channels coder/explore/plan; 13-agent mapping; `disallowed`/`effort` effects | DOCUMENTED-UNTESTED (mapping/effects) + corroborating probe | Real past sessions on this machine store per-agent transcripts (`agents/main` plus `agents/agent-0..N/`) and the host active-tools record includes an `Agent` tool, so the multi-agent machinery is real; the lazykimi 3-channel mapping and frontmatter effects were not observed live. |
+| 5 | PreToolUse tool names for the Write/Edit matcher | OBSERVED | Real session transcript (`~/.kimi-code/sessions/wd_lazykimi_1870ec855ce5/.../agents/main/wire.jsonl`, 2026-07-19): `tools.set_active_tools` + `llm.tools_snapshot` list exactly `Write` and `Edit` (with `Read`, `Bash`, `Grep`, `Glob`, `Agent`, `Skill`, …). The shipped T9 matcher (Write/Edit plus defensive Bash aliases) is confirmed — no mismatch. Corroborating: permission records use camelCase `toolName`, matching the shipped dual-key normalization. |
+| 6 | Kimi effort/model routing scale | FAILED-MISMATCH → ADAPTED | OBSERVED: live `~/.kimi-code/config.toml` `[models."kimi-code/k3"]` carries `support_efforts = ["low", "high", "max"]` and `default_effort = "high"`; `kimi provider list` → 1 provider, 3 model aliases; `default_model = "kimi-code/kimi-for-coding"`; `-m` flag selects aliases. MISMATCH: the shipped agents used a provisional 4-tier scale (`low|standard|high|xhigh`, flagged "pending host verification" in `validate-agent-frontmatter.js`) — `standard` (2 agents) and `xhigh` (4 agents) are outside the observed `kimi-k3` scale. Adaptation applied: `standard`→`high` (family middle intent; Kimi has no middle tier and defaults to `high`), `xhigh`→`max`; validator `EFFORTS`, the frontmatter policy test, and both `model-routing.md` copies (hardlinked) updated; all 13 agents now use `low` (3) / `high` (6) / `max` (4). Per-agent effort *application* in a live session remains documented-untested; the routing policy entry stays effort-free. |
+| 7 | Kimi Work: install 19 skills, restart, one skill observed | OBSERVED (installer mechanics) + DOCUMENTED-UNTESTED (activation) | Real target detected: `~/.kimi-work/skills` (pre-existing 17 v0.x `lazy-*` dirs). `install-kimi-work.sh` copied all 19 v1.3.3 skills (0 skipped — v0.x content differed; net-new dirnames `lazy-report-bug`, `lazy-review-work`, `lazy-ultrawork`) and printed the 6 manual MCP server commands with absolute paths. Test copy fully restored from snapshot (`diff -rq` clean, 17 dirs). Kimi Work restart/Skills-UI activation and manual MCP connectors are GUI-only → documented-untested; `/Applications/Kimi.app` identity as the Kimi Work beta host is unverified. |
+| 8 | Native modes interplay (`/swarm`, `/goal`, `/plan`) | OBSERVED (surface) + DOCUMENTED-UNTESTED (behavior) | `kimi --help` exposes `--plan` ("Start in plan mode"); the real active-tools record includes `EnterPlanMode`/`ExitPlanMode`, `AgentSwarm`, and `CreateGoal`/`GetGoal`/`SetGoalBudget`/`UpdateGoal` — the native mode surfaces exist. Live `/swarm`/`/goal`/`/plan` behavior and coexistence with `.lazykimi/` runs remain documented-untested; the package continues to claim no auto-wiring between native modes and `.lazykimi/` state. |
 
 ## Public capability status contract
 
