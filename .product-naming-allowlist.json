@@ -1758,6 +1758,13 @@
       "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
     },
     {
+      "path": "lazykimi-plugin/tests/v104-product-naming-regression.sh",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "verbatim-eval-quote",
+      "reason": "The naming-guard regression injects the sibling-product string as an adversarial fixture and asserts the guard names it."
+    },
+    {
       "path": "lazykimi-plugin/tests/v110-machine-status.test.js",
       "text": "claude_plugin_root",
       "count": 1,
