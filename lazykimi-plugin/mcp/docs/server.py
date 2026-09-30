@@ -1,100 +1,74 @@
 #!/usr/bin/env python3
-"""docs MCP server — SSRF-safe just-in-time library docs for lazykimi.
+"""docs MCP server — ZCode IDE-native context7 substitute.
 
-Resolves a library name to its registry metadata and README via fixed HTTPS
-registry fetches ONLY. Uses Python stdlib urllib.request (no curl, no
-third-party packages). SSRF protections:
+Fetches just-in-time library documentation from package registries (npm, pypi)
+via curl. This is a lightweight resolver: resolve a library name -> fetch its README/description.
+For free-form web search, the agent should use its native WebSearch/WebFetch
+tools — this server focuses on structured library-doc resolution (context7's
+core value-add).
 
-  * Only HTTPS URLs to registry.npmjs.org and pypi.org are permitted.
-  * URLs are built from validated package names (never taken raw from input).
-  * The final URL is re-checked against a strict regex whitelist before fetch.
-  * Redirects are NEVER followed (custom no-redirect opener).
-  * Only HTTP 200 responses are accepted; everything else is rejected.
-  * No metadata/search URLs, no arbitrary hosts, no redirect chains.
-
-Tools: lookup_docs.
+Single-shot JSON-RPC 2.0 over stdio.
+Tools: get_library_docs, list_supported_registries.
 """
-import json
-import os
-import re
-import sys
-from urllib.error import HTTPError, URLError
+import sys, json, os, subprocess, re
 from urllib.parse import quote
-from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 MCP_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if MCP_ROOT not in sys.path:
     sys.path.insert(0, MCP_ROOT)
 from jsonrpc import serve
 
-# Strict URL whitelist: only fixed registry package URLs over HTTPS.
-# npm:  https://registry.npmjs.org/<@scope/name|name>/latest
-# pypi: https://pypi.org/pypi/<name>/json
+CWD = os.environ.get("CWD", ".")
 _NPM_PACKAGE = re.compile(r"(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$")
 _PYPI_PACKAGE = re.compile(r"[a-z0-9]+(?:[-._][a-z0-9]+)*$", re.I)
-_NPM_URL_OK = re.compile(r"^https://registry\.npmjs\.org/(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*/latest$")
-_PYPI_URL_OK = re.compile(r"^https://pypi\.org/pypi/[a-z0-9]+(?:[-._][a-z0-9]+)*/json$", re.I)
-_USER_AGENT = "lazykimi-docs/1.0.0"
-
-
-class _NoRedirectHandler(HTTPRedirectHandler):
-    """Block all redirects — redirect_request returns None -> urllib raises."""
-
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
-
-
-_OPENER = build_opener(_NoRedirectHandler)
-
-
-def _invalid_package_name(library):
-    return (
-        not isinstance(library, str)
-        or not library
-        or any(ch.isspace() or ord(ch) < 32 or ord(ch) == 127 for ch in library)
-        or any(ch in library for ch in ("?", "#", "\\"))
-        or "://" in library
-    )
-
-
-def _npm_url(library):
-    if _invalid_package_name(library) or not _NPM_PACKAGE.fullmatch(library):
-        return None
-    return "https://registry.npmjs.org/" + quote(library, safe="@/") + "/latest"
-
-
-def _pypi_url(library):
-    if _invalid_package_name(library) or "/" in library or not _PYPI_PACKAGE.fullmatch(library):
-        return None
-    return "https://pypi.org/pypi/" + quote(library, safe="") + "/json"
-
-
-def _fetch_json(url, timeout=20):
-    """Fetch JSON from a whitelisted registry URL. Never follows redirects."""
-    if not (_NPM_URL_OK.match(url) or _PYPI_URL_OK.match(url)):
-        return None, "URL not on registry whitelist"
-    req = Request(url, headers={"User-Agent": _USER_AGENT, "Accept": "application/json"})
+_NPM_REGISTRY_URL = re.compile(r"https://registry\.npmjs\.org/(?:@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*/latest$")
+_PYPI_REGISTRY_URL = re.compile(r"https://pypi\.org/pypi/[a-z0-9]+(?:[-._][a-z0-9]+)*/json$", re.I)
+CURL = None
+for c in ["curl", "/usr/bin/curl"]:
     try:
-        with _OPENER.open(req, timeout=timeout) as resp:
-            if resp.status != 200:
-                return None, "non-200 response: %d" % resp.status
-            body = resp.read().decode("utf-8", errors="replace")
-    except HTTPError as e:
-        return None, "HTTP %d (redirects blocked, non-200 rejected)" % e.code
-    except (URLError, TimeoutError, OSError) as e:
-        return None, "fetch error: %s" % e
+        if subprocess.run([c, "--version"], capture_output=True, timeout=5).returncode == 0:
+            CURL = c
+            break
+    except Exception:
+        pass
+
+
+def fetch(url, timeout=20):
+    if not (_NPM_REGISTRY_URL.fullmatch(url) or _PYPI_REGISTRY_URL.fullmatch(url)):
+        return None, "only fixed package registry URLs are allowed"
+    if not CURL:
+        return None, "curl not available"
+    try:
+        r = subprocess.run([CURL, "-sS", "--proto", "=https", "--proto-redir", "=https", "--max-redirs", "0", "--max-time", str(timeout), "-A", "lazykimi-docs/1.3.3", url],
+                           capture_output=True, text=True, timeout=timeout + 5)
+        if r.returncode == 0 and r.stdout:
+            return r.stdout, None
+        return None, r.stderr or ("curl exit %d" % r.returncode)
+    except Exception as e:
+        return None, str(e)
+
+
+def fetch_json(url, timeout=20):
+    body, err = fetch(url, timeout)
+    if err:
+        return None, err
     try:
         return json.loads(body), None
-    except ValueError as e:
+    except Exception as e:
         return None, "not JSON: %s" % e
 
 
-def _section(readme, topic):
+def section(readme, topic):
+    """Try to extract the markdown section matching `topic` (## heading)."""
     if not readme or not topic:
         return None
     lines = readme.split("\n")
     pat = re.compile(r"^#+\s*" + re.escape(topic), re.I)
-    start = next((i for i, l in enumerate(lines) if pat.match(l)), None)
+    start = None
+    for i, l in enumerate(lines):
+        if pat.match(l):
+            start = i
+            break
     if start is None:
         return None
     out = [lines[start]]
@@ -105,45 +79,100 @@ def _section(readme, topic):
     return "\n".join(out).strip()
 
 
-def _npm_docs(library, topic):
-    url = _npm_url(library)
+def invalid_package_name(library):
+    return (
+        not isinstance(library, str)
+        or not library
+        or any(char.isspace() or ord(char) < 32 or ord(char) == 127 for char in library)
+        or any(char in library for char in ("?", "#", "\\"))
+        or "://" in library
+    )
+
+
+def npm_package_url(library):
+    if invalid_package_name(library) or not _NPM_PACKAGE.fullmatch(library):
+        return None
+    return "https://registry.npmjs.org/" + quote(library, safe="@/") + "/latest"
+
+
+def pypi_package_url(library):
+    if invalid_package_name(library) or "/" in library or not _PYPI_PACKAGE.fullmatch(library):
+        return None
+    return "https://pypi.org/pypi/" + quote(library, safe="") + "/json"
+
+
+def get_npm_docs(library, topic):
+    url = npm_package_url(library)
     if not url:
         return None, "npm: invalid package name"
-    data, err = _fetch_json(url)
+    data, err = fetch_json(url)
     if err:
         return None, "npm: " + err
     readme = data.get("readme") or ""
-    repo = data.get("repository", {})
-    if isinstance(repo, dict):
-        repo = repo.get("url", "")
+    homepage = data.get("homepage") or ""
+    desc = data.get("description") or ""
+    repo = ""
+    if isinstance(data.get("repository"), dict):
+        repo = data["repository"].get("url", "")
     if topic:
-        sec = _section(readme, topic)
+        sec = section(readme, topic)
         if sec:
             readme = sec
-    return {"registry": "npm", "library": library, "version": data.get("version", ""),
-            "description": data.get("description", ""), "homepage": data.get("homepage", ""),
-            "repository": repo, "docs": (readme or "").strip()[:12000] or "(no readme available)"}, None
+    readme = (readme or "").strip()[:12000]
+    return {
+        "registry": "npm",
+        "library": library,
+        "version": data.get("version", ""),
+        "description": desc,
+        "homepage": homepage,
+        "repository": repo,
+        "docs": readme or "(no readme available)",
+    }, None
 
 
-def _pypi_docs(library, topic):
-    url = _pypi_url(library)
+def get_pypi_docs(library, topic):
+    url = pypi_package_url(library)
     if not url:
         return None, "pypi: invalid package name"
-    data, err = _fetch_json(url)
+    data, err = fetch_json(url)
     if err:
         return None, "pypi: " + err
     info = data.get("info", {})
+    desc = info.get("summary") or info.get("description") or ""
+    homepage = info.get("home_page") or ""
     project_urls = info.get("project_urls") or {}
+    repo = project_urls.get("Source") or project_urls.get("Repository") or ""
+    docs_url = project_urls.get("Documentation") or project_urls.get("Homepage") or homepage
     readme = info.get("description") or ""
     if topic and readme:
-        sec = _section(readme, topic)
+        sec = section(readme, topic)
         if sec:
             readme = sec
-    return {"registry": "pypi", "library": library, "version": info.get("version", ""),
-            "description": info.get("summary", ""), "homepage": info.get("home_page", ""),
-            "repository": project_urls.get("Source") or project_urls.get("Repository") or "",
-            "docs_url": project_urls.get("Documentation") or project_urls.get("Homepage") or "",
-            "docs": (readme or info.get("summary", "")).strip()[:12000] or "(fetch homepage for full docs)"}, None
+    readme = (readme or desc or "").strip()[:12000]
+    return {
+        "registry": "pypi",
+        "library": library,
+        "version": info.get("version", ""),
+        "description": info.get("summary", ""),
+        "homepage": homepage,
+        "repository": repo,
+        "docs_url": docs_url,
+        "docs": readme or "(fetch the homepage/docs_url for full docs)",
+    }, None
+
+
+def _is_html(s):
+    s = (s or "").lstrip().lower()
+    return s.startswith("<!doctype") or s.startswith("<html") or s.startswith("<?xml")
+
+
+def _better(a, b):
+    """True if result a is more useful than b: prefer non-HTML and longer docs."""
+    da, db = a.get("docs", ""), b.get("docs", "")
+    a_html, b_html = _is_html(da), _is_html(db)
+    if a_html != b_html:
+        return not a_html  # prefer the non-HTML one
+    return len(da) > len(db)
 
 
 def handle(req, notification):
@@ -155,76 +184,79 @@ def handle(req, notification):
         if not notification:
             print(json.dumps({"jsonrpc": "2.0", "id": rid, "result": j}), flush=True)
 
-    def err(m, code=-32603):
+    def err(m):
         if not notification:
-            print(json.dumps({"jsonrpc": "2.0", "id": rid, "error": {"code": code, "message": m}}), flush=True)
+            print(json.dumps({"jsonrpc": "2.0", "id": rid, "error": {"code": -32603, "message": m}}), flush=True)
 
     def tool_result(text):
         reply({"content": [{"type": "text", "text": text}]})
 
     if method == "initialize":
-        reply({"protocolVersion": "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "lazykimi-docs", "version": "1.0.0"}})
-        return
-    if method == "tools/list":
-        reply({"tools": [
-            {"name": "lookup_docs", "description": "Fetch just-in-time docs for a library from npm and/or pypi registries. SSRF-safe: only fixed HTTPS registry URLs, no redirects, 200-only. Optional topic extracts a markdown section.", "inputSchema": {"type": "object", "properties": {"library": {"type": "string", "description": "package name (e.g. 'fastapi', 'zod', 'react')"}, "topic": {"type": "string", "description": "optional: extract the markdown section with this heading"}, "registry": {"type": "string", "enum": ["npm", "pypi", "auto"], "default": "auto"}}, "required": ["library"]}},
-        ]})
-        return
-    if method != "tools/call":
-        err("unsupported method: " + method)
+        reply({"protocolVersion": "2024-11-05", "capabilities": {"tools": {}}, "serverInfo": {"name": "docs", "version": "1.3.3"}})
         return
 
-    tool = params.get("name", "")
-    args = params.get("arguments", {})
-    try:
-        if tool == "lookup_docs":
-            library = args.get("library", "")
-            if not isinstance(library, str) or not library:
-                err("invalid or missing library")
-                return
-            topic = args.get("topic", "") or ""
-            registry = args.get("registry", "auto")
-            if registry not in ("npm", "pypi", "auto"):
-                err("registry must be npm|pypi|auto")
-                return
-            result, errors = None, []
-            if registry in ("auto", "npm"):
-                r, e = _npm_docs(library, topic)
-                if r:
-                    result = r
-                else:
-                    errors.append(e)
-            if registry == "auto":
-                r2, e2 = _pypi_docs(library, topic)
-                if r2:
-                    if result is None or len(r2.get("docs", "")) > len(result.get("docs", "")):
-                        result = r2
-                else:
-                    errors.append(e2)
-            elif registry == "pypi":
-                r, e = _pypi_docs(library, topic)
-                if r:
-                    result = r
-                else:
-                    errors.append(e)
-            if result is None:
-                err("could not fetch docs for '%s': %s" % (library, "; ".join(errors)))
-                return
-            out = "## %s (%s registry, v%s)\n" % (library, result["registry"], result.get("version", "?"))
-            if result.get("description"):
-                out += result["description"] + "\n\n"
-            if result.get("homepage") or result.get("docs_url"):
-                out += "homepage: " + (result.get("homepage") or result.get("docs_url")) + "\n"
-            if result.get("repository"):
-                out += "repo: " + result["repository"] + "\n"
-            if topic:
-                out += "(section: %s)\n" % topic
-            out += "\n--- docs ---\n" + result.get("docs", "")
-            tool_result(out)
-        else:
-            err("unknown tool: " + tool)
-    except Exception as e:
-        err("tool error: " + str(e))
+    if method == "tools/list":
+        reply({"tools": [
+            {"name": "get_library_docs", "description": "Fetch just-in-time docs for a library. Resolves the library name via npm and pypi registries and returns its README/description (and homepage/repo). Optional topic extracts the matching markdown section. Use before coding against an unfamiliar library API.", "inputSchema": {"type": "object", "properties": {"library": {"type": "string", "description": "library/package name (e.g. 'fastapi', 'zod', 'react')"}, "topic": {"type": "string", "description": "optional: extract the markdown section with this heading (e.g. 'Installation', 'Usage')"}, "registry": {"type": "string", "enum": ["npm", "pypi", "auto"], "default": "auto"}}, "required": ["library"]}},
+            {"name": "list_supported_registries", "description": "List the package registries this docs server can resolve from.", "inputSchema": {"type": "object", "properties": {}}},
+        ]})
+        return
+
+    if method == "tools/call":
+        tool = params.get("name", "")
+        args = params.get("arguments", {})
+        try:
+            if tool == "get_library_docs":
+                library = args["library"]
+                topic = args.get("topic", "")
+                registry = args.get("registry", "auto")
+                result = None
+                errors = []
+                if registry in ("auto", "npm"):
+                    r, e = get_npm_docs(library, topic)
+                    if r:
+                        result = r
+                    else:
+                        errors.append(e)
+                if registry == "auto":
+                    # also try pypi; prefer the more-substantial non-HTML readme
+                    r2, e2 = get_pypi_docs(library, topic)
+                    if r2:
+                        if result is None or _better(r2, result):
+                            result = r2
+                    elif registry == "auto":
+                        errors.append(e2)
+                elif registry == "pypi":
+                    r, e = get_pypi_docs(library, topic)
+                    if r:
+                        result = r
+                    else:
+                        errors.append(e)
+                if result is None:
+                    err("could not fetch docs for '%s': %s" % (library, "; ".join(errors)))
+                    return
+                out = "## %s (%s registry, v%s)\n" % (library, result["registry"], result.get("version", "?"))
+                if result.get("description"):
+                    out += result["description"] + "\n\n"
+                if result.get("homepage") or result.get("docs_url"):
+                    out += "homepage: " + (result.get("homepage") or result.get("docs_url")) + "\n"
+                if result.get("repository"):
+                    out += "repo: " + result["repository"] + "\n"
+                if topic:
+                    out += "(section: %s)\n" % topic
+                out += "\n--- docs ---\n" + result.get("docs", "")
+                tool_result(out)
+
+            elif tool == "list_supported_registries":
+                tool_result("Supported registries:\n  - npm (registry.npmjs.org) — JS/TS packages\n  - pypi (pypi.org) — Python packages\n\nFor other ecosystems (Go, Rust, etc.) or free-form web search, use the agent's native WebFetch/WebSearch tools.")
+
+            else:
+                err("unknown tool: " + tool)
+        except Exception as e:
+            err("tool error: " + str(e))
+        return
+
+    err("unsupported method: " + method)
 
 
 def main():

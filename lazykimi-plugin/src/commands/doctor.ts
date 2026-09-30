@@ -3,12 +3,13 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { readJson, isObject } from '../lib/json';
 import { isPluginSourceRoot } from '../lib/paths';
-import { validateMcpServers, REQUIRED_MCP_SERVERS } from '../lib/mcp-validation';
+import { validateMcpServers, REQUIRED_MCP_SERVERS, EXPECTED_MCP_TOOLS } from '../lib/mcp-validation';
 
 const PLUGIN_VERSION = '1.3.3';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
+const EXPECTED_MCP_TOOL_COUNT = EXPECTED_MCP_TOOLS;
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'WARN';
 
@@ -147,7 +148,7 @@ export function runDoctor(target: string): DoctorResult {
     mcpDetailParts.push(`unknown ${mcpValidation.unknown.join(', ')}`);
   }
   checks.push({
-    label: `mcp.json valid (${REQUIRED_MCP_SERVERS.length} required servers)`,
+    label: `mcp.json valid (${REQUIRED_MCP_SERVERS.length} required servers, ${EXPECTED_MCP_TOOL_COUNT} tools)`,
     status: mcpValidation.valid ? 'PASS' : 'FAIL',
     detail: mcpDetailParts.join('; '),
   });

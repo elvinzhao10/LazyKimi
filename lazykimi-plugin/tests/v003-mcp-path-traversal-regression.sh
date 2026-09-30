@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# LazyKimi v0.3 MCP path traversal regression test.
-# Verifies resolve_repo_path() and safeProjectPath() reject escapes.
+# LazyKimi v1.3.3 MCP path traversal regression test.
+# Verifies resolve_repo_path() rejects escapes (family v1.3.3 API surface —
+# path_boundary.py is the LazyZCode v1.3.3 implementation; the v0.x
+# safeProjectPath alias was dropped upstream in favor of the raising API).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -33,14 +35,11 @@ def expect_rejected(raw):
         raise AssertionError(f"resolve_repo_path should reject {raw!r}")
     except mod.PathBoundaryError:
         pass
-    assert mod.safeProjectPath(root, raw) is None, f"safeProjectPath should reject {raw!r}"
 
 def expect_accepted(raw, expected_suffix):
     resolved = mod.resolve_repo_path(root, raw)
-    safe = mod.safeProjectPath(root, raw)
     expected = os.path.realpath(os.path.join(root, expected_suffix))
     assert resolved == expected, f"resolve_repo_path({raw!r}) = {resolved!r}, expected {expected!r}"
-    assert safe == expected, f"safeProjectPath({raw!r}) = {safe!r}, expected {expected!r}"
 
 # Absolute path is rejected.
 expect_rejected("/etc/passwd")
@@ -65,6 +64,13 @@ expect_accepted("foo/bar", "foo/bar")
 
 # Any literal ".." path component is rejected, even if it resolves inside.
 expect_rejected("subdir/../subdir")
+
+# The CLI boundary rejects escapes with exit 1 and accepts safe paths with 0.
+import subprocess
+ok = subprocess.run([sys.executable, path, root, "subdir"], capture_output=True, text=True)
+assert ok.returncode == 0 and ok.stdout.strip() == os.path.realpath(os.path.join(root, "subdir")), ok
+bad = subprocess.run([sys.executable, path, root, "../escape"], capture_output=True, text=True)
+assert bad.returncode == 1 and "outside project root" in bad.stderr, bad
 
 print("PASS: v003 mcp path traversal regression")
 PYEOF

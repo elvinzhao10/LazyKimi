@@ -1,0 +1,9 @@
+{
+  "name": "@lazyseries/lazykimi-tooling",
+  "version": "1.3.3",
+  "private": true,
+  "description": "LazyKimi package-owned adaptive tooling layer (node dependencies land with the T13 tooling port; the MCP status-dashboard reads the package version from this manifest).",
+  "engines": {
+    "node": ">=20"
+  }
+}

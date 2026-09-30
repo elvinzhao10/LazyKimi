@@ -2,6 +2,7 @@ import { existsSync } from 'fs';
 import path from 'path';
 import { getPluginKimiCodeDir } from '../lib/paths';
 import { readJson, isObject } from '../lib/json';
+import { MCP_TOOL_SURFACE, EXPECTED_MCP_TOOLS } from '../lib/mcp-validation';
 
 export function run(args: string[]): number {
   const asJson = args.includes('--json');
@@ -48,16 +49,20 @@ Options:
 
   console.log('LazyKimi MCP Server Declarations');
   console.log('==================================\n');
-  console.log(`Found ${serverNames.length} servers:\n`);
+  console.log(`Found ${serverNames.length} servers (${EXPECTED_MCP_TOOLS} tools total):\n`);
   for (const name of serverNames) {
     const server = servers[name];
     if (isObject(server)) {
       const cmd = typeof server.command === 'string' ? server.command : '?';
       const argsVal = Array.isArray(server.args) ? (server.args as string[]).join(' ') : '';
       const required = server.required === false ? 'false' : 'true';
+      const tools = MCP_TOOL_SURFACE[name];
       console.log(`  ${name}`);
       console.log(`    command:  ${cmd} ${argsVal}`.trimEnd());
       console.log(`    required: ${required}`);
+      if (tools) {
+        console.log(`    tools:    ${tools.length} (${tools.join(', ')})`);
+      }
       console.log('');
     }
   }

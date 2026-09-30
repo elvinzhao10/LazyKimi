@@ -60,10 +60,12 @@ const countFiles = (relative, filter) => fs.readdirSync(path.join(pluginRoot, re
 contract.payload.counts.commands = countFiles('commands', (n) => n.endsWith('.md'));
 contract.payload.counts.agents = countFiles('agents', (n) => n.endsWith('.md'));
 contract.payload.counts.hook_events = countFiles('hooks', (n) => n.endsWith('.sh'));
-contract.payload.counts.mcp_servers = fs.readdirSync(path.join(pluginRoot, 'mcp'), { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
-  .filter((entry) => ['server.sh', 'server.py'].some((server) => fs.existsSync(path.join(pluginRoot, 'mcp', entry.name, server))))
-  .length;
+// Declared MCP servers come from the canonical manifest declaration. mcp/ may
+// also ship optional env-gated wrappers (codegraph) that are NOT declared
+// servers and stay out of both registration surfaces — counting directories
+// would over-report them, so count kimi.plugin.json mcpServers instead.
+const manifest = JSON.parse(fs.readFileSync(path.join(pluginRoot, 'kimi.plugin.json'), 'utf8'));
+contract.payload.counts.mcp_servers = Object.keys(manifest.mcpServers || {}).length;
 
 const serialized = `${JSON.stringify(contract, null, 2)}\n`;
 fs.writeFileSync(contractPath, serialized);
