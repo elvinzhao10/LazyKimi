@@ -1,0 +1,120 @@
+{
+  "$schema": "lazy-harness-lifecycle.v1.schema.json",
+  "schema_version": 1,
+  "receipt_id": "lazykimi-1-3-3-a1b2c3d4e5f6",
+  "product": "LazyKimi",
+  "origin": "https://github.com/elvinzhao10/LazyKimi.git",
+  "commit_sha": "a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e",
+  "manifest": {
+    "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/package.json",
+    "version": "1.3.3",
+    "sha256": "df8800e4abda15e20b2e7c4adedcf8e03a1a15051af37681668a2198e1998060",
+    "digests": [
+      {
+        "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/package.json",
+        "sha256": "df8800e4abda15e20b2e7c4adedcf8e03a1a15051af37681668a2198e1998060"
+      },
+      {
+        "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/contracts/lazy-harness-lifecycle.v1.schema.json",
+        "sha256": "ac2bc861874dd9e50806cae407cddfe01996f6f47f4cd211c85d5ed85d79c082"
+      }
+    ]
+  },
+  "layout": {
+    "install_root": "/home/example/.local/share/lazyseries",
+    "product_root": "/home/example/.local/share/lazyseries/LazyKimi",
+    "releases": "releases/",
+    "active": "active.json",
+    "launcher": "launcher.js",
+    "receipts": "receipts/",
+    "staging": "staging/",
+    "locks": "locks/",
+    "rollback": "rollback/"
+  },
+  "release": {
+    "id": "1.3.3-a1b2c3d4e5f6",
+    "path": "releases/1.3.3-a1b2c3d4e5f6"
+  },
+  "runtime": {
+    "path": "/usr/local/bin/node",
+    "fingerprint": {
+      "realpath": "/usr/local/bin/node",
+      "version": "v24.14.0",
+      "sha256": "9e831e9b13aa47c5e5eaa3904d232aa527124e8abba7ca5d72b67b46cfb10ae8"
+    },
+    "ownership": "external-prerequisite"
+  },
+  "ownership_policy": {
+    "scope": "product-root-only",
+    "owned_path_base": "product_root",
+    "cross_product_ownership": "forbidden",
+    "host_or_global_ownership": "forbidden",
+    "symlink_ownership": "forbidden"
+  },
+  "created_files": [
+    {
+      "path": "releases",
+      "type": "directory",
+      "mode": "0755",
+      "sha256": null
+    },
+    {
+      "path": "releases/1.3.3-a1b2c3d4e5f6",
+      "type": "directory",
+      "mode": "0755",
+      "sha256": null
+    },
+    {
+      "path": "active.json",
+      "type": "file",
+      "mode": "0644",
+      "sha256": "4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    {
+      "path": "launcher.js",
+      "type": "file",
+      "mode": "0755",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    {
+      "path": "receipts",
+      "type": "directory",
+      "mode": "0700",
+      "sha256": null
+    },
+    {
+      "path": "staging",
+      "type": "directory",
+      "mode": "0700",
+      "sha256": null
+    },
+    {
+      "path": "locks",
+      "type": "directory",
+      "mode": "0700",
+      "sha256": null
+    },
+    {
+      "path": "rollback",
+      "type": "directory",
+      "mode": "0700",
+      "sha256": null
+    }
+  ],
+  "registered_project_declarations": [
+    {
+      "project_root": "/home/example/project",
+      "path": ".kimi-code/mcp.json",
+      "mode": "0644",
+      "managed_entry_sha256": "6666666666666666666666666666666666666666666666666666666666666666",
+      "ownership_scope": "managed-entry-only"
+    }
+  ],
+  "receipt_path": "receipts/lazykimi-1-3-3-a1b2c3d4e5f6.json",
+  "active_release": "1.3.3-a1b2c3d4e5f6",
+  "previous_release": null,
+  "host_evidence": {
+    "status": "pending",
+    "observation_receipt": null
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "contract_version": "1.0.0",
+  "boundary": {
+    "required_common_fields": ["cwd", "hook_event_name"],
+    "dual_key_parsing": ["tool_name|toolName", "tool_input|toolInput"],
+    "omitted_common_fields": ["transcript_path"],
+    "max_payload_bytes": 1048576,
+    "timeout_seconds": 5,
+    "exit_codes": { "accepted": 0, "rejected": 2, "internal_error": 70 },
+    "fail_open_on_internal_errors": true,
+    "stdout_contract": "strict JSON {\"additionalContext\": ...} or nothing; diagnostics to stderr",
+    "active_statuses": ["active", "paused", "created", "planning", "executing", "blocked", "verifying", "reviewing"],
+    "registration_routes": {
+      "kimi-plugin-manifest": "all 16 events inline in kimi.plugin.json",
+      "project-init-route": "8 critical events via scripts/install-hooks.sh [[hooks]] TOML; the 8 advisory events below activate only through the plugin manifest"
+    }
+  },
+  "events": {
+    "SessionStart": { "consumer": "hooks/session-start.sh", "critical": true, "role": "session-bootstrap", "mode": "concrete", "completion_authority": false, "invalidates": [], "readiness": "SESSIONSTART_READINESS=full|degraded" },
+    "UserPromptSubmit": { "consumer": "hooks/user-prompt-submit.sh", "critical": true, "role": "adaptive-intake", "mode": "concrete", "completion_authority": false, "invalidates": [] },
+    "PreToolUse": { "consumer": "hooks/pre-tool-use.sh", "critical": true, "role": "tool-permission-policy", "mode": "concrete", "completion_authority": false, "invalidates": [], "matcher": "Bash", "required_fields": ["tool_name|toolName", "tool_input.command|toolInput.command"] },
+    "PostToolUse": { "consumer": "hooks/post-tool-use.sh", "critical": true, "role": "run-event-ledger", "mode": "concrete", "completion_authority": false, "invalidates": [] },
+    "PostToolUseFailure": { "consumer": "hooks/post-tool-use-failure.sh", "critical": true, "role": "failure-recovery", "mode": "concrete", "completion_authority": false, "invalidates": [] },
+    "Stop": { "consumer": "hooks/stop-gate.sh", "critical": true, "role": "completion-gate", "mode": "concrete", "completion_authority": true, "invalidates": [] },
+    "PermissionRequest": { "consumer": "hooks/permission-request.sh", "critical": true, "role": "permission-audit", "mode": "advisory", "completion_authority": false, "invalidates": [], "required_fields": ["request_id|tool_name"] },
+    "PermissionResult": { "consumer": "hooks/permission-result.sh", "critical": true, "role": "permission-audit-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [], "required_fields": ["request_id"] },
+    "SubagentStop": { "consumer": "hooks/subagent-stop.sh", "critical": false, "role": "executor-evidence-gate", "mode": "advisory", "completion_authority": false, "invalidates": [], "notes": "additive reminder only; the authoritative executor-evidence gate lives in the review skills" },
+    "SubagentStart": { "consumer": "hooks/subagent-start.sh", "critical": false, "role": "dispatch-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "PreCompact": { "consumer": "hooks/pre-compact.sh", "critical": false, "role": "context-recovery-checkpoint", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "PostCompact": { "consumer": "hooks/post-compact.sh", "critical": false, "role": "context-recovery-restore", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "SessionEnd": { "consumer": "hooks/session-end.sh", "critical": false, "role": "ledger-close", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "StopFailure": { "consumer": "hooks/stop-failure.sh", "critical": false, "role": "stop-failure-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "Interrupt": { "consumer": "hooks/interrupt.sh", "critical": false, "role": "interrupt-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "Notification": { "consumer": "hooks/notification.sh", "critical": false, "role": "notification-logger", "mode": "advisory", "completion_authority": false, "invalidates": [] }
+  }
+}
