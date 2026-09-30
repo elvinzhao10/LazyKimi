@@ -79,7 +79,7 @@ for run_dir in sorted(glob.glob(os.path.join(runs_dir, '*/'))):
             'status': 'failure',
             'error': error_msg,
             'suggestion': suggestion,
-            'timestamp': datetime.datetime.utcnow().isoformat() + 'Z',
+            'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z'),
         }
         try:
             with open(os.path.join(run_dir, 'events.jsonl'), 'a', encoding='utf-8') as event_handle:

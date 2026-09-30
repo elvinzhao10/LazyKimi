@@ -148,6 +148,7 @@ SERVER_NAMES: Final = (
     "docs",
 )
 DEFERRED_SERVERS: Final = frozenset(("context-graph", "code-intel", "docs"))
+SERVER_KEYS: Final = tuple(f"lazykimi-{name}" for name in SERVER_NAMES)
 MODE_SERVERS: Final[dict[str, tuple[str, ...]]] = {
     "direct": SERVER_NAMES[:3],
     "assisted": SERVER_NAMES[:5],
@@ -198,9 +199,11 @@ def load_declarations(plugin_root: Path) -> dict[str, dict[str, str | bool | lis
         raise ProfileError(f"MCP declaration is unavailable: {error}") from None
     if not isinstance(document, dict) or set(document) != {"mcpServers"}:
         raise ProfileError("MCP declaration must contain only mcpServers")
-    if not isinstance(servers, dict) or tuple(servers) != SERVER_NAMES:
+    # Kimi hosts namespace the declared servers (lazykimi-*), while the
+    # profile table and launcher directories keep the bare family names.
+    if not isinstance(servers, dict) or tuple(servers) != SERVER_KEYS:
         raise ProfileError("MCP declaration must contain the canonical six-server inventory")
-    return servers
+    return {name[len("lazykimi-"):]: server for name, server in servers.items()}
 
 
 def render_profile(

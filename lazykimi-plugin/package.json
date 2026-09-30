@@ -8,12 +8,12 @@
     "lazykimi": "dist/index.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc",
-    "test": "bash scripts/lazykimi-verify.sh",
-    "smoke": "bash scripts/lazykimi-smoke.sh"
+    "test": "LAZYKIMI_VERIFY_SUITE=all bash scripts/lazykimi-verify.sh",
+    "smoke": "bash scripts/lazykimi-smoke-test.sh"
   },
   "keywords": [
     "kimi",

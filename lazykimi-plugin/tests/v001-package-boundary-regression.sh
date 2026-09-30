@@ -28,13 +28,19 @@ done
 [ ! -e "$REPO_ROOT/.lazytrae" ] || fail "root .lazytrae/ must not exist"
 [ -d "$PLUGIN_ROOT/.lazykimi/schemas" ] || fail "shipped .lazykimi/schemas/ missing"
 
-# 3. No git-tracked symlink inside the plugin escapes the plugin root.
+# 3. No git-tracked symlink inside the plugin escapes the plugin root. The
+#    scripts/hooks -> ../hooks bridge serves the byte-identical family harness
+#    tests (v122 semantic parity addresses hook drivers at scripts/hooks); it
+#    resolves INSIDE the plugin root, so containment is decided on the resolved
+#    target, not on a lexical ../ prefix.
 cd "$REPO_ROOT"
 while IFS= read -r f; do
   if [ -L "$f" ]; then
-    target="$(readlink "$f")"
-    case "$target" in
-      /*|../*) fail "tracked symlink escapes plugin: $f -> $target" ;;
+    resolved="$(cd "$(dirname "$f")" && cd "$(readlink "$f")" 2>/dev/null && pwd -P)" || \
+      resolved=""
+    case "$resolved" in
+      "$PLUGIN_ROOT"|"$PLUGIN_ROOT"/*) ;;
+      *) fail "tracked symlink escapes plugin: $f -> $(readlink "$f")" ;;
     esac
   fi
 done < <(git ls-files lazykimi-plugin/)

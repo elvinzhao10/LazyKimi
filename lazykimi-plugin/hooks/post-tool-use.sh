@@ -62,7 +62,7 @@ for run_dir in sorted(glob.glob(os.path.join(runs_dir, '*/'))):
 if active_run is None:
     raise SystemExit(0)
 
-event = {'tool': tool_name, 'timestamp': datetime.datetime.utcnow().isoformat() + 'Z'}
+event = {'tool': tool_name, 'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z')}
 tool_input = payload.get('tool_input', payload.get('toolInput'))
 if not isinstance(tool_input, dict):
     tool_input = {}

@@ -221,5 +221,10 @@ Options:
     console.log(`  [${c.status}] ${label} ${c.detail ?? ''}`);
   }
   console.log(`\n=== Results: ${result.pass} PASS, ${result.warn} WARN, ${result.fail} FAIL ===`);
+  // v1.3.3 honest host-readiness contract: without a lifecycle observation
+  // receipt (bound to an active source/version/build/session with one loaded
+  // skill, command, agent, hook, and all six MCP connections), the host is
+  // PENDING — package checks never prove a live host session.
+  console.log('HOST_READINESS=pending (no host observation receipt; host claims stay documented-untested)');
   return result.fail > 0 ? 1 : 0;
 }
