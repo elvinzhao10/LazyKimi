@@ -48,14 +48,15 @@ append_policy_violation() {
 
 check_active_documentation_policy() {
     # Active payload surfaces must not carry retired product vocabulary or
-    # stale internal references; NOTICE/README attribution lines stay allowed.
-    # The plugin README is regenerated wholesale by the docs task; its content
-    # policy is owned there and by the naming gate, not by this check.
+    # stale internal references; NOTICE attribution lines stay allowed. Since
+    # the v1.3.3 docs regeneration the plugin README is held to the same
+    # policy (it previously carried the retired Greek-agent inventory).
     local active_paths=(
         "${PLUGIN_ROOT}/.kimi-code/skills"
         "${PLUGIN_ROOT}/agents"
         "${PLUGIN_ROOT}/commands"
         "${PLUGIN_ROOT}/templates"
+        "${PLUGIN_ROOT}/README.md"
     )
     local forbidden_patterns=(
         '\\.omo(/|[^[:alnum:]_])'

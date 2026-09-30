@@ -13,8 +13,10 @@ Do not paste tokens, credentials, API keys, or private workspace paths.
 
 ## Development setup
 
-LazyKimi requires Node.js 18 or later and Python 3 for the MCP servers. The
-package builds with the TypeScript compiler; no bundler is used.
+LazyKimi requires Node.js 20 or later and Python 3.10+ (resolved
+automatically by `scripts/lazykimi-python-resolver.sh`) for the MCP servers
+and pytest suite. The package builds with the TypeScript compiler; no
+bundler is used.
 
 ```bash
 git clone https://github.com/elvinzhao10/LazyKimi.git
@@ -28,7 +30,10 @@ Run it directly with `node dist/index.js <command>` during development.
 
 ## Test commands
 
-Run these checks from the `lazykimi-plugin/` directory before requesting
+The family test stack lives under `lazykimi-plugin/`: `tests/*.test.js`
+(node:test), `tests/test_lazykimi_*.py` + `tooling/test_lazykimi_*.py`
+(pytest), and `tests/v*.sh` + `tests/publication-regression.sh` (bash
+regressions). Run these checks from `lazykimi-plugin/` before requesting
 review:
 
 ```bash
@@ -41,13 +46,41 @@ node dist/index.js load-check
 # Package health diagnostics.
 node dist/index.js doctor
 
-# Aggregate verification gate (doctor + load-check + MCP + hooks).
-bash scripts/lazykimi-verify.sh
+# Node test suite (32 files).
+node --test tests/*.test.js
+
+# Pytest suite (26 files; uses the resolved python3.10+ interpreter).
+python3 -m pytest tests/ tooling/ -q
+
+# Aggregate verification gate, suite selector core | lifecycle | all.
+LAZYKIMI_VERIFY_SUITE=all bash scripts/lazykimi-verify.sh
 ```
 
-The CI workflow at `.github/workflows/ci.yml` runs `npm run build` and
-`bash scripts/lazykimi-verify.sh` on every pull request to `main` on
-macOS-latest with Node 22.
+The pytest interpreter is resolved from `LAZYKIMI_PYTHON` or the newest
+available python3.10+ on PATH; the system `python3` may be older, in which
+case the resolver falls back to an explicit `python3.13`/`3.12`/`3.11`/`3.10`.
+
+The CI workflow at `.github/workflows/ci.yml` runs the supported-floor check
+plus `npm run build` and `LAZYKIMI_VERIFY_SUITE=core bash
+scripts/lazykimi-verify.sh` on every pull request to `main` on macOS with
+Node 22 / Python 3.13.
+
+## Contract parity rules
+
+`lazykimi-plugin/contracts/` carries family-shared byte-identical contracts
+copied verbatim from LazyZCode v1.3.3. They are untouchable except via a
+family-wide decision:
+
+- Copy with `cp`, never retype; verify with `cmp`
+  (`tests/v103-automatic-tooling-contract-parity.sh` gates this).
+- The only lazykimi-modified contracts are `model-routing-policy.v1.json`
+  (the `kimi` host entry), `model-routing.js`, and the per-host set
+  (`kimi-*` files, lifecycle schemas with kimi enums, per-host fixtures).
+- If a family contract needs a change, record a deviation note in the
+  CHANGELOG instead of editing the shared file.
+- Regenerate the marketplace route contract after ANY edit under `skills/`,
+  `commands/`, `agents/`, `hooks/`, `mcp/`, or `kimi.plugin.json`:
+  `node scripts/lazykimi-regenerate-marketplace-contract.js`.
 
 ## Pull requests
 

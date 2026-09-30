@@ -18,7 +18,7 @@ host observations separate from package evidence.
 | You need structural code search | `lazy-ast-grep` | AST-pattern search and rewrite. |
 | You need to adapt LazyKimi to a foreign host | `lazy-migration-planner` | Migration plan; no product code. |
 | You need to reconstruct a prior session | `lazy-coding-agent-sessions` | Session history and transcript reconstruction. |
-| You need to report a LazyKimi bug | `lazy-lcx-report-bug` | Structured bug report. |
+| You need to report a LazyKimi bug | `lazy-report-bug` | Structured bug report. |
 
 Kimi Code CLI exposes skills via `/skill:lazy-<name>` or `/<name>` shorthand
 after the host has loaded `.kimi-code/`. In Kimi Work, use a verified Skills
@@ -46,24 +46,31 @@ quietly becoming unreviewed implementation.
 
 | Mode | When to invoke | Owner | Output |
 | --- | --- | --- | --- |
-| `/swarm <task>` | Explore phase (parallel Explorer + Librarian + Atlas); parallel independent task implementation; parallel review (Oracle + Momus) | Sisyphus dispatches | Heartbeat markers and deliverables under `.lazykimi/team/members/<id>/` |
-| `/goal <objective>` | Implement phase when the work is a single large objective rather than a checklist | Sisyphus oversees | Full Explore -> Plan -> Implement -> Verify -> QA loop; Atlas reconstructs on resumption |
-| `/plan on` / `/plan off` | Plan phase; turn off before Implement | Sisyphus toggles | Read-only + plan-file writes while Prometheus and Metis work |
+| `/swarm <task>` | Explore phase (parallel explorer + librarian + context-miner); parallel independent task implementation; parallel review lanes | Orchestrator dispatches | Heartbeat markers and deliverables under `.lazykimi/team/members/<id>/` |
+| `/goal <objective>` | Implement phase when the work is a single large objective rather than a checklist | Orchestrator oversees | Full Explore -> Plan -> Implement -> Verify -> QA loop; context-indexer reconstructs on resumption |
+| `/plan on` / `/plan off` | Plan phase; turn off before Implement | Orchestrator toggles | Read-only + plan-file writes while the planner and context-indexer work |
 | `/yolo` | (optional) User explicitly accepts risk of skipping approval prompts | User-initiated | Faster execution with reduced gate friction |
 | `/auto` | (optional) Automatic tool execution following host permission policy | User-initiated | Host-governed tool automation |
 
-Sisyphus decides when to invoke each mode based on the workflow phase and task
-shape. Momus and Oracle may be invoked as peers inside a `/swarm` or as the
-closing checkpoint of a `/goal`.
+The orchestrator decides when to invoke each mode based on the workflow phase
+and task shape. The reviewer and verifier may be invoked as peers inside a
+`/swarm` or as the closing checkpoint of a `/goal`.
 
 ## Command and skill inventory
 
-The package contains 17 portable `lazy-` skills. The skill inventory is:
-`lazy-ast-grep`, `lazy-coding-agent-sessions`, `lazy-debugging`,
-`lazy-frontend`, `lazy-git-master`, `lazy-init-deep`, `lazy-lcx-report-bug`,
+The package contains 19 portable `lazy-` skills (v1.3.3: `lazy-lcx-report-bug`
+renamed to `lazy-report-bug`; `lazy-review-work` and `lazy-ultrawork` added).
+The skill inventory is: `lazy-ast-grep`, `lazy-coding-agent-sessions`,
+`lazy-debugging`, `lazy-frontend`, `lazy-git-master`, `lazy-init-deep`,
 `lazy-librarian`, `lazy-migration-planner`, `lazy-programming`,
-`lazy-refactor`, `lazy-remove-ai-slops`, `lazy-reviewer`, `lazy-start-work`,
+`lazy-refactor`, `lazy-remove-ai-slops`, `lazy-report-bug`,
+`lazy-review-work`, `lazy-reviewer`, `lazy-start-work`, `lazy-ultrawork`,
 `lazy-ulw-loop`, `lazy-ulw-plan`, and `lazy-verifier`.
+
+Twenty `lazy-*` command documents under `commands/` provide the named host
+entry points, including the lifecycle commands (`lazy-onboard`,
+`lazy-update`, `lazy-status`, `lazy-offboard`, `lazy-resume`, `lazy-new-run`)
+that wire to the durable lifecycle CLI.
 
 Skills are host invocation surfaces and workflow policy. They are not proof of
 live host loading.

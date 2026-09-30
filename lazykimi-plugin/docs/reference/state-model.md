@@ -1,8 +1,9 @@
 # State model reference
 
-Status: v1.3.3 port, intermediate state. This page documents the run-state
-model mapping while the state/orchestration wave lands; it is extended by the
-documentation wave into the full state-artifact reference.
+Status: v1.3.3. This page is the state-artifact reference for the `.lazykimi/`
+run-state model: what each artifact is, who writes it, and how the v0.x state
+maps onto the family model.
+
 
 ## Two schema sets
 
@@ -28,3 +29,53 @@ LazyKimi v1.3.3 carries two schema sets during the port:
 The v0.x schemas are not auto-migrated; the manual mapping above applies and
 the deprecation is noted in CHANGELOG. `lazykimi sync` bridges user-managed
 blocks forward.
+
+## The v1.3.3 run-state tree
+
+The session-start hook and `scripts/state/create-run.sh` bootstrap the same
+tree; MCP servers, hooks, and the CLI share the scripts under
+`scripts/state/`:
+
+```
+.lazykimi/
+├── plans/                 # family plan files (TL;DR + ## TODOs + ## Final Verification Wave)
+├── context/               # knowledge base written by init-deep / context roles
+├── drafts/                # planner's durable drafts
+├── rules/                 # project-local rule supplements
+├── ulw-loop/              # durable loop state (tiers, continuation)
+├── config.json            # project route config (e.g. "mcpMode")
+└── runs/<run_id>/
+    ├── state.json         # run state (schemas/active-run.schema.json)
+    ├── events.jsonl       # append-only event ledger (hooks, MCP, CLI append)
+    ├── checkpoints/       # compact-recovery and explicit checkpoints
+    ├── evidence/          # run-scoped, revision-bound evidence
+    ├── verification/      # criterion/gate results (verification server store)
+    ├── review/            # review-panel output
+    ├── agent_outputs/     # per-dispatch subagent outputs
+    ├── artifacts/         # manual-QA and adversarial-QA artifacts
+    └── memory_updates/    # librarian findings destined for durable memory
+```
+
+| Artifact | Writer | Reader |
+| --- | --- | --- |
+| `runs/<id>/state.json` | state scripts (`create-run.sh`, `update-task.sh`) | orchestrator, `lazy-status`, dashboard |
+| `runs/<id>/events.jsonl` | hook consumers, state scripts, MCP run-ledger | verifier, telemetry |
+| `runs/<id>/checkpoints/` | `checkpoint.sh`, pre/post-compact hooks | recovery (`recover-run.sh`) |
+| `runs/<id>/verification/` | verification server, verifier role | review panel, completion-status CLI |
+| `plans/<slug>.md` | planner (plan channel) | every role; checkbox state is the task source of truth |
+
+## Loop and failure semantics
+
+`scripts/loop/` implements the failure-to-repair loop over that tree:
+`next-task.sh` selects the first unchecked `T<n>` respecting the plan's
+dependency/wave structure; `classify-failure.sh` emits the family failure
+classes; `create-repair-task.sh` appends a repair task (also exposed as the
+verification server tool of the same name); `run-cycle.sh` drives one
+orchestration cycle; `finalize-run.sh` produces the terminal report.
+`sync-plan-state.sh` and `update-plan-checkbox.sh` keep plan checkboxes and
+run state aligned — the checkbox is authoritative for completion.
+
+Cross-reference: [hook-policy.md](hook-policy.md) for which hook consumers
+append to `events.jsonl`, and [host-routes.md](host-routes.md) for which
+routes install the hook consumers that write here.
+

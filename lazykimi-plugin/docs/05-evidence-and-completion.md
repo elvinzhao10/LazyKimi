@@ -32,21 +32,24 @@ untrusted commands; no no-fork sandbox is enabled by default.
 
 ## The five evidence gates
 
-Every completion must pass all five gates. Gates are mandatory; Sisyphus
-cannot waive them. Oracle consolidates the gate review and issues the final
-verdict.
+Every completion must pass all five gates. Gates are mandatory; the
+orchestrator cannot waive them. At review time the five-member review panel —
+lazykimi-verifier (goal), lazykimi-qa-executor (QA), lazykimi-reviewer
+(code), lazykimi-security-auditor (security), lazykimi-context-miner
+(context) — is ALL-MUST-PASS: the lazykimi-reviewer consolidates the gate
+review and issues the final verdict only when every lane approves.
 
 | Gate | Name | Owner | Evidence required |
 | --- | --- | --- | --- |
-| 1 | plan-reread | Sisyphus (at resume) / Prometheus (at creation) / Momus (at execution entry) / Atlas (at reconstruction) | Plan file re-read end-to-end; every task has References + Acceptance Criteria + QA Scenarios + Commit instruction; all referenced paths exist |
-| 2 | automated-verification | Hephaestus (or per-task executor) | LSP diagnostics clean on all changed files; related tests passing; full build green |
-| 3 | manual-qa | Hephaestus (or per-task executor) | Real-surface artifact: CLI output, HTTP response, browser screenshot, or data output — concrete, not asserted |
-| 4 | adversarial-qa | Oracle | Edge cases and regression scenarios executed with captured evidence |
-| 5 | cleanup | Cleaner | No AI-slop remains; regression tests pass identically before and after; lint and type-check clean |
+| 1 | plan-reread | orchestrator (at resume) / planner (at creation) / reviewer (at execution entry) / context-indexer (at reconstruction) | Plan file re-read end-to-end; every task has References + Acceptance Criteria + QA Scenarios + Commit instruction; all referenced paths exist |
+| 2 | automated-verification | implementer (or per-task executor) | LSP diagnostics clean on all changed files; related tests passing; full build green |
+| 3 | manual-qa | implementer or qa-executor | Real-surface artifact: CLI output, HTTP response, browser screenshot, or data output — concrete, not asserted |
+| 4 | adversarial-qa | verifier (+ security-auditor lane) | Edge cases and regression scenarios executed with captured evidence |
+| 5 | cleanup | context-miner | No AI-slop remains; regression tests pass identically before and after; lint and type-check clean |
 
-A failed gate blocks completion. Oracle returns ITERATE (max 3 fixable issues)
-or REJECT (blocking). Sisyphus may not declare completion until all five gates
-are PASS.
+A failed gate blocks completion. The reviewer returns ITERATE (max 3 fixable
+issues) or REJECT (blocking). The orchestrator may not declare completion
+until all five gates are PASS.
 
 ## Read the result at the right scope
 

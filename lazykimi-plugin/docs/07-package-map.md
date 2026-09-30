@@ -8,10 +8,10 @@ local executable services, and verification.
 flowchart TB
     KCDot[".kimi-code/ (host entry)"] --> Assets
     subgraph Assets["plugin assets"]
-      Skills[".kimi-code/skills/ (17)"]
-      Agents["agents/ (11 roles)"]
+      Skills[".kimi-code/skills/ (19)"]
+      Agents["agents/ (13 roles)"]
       HookScripts["hooks/*.sh (16)"]
-      MCP["mcp/*/server.* (6 servers)"]
+      MCP["mcp/*/server.* (6 servers, 32 tools)"]
       CLI["src/ (TypeScript CLI)"]
       Scripts["scripts/"]
     end
@@ -52,22 +52,29 @@ The six declarations in `.kimi-code/mcp.json` launch package-local services:
 | `lazykimi-docs` | Python registry client | Fixed-registry documentation lookup with SSRF boundaries. |
 
 Each declaration is a recipe for a host. It becomes a service only when Kimi
-Code CLI starts it over stdio. The `${KIMI_PLUGIN_ROOT}` variable resolves to
-the `lazykimi-plugin/` directory.
+Code CLI starts it over stdio. The shipped template uses the
+`__KIMI_PLUGIN_ROOT__` placeholder (Kimi does not interpolate environment
+variables in `mcp.json`); `lazykimi init` rewrites it to the absolute
+`lazykimi-plugin/` directory path at init time.
 
 ## TypeScript CLI
 
 `src/` contains the `lazykimi` CLI, compiled to `dist/index.js`. The CLI
-provides six commands:
+provides these commands:
 
 | Command | Purpose |
 | --- | --- |
-| `init` | Copy package assets into `.kimi-code/` and `.lazykimi/`. |
-| `doctor` | Package health diagnostics. |
+| `init` | Copy package assets into `.kimi-code/` and `.lazykimi/`; rewrite `__KIMI_PLUGIN_ROOT__`; persist the MCP mode. |
+| `doctor` | Package health diagnostics (hook wiring, MCP mode, honest host-readiness). |
 | `load-check` | Package readiness: inventories, declarations, executable scripts. |
-| `verify` | Aggregate verification gate (doctor + load-check + MCP + hooks). |
+| `verify` | Aggregate verification gate (suite selector `core\|lifecycle\|all`). |
 | `mcp` | MCP server lifecycle inspection. |
-| `uninstall` | Remove package-owned assets; preserve host state. |
+| `tooling` | Adaptive tooling layer: capability-status, codegraph lifecycle. |
+| `lifecycle` | Durable onboard/update/status/offboard/recover-bootstrap-lock. |
+| `sync` | Bridge v0.x user-managed state into the run-state model. |
+| `handoff` | Parseable handoff summary from `.lazykimi/` state. |
+| `completion-status` | Read the verification store's completion evidence. |
+| `uninstall` | Remove package-owned assets; preserve host state. | |
 
 The CLI is the package's control plane. It does not start MCP servers itself
 — that is the host's job. It does not install hooks — that is
@@ -82,8 +89,9 @@ except through the explicit hook installer.
 2. Host tool activity can produce a structured hook event. `pre-tool-use.sh`
    and `post-tool-use.sh` inspect supported fields, while the package avoids
    granting authority based on free-form text.
-3. State helpers under `.lazykimi/state/` create or update a run, plan, task,
-   event, or checkpoint. The boulder state file advances one task at a time.
+3. State scripts under `scripts/state/` create or update a run, task, event,
+   or checkpoint under `.lazykimi/runs/<id>/`. Plan checkboxes advance one
+   task at a time and stay authoritative.
 4. `lazykimi verify` runs package-owned checks. Each check gets an owned
    process group, a deadline, JSON status/reason, and best-effort cleanup.
    This is not a security sandbox; untrusted commands need VM or
@@ -98,19 +106,20 @@ All LazyKimi runtime state lives under `.lazykimi/`. Configuration lives under
 
 | Artifact | Path | Owner | Format |
 | --- | --- | --- | --- |
-| Boulder state | `.lazykimi/state/boulder.json` | Sisyphus | JSON (`boulder.schema.json`) |
-| Active loop state | `.lazykimi/state/active-loop.json` | Sisyphus | JSON (`active-loop.schema.json`) |
-| Sessions ledger | `.lazykimi/state/sessions.json` | Sisyphus | JSON (`sessions.schema.json`) |
-| Plan files | `.lazykimi/plans/<slug>.md` | Prometheus | Markdown |
-| Evidence files | `.lazykimi/evidence/<gate>.md` | Per-gate owner | Markdown |
-| Handoff summary | `.lazykimi/evidence/handoff.md` | Sisyphus | Markdown |
-| Schemas | `.lazykimi/schemas/*.schema.json` | LazyKimi CLI | JSON Schema |
+| Run state | `.lazykimi/runs/<id>/state.json` | state scripts | JSON (`active-run.schema.json`) |
+| Event ledger | `.lazykimi/runs/<id>/events.jsonl` | hooks, state scripts, run-ledger MCP | JSON Lines |
+| Checkpoints | `.lazykimi/runs/<id>/checkpoints/` | checkpoint script, compact hooks | JSON |
+| Verification store | `.lazykimi/runs/<id>/verification/` | verification server, verifier | JSON + Markdown |
+| Plan files | `.lazykimi/plans/<slug>.md` | planner | Markdown (checkboxes are task truth) |
+| Evidence files | `.lazykimi/runs/<id>/evidence/` | per-gate owner | Markdown |
+| Loop state | `.lazykimi/ulw-loop/` | loop scripts | JSON |
+| v0.x schemas | `.lazykimi/schemas/*.schema.json` | LazyKimi CLI | JSON Schema (mapping in [reference/state-model.md](reference/state-model.md)) |
 | Project config | `.kimi-code/` | LazyKimi CLI | Markdown + JSON |
 | Agent definitions | `agents/lazykimi-*.md` | LazyKimi CLI | Markdown |
 
-The boulder state file is the single source of truth for "where are we in the
-plan?" — Atlas reconstructs from it, Sisyphus advances it, Oracle reads it to
-verify plan compliance.
+The plan file's checkbox state is the single source of truth for "where are we
+in the plan?" — the context-indexer reconstructs from it, the orchestrator
+advances it, the verifier reads it to confirm plan compliance.
 
 ## Control-plane versus data-plane
 

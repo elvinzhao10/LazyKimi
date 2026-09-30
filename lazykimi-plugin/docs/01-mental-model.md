@@ -7,7 +7,7 @@ a passing local check from being mistaken for a live host capability.
 ```mermaid
 flowchart TB
     Policy["skills + SKILL.md\nwhat the workflow asks for"]
-    Roles["agents (11 roles)\nwho investigates, implements, verifies"]
+    Roles["agents (13 roles)\nwho investigates, implements, verifies"]
     Channels["Kimi sub-agents (coder/explore/plan)\nhost dispatch surface"]
     Adapter["hooks + MCP\nhost/protocol adapters"]
     Runtime["scripts + CLI\nstate changes and checks"]
@@ -35,20 +35,23 @@ session for an integration.
 
 ## The planner/implementer/verifier separation
 
-LazyKimi's eleven roles map to three Kimi sub-agent channels plus the main
+LazyKimi's thirteen roles map to three Kimi sub-agent channels plus the main
 agent. This mapping is not cosmetic — it enforces the separation the five
 evidence gates depend on:
 
-- **`plan` channel**: Prometheus (planner) and Momus (plan reviewer). Both are
-  read-only except the single plan file. Prometheus cannot implement; Momus
-  cannot approve its own plan.
-- **`coder` channel**: Hephaestus (deep implementer), Cleaner (slop removal),
-  Migration Planner. These are the only roles with write access to product
-  code.
-- **`explore` channel**: Explorer, Librarian, Atlas, Metis. All read-only for
+- **`plan` channel**: lazykimi-planner (planning) and lazykimi-context-indexer
+  (indexing). Read-only over the repository; plan artifacts are written under
+  `.lazykimi/`. The planner cannot implement.
+- **`coder` channel**: lazykimi-implementer (deep implementation),
+  lazykimi-qa-executor (QA execution), and lazykimi-migration-planner
+  (host-adapter planning). These are the only roles with write access to
   product code.
-- **Main agent**: Sisyphus (orchestrator) and Oracle (verifier). Sisyphus
-  steers but does not implement; Oracle judges but does not implement.
+- **`explore` channel**: lazykimi-explorer, lazykimi-librarian, and
+  lazykimi-context-miner. All read-only for product code.
+- **Main session**: lazykimi-orchestrator, lazykimi-verifier, lazykimi-reviewer,
+  lazykimi-security-auditor, and lazykimi-gate-reviewer run as main-session
+  peers. The orchestrator steers but does not implement; the verifier judges
+  but does not implement — preserving orchestration/judgment separation.
 
 Collapsing planner and implementer into one agent would let a plan be
 rationalized by its own author mid-implementation. Collapsing implementer and

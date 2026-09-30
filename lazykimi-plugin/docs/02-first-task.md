@@ -24,11 +24,13 @@ separate files and separate host actions.
 
 ## From request to records
 
-The state helpers under `.lazykimi/state/` provide the persistence layer for
-the workflow: a run contains tasks, checkpoints, events, and evidence
-references. The boulder state file (`.lazykimi/state/boulder.json`) is the
-single source of truth for "where are we in the plan?" — Atlas reconstructs
-from it, Sisyphus advances it, Oracle reads it to verify plan compliance.
+The state scripts under `scripts/state/` provide the persistence layer for
+the workflow: a run under `.lazykimi/runs/<id>/` contains state, tasks,
+checkpoints, an append-only event ledger, and evidence references. The plan
+file's checkbox state is the single source of truth for "where are we in the
+plan?" — the context-indexer reconstructs from it, the orchestrator advances
+it, the verifier reads it to confirm plan compliance
+(see [reference/state-model.md](reference/state-model.md)).
 
 The loop helpers operate on that state rather than trying to infer current
 work from the latest chat message. A verifier can therefore inspect the
@@ -51,15 +53,15 @@ See [Workflow playbooks](04-workflow-playbooks.md) for policy roles and
 The request text is interpreted by policy files first, then becomes state only
 when an execution path chooses to record it. `lazy-ulw-plan` defines the
 questions that must be answered before implementation; `lazy-start-work`
-expects an approved plan and directs evidence collection. The state files turn
-those ideas into `boulder.json`, `sessions.json`, checkpoints, and evidence
-references.
+expects an approved plan and directs evidence collection. The state scripts
+turn those ideas into run state (`state.json`), the event ledger
+(`events.jsonl`), checkpoints, and evidence references.
 
 ```mermaid
 flowchart LR
     Prompt["request text"] --> Skill["workflow policy"]
     Skill --> Plan["plan/acceptance criteria"]
-    Plan --> State["boulder + run state"]
+    Plan --> State["run state + event ledger"]
     State --> Check["chosen verification"]
     Check --> Evidence["event/evidence record"]
 ```
@@ -73,11 +75,12 @@ result inspectable after the original conversation has ended.
 LazyKimi maps the request shape onto Kimi Code CLI's native modes:
 
 - A vague or large request enters `/plan on` and the `plan` sub-agent
-  (Prometheus) authors the plan.
+  (lazykimi-planner) authors the plan.
 - An approved plan with independent tasks may be handed to `/swarm <task>`
   for parallel execution across the `coder` and `explore` channels.
 - A single large objective with a clear goal may be handed to
-  `/goal <objective>` for durable autonomous execution under Sisyphus.
+  `/goal <objective>` for durable autonomous execution under the
+  orchestrator.
 
 The mode is an execution-channel option chosen at `start-work` time; the plan
 itself remains the contract.

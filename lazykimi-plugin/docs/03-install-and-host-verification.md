@@ -57,8 +57,13 @@ installation, restart the Kimi Code CLI session so the new hooks take effect.
 `.kimi-code/mcp.json` declares six local MCP servers. Kimi Code CLI
 auto-discovers this file when the project is opened. To inspect or modify MCP
 registration interactively, use `/mcp` (list servers) and `/mcp-config`
-(configure servers) inside a Kimi Code CLI session. The `${KIMI_PLUGIN_ROOT}`
-variable in each declaration resolves to the `lazykimi-plugin/` directory.
+(configure servers) inside a Kimi Code CLI session. The shipped template uses
+the `__KIMI_PLUGIN_ROOT__` placeholder — Kimi does not interpolate environment
+variables in `mcp.json` — and `lazykimi init` rewrites it to the absolute
+`lazykimi-plugin/` directory path (injecting the `LAZYKIMI_MCP_MODE` and
+`CWD` env stanza) when the project route is initialized. The full route and
+connector specification is in
+[reference/host-routes.md](reference/host-routes.md).
 
 For Kimi Work, add each `lazykimi-*` MCP connector manually through Kimi
 Work's MCP configuration UI. The copied repository does not auto-register MCP

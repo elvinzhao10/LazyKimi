@@ -1,7 +1,8 @@
 # LazyKimi
 
 > Kimi-native evidence-led agent workflow harness for **Kimi Code CLI** (primary)
-> and **Kimi Work** (secondary, skills import only).
+> and **Kimi Work** (secondary, skills import only). Current release:
+> **v1.3.3**, at family parity with LazyZCode v1.3.3.
 
 > **Verified on macOS only.** Linux and Windows paths and host behaviour are
 > unverified. Package checks prove the copied package and its local contracts;
@@ -65,13 +66,15 @@ lazykimi/
 ├── lazykimi-evaluation.md # Public verification evidence
 ├── lazykimi-plugin/       # The installable plugin package (see lazykimi-plugin/README.md)
 │   ├── .kimi-code/         # Kimi Code CLI host entry (skills, mcp.json, AGENTS.md)
-│   ├── agents/             # 11 Greek-myth agent role definitions
-│   ├── commands/           # 9 named slash-command workflows
+│   ├── agents/             # 13 family role-agent definitions
+│   ├── commands/           # 20 named slash-command workflows
 │   ├── hooks/              # 16 hook event declarations + shell scripts
-│   ├── mcp/                # 6 local MCP servers (Python stdio, 21 tools)
+│   ├── mcp/                # 6 local MCP servers (bash + Python stdio, 32 tools)
 │   ├── src/                # TypeScript `lazykimi` CLI
-│   ├── scripts/            # install-hooks.sh and verification utilities
-│   └── docs/               # Numbered technical architecture pages
+│   ├── contracts/          # Family-shared + per-host Kimi contracts
+│   ├── tooling/            # Adaptive tooling layer (locked node dependencies)
+│   ├── scripts/            # State, loop, lifecycle, and verification utilities
+│   └── docs/               # Numbered technical architecture pages + reference/
 └── sources/                # Read-only reference repos (LazyBuddy, LazyTrae, lazycodex)
 ```
 
@@ -103,9 +106,9 @@ lazykimi verify --must-pass
 ```
 
 These read-only reports cover copied assets and declarations. The installed
-layout contains 17 skills, 11 agents, sixteen hook scripts across sixteen events,
-and six MCP server declarations exposing 21 tools. The MCP servers expose
-tools only after a host connection.
+layout contains 19 skills, 20 commands, 13 agents, sixteen hook scripts across
+sixteen events, and six MCP server declarations exposing 32 tools. The MCP
+servers expose tools only after a host connection.
 
 Type `offboard` for the matching safe-removal protocol; it never guesses or
 removes host-managed paths.
@@ -114,17 +117,21 @@ removes host-managed paths.
 
 | Surface | Count | Role |
 | --- | ---: | --- |
-| Skills | 17 | Host-facing workflow policies for planning, execution, review, and verification. |
-| Commands | 9 | Named host entry points for those workflow policies. |
-| Agents | 11 | Specialist role definitions mapped to Kimi Code CLI's three sub-agent channels. |
-| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs. |
-| Hooks | 16 | Hook event declarations installed into `~/.kimi-code/config.toml`. |
+| Skills | 19 | Host-facing workflow policies for planning, execution, review, and verification. |
+| Commands | 20 | Named host entry points for those workflow policies. |
+| Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (32 tools). |
+| Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
 
 ## Documentation
 
 - [Plugin README](lazykimi-plugin/README.md) — installation, usage, MCP servers,
   hooks, skills, agent list, workflow phases, and evidence gates.
-- [Docs index](docs/) — numbered technical architecture pages (00-11).
+- [Docs index](docs/) — numbered technical architecture pages (00-11) plus the
+  reference set ([host routes](lazykimi-plugin/docs/reference/host-routes.md),
+  [hook policy](lazykimi-plugin/docs/reference/hook-policy.md),
+  [model routing](lazykimi-plugin/docs/reference/model-routing.md),
+  [state model](lazykimi-plugin/docs/reference/state-model.md)).
 - [Kimi Work setup](docs/11-kimi-work-setup.md) — secondary host setup walk-through.
 - [Evaluation evidence](lazykimi-evaluation.md) — public verification report
   with capability comparison to LazyBuddy, LazyTrae, and lazycodex.

@@ -1,8 +1,26 @@
 # LazyKimi verification evidence
 
-This document records public, present-tense evidence for the LazyKimi package.
-It is not evidence that a specific Kimi Code CLI or Kimi Work session has
-loaded a plugin. Verification is on macOS only.
+This document records public, present-tense evidence for the LazyKimi package
+(v1.3.3, family parity with LazyZCode v1.3.3). It is not evidence that a
+specific Kimi Code CLI or Kimi Work session has loaded a plugin. Verification
+is on macOS only.
+
+## Evidence scope vocabulary
+
+Every claim below carries one of three scopes:
+
+- **package** — proven by the copied package and its local checks
+  (load-check, doctor, verify, regressions) on this checkout.
+- **probe** — proven by a bounded local protocol probe against a packaged
+  endpoint or script (e.g. JSON-RPC stream fixtures), still without a host.
+- **current-session** — observed in a live host session and recorded as an
+  observation receipt. No claim in this document currently holds this scope.
+
+Any host behavior not yet observed is **documented-untested**: the package
+describes the mechanism, and the host observation pass owns converting it
+into evidence. **HOST READINESS: PENDING** until a complete observation
+receipt exists (one loaded skill, command, agent, hook, and all six MCP
+connections, bound to the active source/version/build/session).
 
 ## Project purpose and attribution
 
@@ -15,10 +33,11 @@ LazyTrae, or lazycodex at runtime.
 
 ## Implemented package behavior
 
-LazyKimi packages 17 `lazy-` skills, 11 Greek-myth agent role definitions, 16
-hook event declarations, and six local MCP declarations exposing 21 tools:
-`run-ledger`, `verification`, `status-dashboard`, `context-graph`,
-`code-intel`, and `docs`. The package checks validate manifests, component
+LazyKimi packages 19 `lazy-` skills, 20 `lazy-*` command documents, 13 family
+role-agent definitions, 16 hook event declarations (critical 8 on the TOML
+route), and six local MCP declarations exposing 32 tools: `run-ledger` (9),
+`verification` (7), `status-dashboard` (4), `context-graph` (5), `code-intel`
+(5), and `docs` (2). The package checks validate manifests, component
 inventory, JSON, executable MCP scripts, internal Markdown links, hook and
 security behavior, and MCP protocol regressions.
 
@@ -102,7 +121,8 @@ LazyKimi is the first harness in the LazySeries to map its workflow onto
 native host modes rather than emulating them through agents alone:
 
 - `/swarm <task>` (up to 300 agents) — used for parallel Explore, parallel
-  independent task implementation, and parallel review (Oracle + Momus).
+  independent task implementation, and parallel review lanes (reviewer,
+  verifier, security-auditor as peers).
 - `/goal <objective>` — persistent autonomous objective used for the
   Implement phase when the work is a single large objective.
 - `/plan on` / `/plan off` — plan mode toggle used to constrain the session
@@ -133,12 +153,13 @@ workflow heritage and the same MIT license.
 
 | Capability | LazyBuddy | LazyTrae | lazycodex | LazyKimi |
 |---|---|---|---|---|
-| Skills | 14 | 17 | 16+ | 17 |
-| Agents | 13 | 11 | 5 (TOML) | 11 (mapped to 3 Kimi sub-agents) |
+| Skills | 14 | 17 | 16+ | 19 |
+| Commands | — | — | — | 20 |
+| Agents | 13 | 11 | 5 (TOML) | 13 family roles (mapped to 3 Kimi sub-agents + main) |
 | Hooks | 12 | eight | 24 | 16 |
-| MCP servers | 6 | 15 tools | N/A | 6 (21 tools) |
+| MCP servers | 6 | 15 tools | N/A | 6 (32 tools) |
 | Host | CodeBuddy | Trae IDE/Work/CLI | Codex | Kimi Code CLI |
-| Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Python MCP |
+| Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Bash/Python MCP |
 | Native swarm | No | No | No | Yes (/swarm 300 agents) |
 | Native goal mode | No | No | No | Yes (/goal) |
 | Native plan mode | No | No | No | Yes (/plan on/off) |
@@ -146,20 +167,25 @@ workflow heritage and the same MIT license.
 
 ### Per-capability notes
 
-- **Skills**: LazyKimi inherits the LazyTrae skill count (17) and adapts each
-  `SKILL.md` to Kimi Code CLI's YAML frontmatter (`name`, `description`,
-  `type`, `whenToUse`, `arguments`) and invocation conventions
+- **Skills**: LazyKimi historically inherited the LazyTrae skill set (17);
+  v1.3.3 grows it to the family 19-skill set (renaming `lazy-lcx-report-bug`
+  to `lazy-report-bug`, adding `lazy-review-work` and `lazy-ultrawork`) and
+  adapts each `SKILL.md` to Kimi Code CLI's YAML frontmatter (`name`,
+  `description`, `type`, `whenToUse`, `arguments`) and invocation conventions
   (`/skill:<name>` or `/<name>` shorthand).
-- **Agents**: LazyKimi inherits LazyTrae's 11 Greek-myth roles and maps them
-  to Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`,
-  `plan`) plus the main agent. This is a structural difference from LazyBuddy
-  (13 roles, no sub-agent channel constraint) and lazycodex (5 TOML agents).
+- **Agents**: v0.x inherited LazyTrae's 11 Greek-myth roles (historical
+  attribution); v1.3.3 replaces them with the 13 family role agents mapped to
+  Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`,
+  `plan`) plus the main session. This is a structural difference from
+  LazyBuddy (13 roles, no sub-agent channel constraint) and lazycodex
+  (5 TOML agents).
 - **Hook scripts**: LazyKimi ships 16 hook scripts covering the
-  events Kimi Code CLI exposes through `[[hooks]]` in `~/.kimi-code/config.toml`.
-- **MCP**: LazyKimi inherits LazyBuddy's six-server Python model (run-ledger,
-  verification, status-dashboard, context-graph, code-intel, docs) exposing
-  21 tools. LazyTrae consolidates into a single Node.js core server exposing
-  15 tools.
+  events Kimi Code CLI exposes through `[[hooks]]` in `~/.kimi-code/config.toml`,
+  with the lazyzcode v1.3.3 hardened pre-tool semantics.
+- **MCP**: LazyKimi inherits LazyBuddy's six-server model (run-ledger,
+  verification, status-dashboard, context-graph, code-intel, docs), rebuilt
+  in v1.3.3 to the family 32-tool surface behind the profile gate. LazyTrae
+  consolidates into a single Node.js core server exposing 15 tools.
 - **Native modes**: LazyKimi is the only harness in the series whose target
   host exposes native swarm, goal, and plan modes. The other harnesses
   emulate these through agents and loops.
