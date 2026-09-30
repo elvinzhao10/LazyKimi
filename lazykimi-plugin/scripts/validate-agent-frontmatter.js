@@ -4,7 +4,8 @@
 //
 // Validates plugins/lazykimi/agents/*.md against the Kimi Code CLI subagent
 // schema: name, description (dispatcher style), model (kimi-k3), effort
-// (low|standard|high|xhigh — Kimi effort scale pending host verification),
+// (low|high|max — Kimi effort scale observed on-host 2026-09-30: kimi-k3
+// support_efforts = ["low","high","max"], default_effort = "high"),
 // maxTurns, disallowed (denylist within Kimi's file-mutation tool universe),
 // and isolation. Legacy ZCode-family keys (color, thoughtLevel, tools,
 // disallowedTools, skills, memory) are rejected: Kimi uses a `disallowed`
@@ -23,7 +24,7 @@ const EXPECTED_NAMES = new Set([
 const REQUIRED_FIELDS = new Set(['name', 'description', 'model', 'effort', 'maxTurns', 'disallowed', 'isolation']);
 const ALLOWED_FIELDS = new Set(REQUIRED_FIELDS);
 const FORBIDDEN_FIELDS = new Set(['color', 'thoughtLevel', 'tools', 'disallowedTools', 'skills', 'memory', 'user-invocable']);
-const EFFORTS = new Set(['low', 'standard', 'high', 'xhigh']);
+const EFFORTS = new Set(['low', 'high', 'max']);
 const KIMI_TOOLS = new Set(['Read', 'Edit', 'Write', 'Bash']);
 const READONLY_NAMES = new Set([
   'context-indexer', 'context-miner', 'explorer', 'gate-reviewer', 'librarian',

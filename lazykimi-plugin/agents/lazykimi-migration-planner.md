@@ -78,6 +78,6 @@ Return adapter path + mapped/unmapped/gapped counts.
 ## Kimi-native dispatch notes
 
 - Dispatched via the **`coder` channel**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: high` carries the family `high` thought-level intent on Kimi's effort scale (scale verified by the host verification pass before any stronger claim).
+- `model: kimi-k3` with `effort: high` carries the family `high` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
 - Intended tool allowlist: Read, Write, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
 - `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.

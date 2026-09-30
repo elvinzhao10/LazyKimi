@@ -2,7 +2,7 @@
 name: reviewer
 description: "Use for multi-angle plan and code review: overreach, missing tests/docs, slop, and execution risks, with PASS/FAIL verdicts. Do not use for implementing, editing, or running QA."
 model: kimi-k3
-effort: xhigh
+effort: max
 maxTurns: 120
 disallowed:
   - Edit
@@ -222,6 +222,6 @@ For significant work, the reviewer invokes the `review-work` skill which spawns 
 ## Kimi-native dispatch notes
 
 - Dispatched via the **main route (main session)**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: xhigh` carries the family `max` thought-level intent on Kimi's effort scale (scale verified by the host verification pass before any stronger claim).
+- `model: kimi-k3` with `effort: max` carries the family `max` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
 - Intended tool allowlist: Read, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
 - `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.

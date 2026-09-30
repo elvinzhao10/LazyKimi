@@ -2,7 +2,7 @@
 name: qa-executor
 description: "Use when the application must actually be run: execute test scenarios and capture real-surface evidence artifacts. Do not use for speculative analysis or product-code implementation."
 model: kimi-k3
-effort: standard
+effort: high
 maxTurns: 80
 disallowed: []
 isolation: true
@@ -96,6 +96,6 @@ artifact; stateful criteria also require a before/after transition artifact.
 ## Kimi-native dispatch notes
 
 - Dispatched via the **coder** channel; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: standard` carries the family `medium` thought-level intent on Kimi's effort scale (scale verified by the host verification pass before any stronger claim).
+- `model: kimi-k3` with `effort: high` carries the family `medium` thought-level intent; Kimi's observed scale is `low|high|max` with no middle tier, so the family middle intent maps to `high` (T21 host receipt 2026-09-30).
 - Intended tool allowlist: Read, Edit, Write, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
 - `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.

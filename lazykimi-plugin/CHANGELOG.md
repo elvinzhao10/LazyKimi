@@ -45,6 +45,19 @@
   run-state + loop scripts, tooling layer, lifecycle machinery, verify
   suites, docs, CI, host verification) land on this branch and are
   documented in their own sections as they ship.
+- **T21 host verification pass (2026-09-30):** probed the real Kimi Code CLI
+  v0.27.0 on this machine. Confirmed on-host: the `[[hooks]]` TOML schema
+  (critical-8 appended by `install-hooks.sh` validated by `kimi doctor
+  config`; full uninstall removes exactly those blocks), the `Write`/`Edit`
+  PreToolUse tool names (real `tools.set_active_tools` transcript), and the
+  Kimi Work skills-import target (`~/.kimi-work/skills`, 19-skill installer
+  run + snapshot restore). Adapted the agent effort scale to the observed
+  `kimi-k3` surface (`support_efforts = ["low","high","max"]`): `standard`
+  → `high` and `xhigh` → `max` across the six affected agents, the
+  frontmatter validator, the policy test, and `docs/reference/model-routing.md`.
+  Live-session claims (auth-gated: expired OAuth credential) remain
+  documented-untested; HOST READINESS stays PENDING. Full outcome table in
+  `lazykimi-evaluation.md` ("T21 host verification pass").
 
 ## v0.3.0 (unreleased)
 

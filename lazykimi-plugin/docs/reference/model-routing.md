@@ -8,18 +8,24 @@ model, account availability, host loading, or a particular rate.
 LazyKimi's declared agents pin `model: kimi-k3` and an `effort` budget in
 their Kimi frontmatter, and the routing policy's `kimi` host entry maps every
 profile tier (economy/balanced/strong) to the `kimi-k3` alias with
-`agent-frontmatter` dispatch. The entry deliberately carries no `effort`
-mappings: the Kimi effort scale is not yet observed on-host, so any per-tier
-effort claim would be invented capability. Before dispatch, propose
-delegation and any model switches in the plan, remind the user that switching
-can change quality, latency, and cost, and record the decision. If the plan
-is silent, keep the same model across all subagents and retries.
+`agent-frontmatter` dispatch. The observed Kimi effort scale on `kimi-k3` is
+`low|high|max` with `default_effort = "high"` (T21 host receipt 2026-09-30:
+`[models."kimi-code/k3"] support_efforts` in `~/.kimi-code/config.toml`, real
+CLI v0.27.0), so agent effort values are restricted to that scale: family
+`low` maps to `low`, the family middle intent to `high` (Kimi has no middle
+tier), and family `max` to `max`. The policy entry itself still carries no
+per-tier `effort` mappings: frontmatter effort remains package metadata, and
+whether a live session honors it is a separate host observation. Before
+dispatch, propose delegation and any model switches in the plan, remind the
+user that switching can change quality, latency, and cost, and record the
+decision. If the plan is silent, keep the same model across all subagents and
+retries.
 
 | Task class | Optional plan choice | Use |
 | --- | --- | --- |
-| Mechanical work | economy tier, low effort | Repository indexing, bounded search, and routine memory maintenance. |
+| Mechanical work | economy tier, `low` effort | Repository indexing, bounded search, and routine memory maintenance. |
 | Default work | `inherit` | All roles keep the current parent-session model unless the plan explicitly enables a switch. |
-| Quality-focused work | strong tier, high effort | Planning, review, security review, final gates, and verification. |
+| Quality-focused work | strong tier, `max` effort | Planning, review, security review, final gates, and verification. |
 
 The strong tier is a provisional choice for those roles. It does not claim a
 specific model or a quality guarantee. Kimi exposes model and effort selection
@@ -125,6 +131,7 @@ Run package tests for frontmatter and helper behavior locally
 Listing a real account catalog, selecting a tier/direct/custom model, and
 observing a per-agent override are host- and user-owned checks. A given
 checkout may have no Kimi account catalog evidence, so it makes no
-availability claim. The Kimi effort/model routing scale is a
-host-verification item; until it is observed, the `kimi` policy entry stays
-effort-free and every tier claim here is `documented-untested`.
+availability claim. The Kimi effort scale is now observed at the config
+layer (`low|high|max` on `kimi-k3`, T21 receipt 2026-09-30), but per-agent
+effort application inside a live session remains host-owned and
+`documented-untested`; the `kimi` policy entry therefore stays effort-free.

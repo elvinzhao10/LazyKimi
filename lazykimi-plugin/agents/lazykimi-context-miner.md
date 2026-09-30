@@ -2,7 +2,7 @@
 name: context-miner
 description: "Use as the context-mining lane of the 5-agent review: git history, docs, and cross-references the other lanes missed. Do not use for correctness review or implementation."
 model: kimi-k3
-effort: standard
+effort: high
 maxTurns: 80
 disallowed:
   - Edit

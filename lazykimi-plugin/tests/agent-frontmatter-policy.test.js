@@ -68,11 +68,11 @@ test('Given the shipped agents When frontmatter is parsed Then all role names an
       assert.equal(Object.hasOwn(agent, legacy), false, `${agent.name} must not carry legacy field ${legacy}`);
     }
     assert.equal(agent.model, 'kimi-k3', `${agent.name} model is Kimi-valid`);
-    assert.ok(['low', 'standard', 'high', 'xhigh'].includes(agent.effort), `${agent.name} effort is Kimi-valid`);
+    assert.ok(['low', 'high', 'max'].includes(agent.effort), `${agent.name} effort is Kimi-valid (observed kimi-k3 scale low|high|max)`);
     assert.equal(agent.isolation, true, `${agent.name} dispatches are self-contained`);
   }
   assert.deepEqual(
-    agents.filter((agent) => agent.effort === 'xhigh').map((agent) => agent.name).sort(),
+    agents.filter((agent) => agent.effort === 'max').map((agent) => agent.name).sort(),
     ['gate-reviewer', 'planner', 'reviewer', 'verifier'],
   );
 });

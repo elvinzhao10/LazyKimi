@@ -2,7 +2,7 @@
 name: planner
 description: "Use when a vague or large request must become ONE decision-complete work plan under .lazykimi/plans/ before any implementation. Do not use for executing, implementing, or editing code."
 model: kimi-k3
-effort: xhigh
+effort: max
 maxTurns: 120
 disallowed:
   - Edit
@@ -202,6 +202,6 @@ After approval and plan file written:
 ## Kimi-native dispatch notes
 
 - Dispatched via the **`plan` channel**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: xhigh` carries the family `max` thought-level intent on Kimi's effort scale (scale verified by the host verification pass before any stronger claim).
+- `model: kimi-k3` with `effort: max` carries the family `max` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
 - Intended tool allowlist: Read, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
 - `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
