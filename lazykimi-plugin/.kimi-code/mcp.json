@@ -3,36 +3,60 @@
     "lazykimi-run-ledger": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/run-ledger/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     },
     "lazykimi-verification": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/verification/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     },
     "lazykimi-status-dashboard": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/status-dashboard/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     },
     "lazykimi-context-graph": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/context-graph/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     },
     "lazykimi-code-intel": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/code-intel/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     },
     "lazykimi-docs": {
       "command": "bash",
       "args": ["__KIMI_PLUGIN_ROOT__/mcp/docs/server.sh"],
+      "env": {
+        "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
+        "CWD": "__KIMI_PROJECT_ROOT__"
+      },
       "cwd": ".",
       "required": false
     }

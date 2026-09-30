@@ -5,14 +5,19 @@ import { writeJson } from '../lib/json';
 import { writeReceipt } from '../lib/receipt';
 
 const PLUGIN_VERSION = '1.3.3';
-const EXPECTED_SKILLS = 17;
-const EXPECTED_AGENTS = 11;
+const EXPECTED_SKILLS = 19;
+const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
 const EXPECTED_MCP = 6;
+
+// v1.3.3 MCP profile modes (mcp/profile-gate.sh server-selection table).
+const MCP_MODES: readonly string[] = ['direct', 'assisted', 'planned', 'orchestrated', 'long-horizon'];
+const DEFAULT_MCP_MODE = 'orchestrated';
 
 interface InitOptions {
   readonly dryRun: boolean;
   readonly target: string;
+  readonly mcpMode: string;
 }
 
 function printHelp(): void {
@@ -24,21 +29,35 @@ copied to <target>/.kimi-code/hooks/ but NOT auto-appended to
 ~/.kimi-code/config.toml — see the post-install message for activation.
 
 Options:
-  --help, -h        Show this help message
+  --help, -h        Show this help message and exit 0
   --dry-run         Preview actions without writing any files
-  --target <path>   Target directory (default: current directory)`);
+  --target <path>   Target directory (default: current directory)
+  --mcp-mode <mode> MCP profile mode: direct | assisted | planned |
+                    orchestrated (default) | long-horizon. Persisted to
+                    .lazykimi/config.json and injected as the
+                    LAZYKIMI_MCP_MODE env stanza in the project
+                    .kimi-code/mcp.json (Kimi does not interpolate env
+                    vars, so the mode rides the init-time rewrite).`);
 }
 
 function parseArgs(args: string[]): InitOptions {
   let dryRun = false;
   let target = process.cwd();
+  let mcpMode = DEFAULT_MCP_MODE;
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === '--help' || a === '-h') { printHelp(); process.exit(0); }
     else if (a === '--dry-run') dryRun = true;
     else if (a === '--target' && i + 1 < args.length) target = args[++i];
+    else if (a.startsWith('--target=')) target = a.slice('--target='.length);
+    else if (a === '--mcp-mode' && i + 1 < args.length) mcpMode = args[++i];
+    else if (a.startsWith('--mcp-mode=')) mcpMode = a.slice('--mcp-mode='.length);
   }
-  return { dryRun, target };
+  if (!MCP_MODES.includes(mcpMode)) {
+    console.error(`lazykimi init: unsupported --mcp-mode '${mcpMode}' (expected one of: ${MCP_MODES.join(', ')})`);
+    process.exit(2);
+  }
+  return { dryRun, target, mcpMode };
 }
 
 function copyDir(
@@ -117,23 +136,30 @@ function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string
   }
 }
 
-export function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[]): void {
+export function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[], mcpMode: string = DEFAULT_MCP_MODE): void {
   // Kimi Code CLI does not interpolate env vars in .kimi-code/mcp.json (per
   // https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html). The
-  // source template ships with __KIMI_PLUGIN_ROOT__ placeholders that we
-  // rewrite to absolute paths at install time so the project-level mcp.json
-  // resolves server.sh correctly regardless of CWD.
+  // source template ships with __KIMI_PLUGIN_ROOT__/__KIMI_MCP_MODE__/
+  // __KIMI_PROJECT_ROOT__ placeholders that we rewrite at install time so the
+  // project-level mcp.json resolves server.sh regardless of CWD AND carries
+  // the MCP profile mode (LAZYKIMI_MCP_MODE) plus project CWD into every
+  // server's env stanza — the Kimi-native mode-plumbing mechanism. Re-running
+  // init re-copies the template and rewrites it, so a mode change is an
+  // idempotent re-rewrite with no duplicate keys.
   const mcpPath = path.join(target, '.kimi-code', 'mcp.json');
   if (!existsSync(mcpPath)) return;
   const pluginRoot = getPluginRoot();
   if (dryRun) {
-    actions.push(`rewrite mcp.json paths (__KIMI_PLUGIN_ROOT__ -> ${pluginRoot})`);
+    actions.push(`rewrite mcp.json paths (__KIMI_PLUGIN_ROOT__ -> ${pluginRoot}; mode ${mcpMode})`);
     return;
   }
   const raw = readFileSync(mcpPath, 'utf-8');
-  const rewritten = raw.replace(/__KIMI_PLUGIN_ROOT__/g, pluginRoot);
+  const rewritten = raw
+    .replace(/__KIMI_PLUGIN_ROOT__/g, pluginRoot)
+    .replace(/__KIMI_MCP_MODE__/g, mcpMode)
+    .replace(/__KIMI_PROJECT_ROOT__/g, target);
   writeFileSync(mcpPath, rewritten, 'utf-8');
-  actions.push(`rewrite mcp.json paths (absolute: ${pluginRoot})`);
+  actions.push(`rewrite mcp.json paths (absolute: ${pluginRoot}; mcp-mode: ${mcpMode})`);
 }
 
 function defaultBoulderState(): unknown {
@@ -151,8 +177,8 @@ function defaultActiveLoopState(): unknown {
   };
 }
 
-function defaultConfig(): unknown {
-  return { host: 'kimi-code-cli', model: 'kimi-k3', state_dir: '.lazykimi' };
+function defaultConfig(mcpMode: string): unknown {
+  return { host: 'kimi-code-cli', model: 'kimi-k3', state_dir: '.lazykimi', mcpMode };
 }
 
 export function run(args: string[]): number {
@@ -167,10 +193,11 @@ export function run(args: string[]): number {
 
   // 1. Copy .kimi-code/ template (skills/, AGENTS.md, mcp.json)
   copyDir(getPluginKimiCodeDir(), path.join(target, '.kimi-code'), target, opts.dryRun, actions, copied);
-  // 1b. Rewrite __KIMI_PLUGIN_ROOT__ placeholders in the copied mcp.json to
-  //     absolute plugin-root paths (Kimi does not interpolate env vars in
-  //     project-level mcp.json).
-  rewriteMcpPaths(target, opts.dryRun, actions);
+  // 1b. Rewrite __KIMI_PLUGIN_ROOT__/__KIMI_MCP_MODE__/__KIMI_PROJECT_ROOT__
+  //     placeholders in the copied mcp.json to absolute plugin-root paths, the
+  //     selected MCP profile mode, and the project root (Kimi does not
+  //     interpolate env vars in project-level mcp.json).
+  rewriteMcpPaths(target, opts.dryRun, actions, opts.mcpMode);
   // 1c. Copy rules/ -> .kimi-code/rules/ (also covered by step 1, but kept
   //     explicit so future rules additions are obvious).
   copyDir(getPluginRulesDir(), path.join(target, '.kimi-code', 'rules'), target, opts.dryRun, actions, copied);
@@ -209,7 +236,7 @@ export function run(args: string[]): number {
   writeSeedJson('.lazykimi/state/boulder.json', defaultBoulderState(), target, opts.dryRun, actions);
   writeSeedJson('.lazykimi/state/sessions.json', { sessions: [] }, target, opts.dryRun, actions);
   writeSeedJson('.lazykimi/state/active-loop.json', defaultActiveLoopState(), target, opts.dryRun, actions);
-  writeSeedJson('.lazykimi/config.json', defaultConfig(), target, opts.dryRun, actions);
+  writeSeedJson('.lazykimi/config.json', defaultConfig(opts.mcpMode), target, opts.dryRun, actions);
 
   // 5. Hooks: scripts are copied (step 3) but NOT auto-appended to
   //    ~/.kimi-code/config.toml. The plugin manifest (kimi.plugin.json)
@@ -236,6 +263,7 @@ export function run(args: string[]): number {
   for (const a of actions) console.log(`  ${opts.dryRun ? '[dry-run] ' : ''}${a}`);
   console.log(`\n${opts.dryRun ? 'Preview complete' : 'Install complete'}. ${copied.length} file(s) ${opts.dryRun ? 'would be ' : ''}copied.`);
   console.log(`Expected: ${EXPECTED_SKILLS} skills, ${EXPECTED_AGENTS} agents, ${EXPECTED_HOOKS} hooks, ${EXPECTED_MCP} MCP servers.`);
+  console.log(`MCP profile mode: ${opts.mcpMode} (LAZYKIMI_MCP_MODE injected into .kimi-code/mcp.json env stanzas; change with \`lazykimi init --mcp-mode <mode>\`).`);
   console.log('Run `lazykimi doctor` to verify, `lazykimi load-check` for package readiness.');
   return 0;
 }

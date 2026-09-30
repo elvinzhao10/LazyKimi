@@ -91,6 +91,41 @@ function checkKimiBinary(): CheckResult {
   };
 }
 
+// v1.3.3: report the active MCP profile mode. Kimi provides no env
+// interpolation, so the mode rides the init-time mcp.json env stanza; this
+// reads the persisted .lazykimi/config.json record of that rewrite.
+function checkMcpMode(target: string, isPluginRoot: boolean): CheckResult {
+  const configPath = isPluginRoot
+    ? (existsSync(path.join(target, '.lazykimi', 'config.json'))
+        ? path.join(target, '.lazykimi', 'config.json')
+        : path.join(target, '..', '.lazykimi', 'config.json'))
+    : path.join(target, '.lazykimi', 'config.json');
+  if (!existsSync(configPath)) {
+    return {
+      label: 'MCP profile mode',
+      status: 'PASS',
+      detail: 'not initialized (servers default to the orchestrated profile)',
+    };
+  }
+  try {
+    const data = readJson(configPath);
+    if (!isObject(data) || typeof data.mcpMode !== 'string') {
+      return { label: 'MCP profile mode', status: 'WARN', detail: '.lazykimi/config.json has no mcpMode (re-run lazykimi init)' };
+    }
+    return {
+      label: 'MCP profile mode',
+      status: 'PASS',
+      detail: `${data.mcpMode} (change with: lazykimi init --mcp-mode <mode>)`,
+    };
+  } catch (e) {
+    return {
+      label: 'MCP profile mode',
+      status: 'WARN',
+      detail: e instanceof Error ? e.message : String(e),
+    };
+  }
+}
+
 export function runDoctor(target: string): DoctorResult {
   const checks: CheckResult[] = [];
   const isPluginRoot = isPluginSourceRoot(target);
@@ -154,6 +189,7 @@ export function runDoctor(target: string): DoctorResult {
   });
 
   checks.push(checkBoulderState(resolvedBoulderPath));
+  checks.push(checkMcpMode(target, isPluginRoot));
   checks.push(checkKimiBinary());
 
   let pass = 0, fail = 0, warn = 0;
