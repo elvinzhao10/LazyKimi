@@ -42,6 +42,7 @@ NODE_TESTS_RESULT="fail"
 PYTHON_TESTS_RESULT="fail"
 REGRESSION_DEPTH="${LAZYKIMI_VERIFY_REGRESSION_DEPTH:-0}"
 VERIFY_TIMEOUT="${LAZYKIMI_VERIFY_TIMEOUT_SECONDS:-90}"
+CODEGRAPH_REGRESSION_TIMEOUT="${LAZYKIMI_CODEGRAPH_REGRESSION_TIMEOUT_SECONDS:-240}"
 NODE_TEST_CONCURRENCY="${LAZYKIMI_NODE_TEST_CONCURRENCY:-2}"
 VERIFY_SUITE="${LAZYKIMI_VERIFY_SUITE:-all}"
 PYTHON_REQUEST="${LAZYKIMI_PYTHON:-}"
@@ -248,11 +249,23 @@ run_regression_inventory() {
     )
     local lifecycle_tests=(
         "v103-loop-scripts-regression.sh"
+        "v103-tooling-lifecycle-regression.sh"
+        "v103-codegraph-regression.sh"
+        "v103-codegraph-fixture-cleanup-regression.sh"
+        "v103-codegraph-install-timeout-regression.sh"
+        "v103-codegraph-lifecycle-caller-survival-regression.sh"
+        "v103-codegraph-uninstall-pid-identity-regression.sh"
+        "v103-lifecycle-entrypoint-regression.sh"
     )
     local standalone_tests=("${core_tests[@]}" "${lifecycle_tests[@]}")
     local selected_tests=()
     local paired_only_tests=(
         "v103-automatic-tooling-contract-parity.sh"
+        "v103-lifecycle-contract-parity.sh"
+        "v2-lifecycle-contract-parity.sh"
+    )
+    local publication_tests=(
+        "publication-regression.sh"
     )
 
     contains_test() {
@@ -264,7 +277,7 @@ run_regression_inventory() {
         return 1
     }
 
-    for test_name in "${standalone_tests[@]}" "${paired_only_tests[@]}"; do
+    for test_name in "${standalone_tests[@]}" "${paired_only_tests[@]}" "${publication_tests[@]}"; do
         test_path="${tests_dir}/${test_name}"
         if [ ! -f "$test_path" ] || [ ! -s "$test_path" ] || ! bash -n "$test_path"; then
             printf 'ERROR: classified regression is missing, empty, or invalid: %s\n' "$test_name" >&2
@@ -278,6 +291,8 @@ run_regression_inventory() {
             :
         elif contains_test "$test_name" "${paired_only_tests[@]}"; then
             :
+        elif contains_test "$test_name" "${publication_tests[@]}"; then
+            :
         else
             printf 'ERROR: unclassified package-local regression: %s\n' "$test_name" >&2
             inventory_failed=true
@@ -286,6 +301,13 @@ run_regression_inventory() {
 
     for test_name in "${standalone_tests[@]}"; do
         if contains_test "$test_name" "${paired_only_tests[@]}"; then
+            printf 'ERROR: regression has conflicting classifications: %s\n' "$test_name" >&2
+            inventory_failed=true
+        fi
+    done
+
+    for test_name in "${publication_tests[@]}"; do
+        if contains_test "$test_name" "${standalone_tests[@]}" || contains_test "$test_name" "${paired_only_tests[@]}"; then
             printf 'ERROR: regression has conflicting classifications: %s\n' "$test_name" >&2
             inventory_failed=true
         fi
@@ -313,6 +335,19 @@ run_regression_inventory() {
     for test_name in "${selected_tests[@]}"; do
         test_path="${tests_dir}/${test_name}"
         test_timeout="$VERIFY_TIMEOUT"
+        # The codegraph lifecycle set owns long-running process supervision and
+        # the tooling lifecycle runs several bounded fixture installs; both need
+        # a floor above the generic per-check budget. v003-doctor-plugin-root
+        # drives a full nested `lazykimi verify --must-pass`, whose phase
+        # budget grew with the v1.3.3 family test stack, so it needs the same
+        # floor (measured ~2 min nested, ~3.5 min unnested on the dev host).
+        case "$test_name" in
+            v103-codegraph-regression.sh|v103-codegraph-install-timeout-regression.sh|v103-tooling-lifecycle-regression.sh|v003-doctor-plugin-root-regression.sh)
+                if [ "$CODEGRAPH_REGRESSION_TIMEOUT" -gt "$test_timeout" ]; then
+                    test_timeout="$CODEGRAPH_REGRESSION_TIMEOUT"
+                fi
+                ;;
+        esac
         if ! run_isolated_test "$test_path" "$test_timeout"; then
             printf 'FAIL: standalone regression failed: %s\n' "$test_name" >&2
             regression_failed=true
@@ -426,9 +461,9 @@ run_language_tests() {
         rm -f "$result_file"
     fi
 
-    # The pytest set lands with the family test-stack port; until then the
-    # phase reports an honest skip when no pytest files exist rather than
-    # fabricating a pass over an empty collection.
+    # The pytest set ships with the family test-stack port (tests/ +
+    # tooling/test_lazykimi_*.py). The count guard keeps the phase honest: an
+    # empty collection reports a skip rather than fabricating a pass.
     local pytest_files=0
     while IFS= read -r test_path; do
         pytest_files=$((pytest_files + 1))

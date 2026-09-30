@@ -81,7 +81,7 @@ Start from the immutable release, open the cloned folder in the host you want
 to use, and type `onboard` in the agent chat:
 
 ```bash
-git clone https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.3.3 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
 ```
 

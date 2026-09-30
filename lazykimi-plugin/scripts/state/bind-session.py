@@ -218,7 +218,7 @@ def main() -> int:
     parser.add_argument("--probe-file", required=True, type=Path)
     parser.add_argument(
         "--marketplace-file",
-        default=Path(__file__).resolve().parents[3] / "marketplace.json",
+        default=Path(__file__).resolve().parents[2] / "marketplace.json",
         type=Path,
     )
     args = parser.parse_args()

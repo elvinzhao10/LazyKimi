@@ -115,3 +115,38 @@ When a regression fails, start from its fixture and expected assertion, then
 follow the smallest source function named in the failure. Do not "fix" a
 release check by weakening its assertion: each assertion encodes a published
 ownership or evidence contract.
+
+## Family test-stack port: inventory and skip list (v1.3.3)
+
+The v1.3.3 test stack mirrors the lazyzcode layout: `tests/*.test.js`
+(node:test), `tests/test_lazykimi_*.py` plus `tooling/test_lazykimi_*.py`
+(pytest, python3.10+ resolved by `scripts/lazykimi-python-resolver.sh`),
+`tests/v*.sh` and `tests/publication-regression.sh` (bash), `tests/fixtures/`,
+and `scripts/assets/` fixture libraries. Existing `v001`–`v003` regressions
+keep their numbers; ports new in v1.3.3 use the `v103*` family prefix.
+
+Current committed inventory: 32 node:test files, 26 pytest files (15 in
+`tests/`, 11 in `tooling/`), and 40 bash regressions (24 historical `v001`–
+`v003` + 16 `v103`/`v2`/publication ports), of which the paired-only parity
+checks and the publication regression run outside the normal suite selector.
+
+Verify suites stay `all | core | lifecycle`. LazyZCode's fourth `language`
+suite is intentionally NOT ported as a selector: its content (package node
+tests + contract tests + pytest) is exactly what lazykimi's `all` suite runs,
+so a duplicate selector would add drift risk without adding coverage.
+
+Skipped lazyzcode tests, with reasons:
+
+| Skipped lazyzcode test | Reason |
+| --- | --- |
+| `v015-consumer-agents-regression.sh` | Exercises `scripts/ensure-consumer-agents.sh` and ZCode consumer-agent injection at session start; lazykimi ships its 13 family agents statically and has no consumer-agent ensurement machinery. |
+| `v110-six-host-contract-parity.sh` (+ `-regression.sh`) | Gates the LazyTrae/LazyZCode sibling pair by explicit root; lazykimi's family parity runs through `v103-automatic-tooling-contract-parity.sh`, `v103-lifecycle-contract-parity.sh`, and `v2-lifecycle-contract-parity.sh` against LazyZCode. |
+| `host-capability-routes.test.js` | Enumerates the ZCode host-capability route table; lazykimi's host surface is Kimi-only and is asserted by `marketplace-route-contract.test.js` and `v110-machine-status.test.js`. |
+| `product-naming.test.js` | Replaced by the repo-root naming guard ported in T20 (`scripts/check-product-naming.js` + `.product-naming-allowlist.json` + its negative test), which covers the whole active surface instead of test-local fixtures. |
+| `zcode-connector-reference.test.js` | ZCode connector-manifest specifics with no Kimi counterpart (Kimi Work connectors are documented in `docs/reference/host-routes.md` and verified on-host in T21). |
+| `zcode-observation-bundle.test.js` | ZCode observation-bundle packaging; lazykimi's equivalent receipt machinery (`kimi-observation*`, `kimi-receipt.js`) is covered by `lifecycle-host-handoff.test.js` and `kimi-receipt-path.test.js`. |
+| remaining `v015`–`v12x` host/UI regressions (cwd-injection, capability broker/detector, provider lifecycle, LSP, remote capabilities, zcode package preparation, zcode observation bundle, state-task schema, etc.) | They drive ZCode host surfaces (ZCode UI hooks, ZCode capability broker, ZCode provider registry) that lazykimi does not ship; the Kimi equivalents are covered by the ported `v103-*` set, the six MCP servers' own contract tests, and `lazykimi-hook-pipeline-test.sh`. |
+
+Ported-and-renamed (not skipped): `zcode-receipt-path.test.js` becomes
+`kimi-receipt-path.test.js` with the same private-path refusal semantic against
+`.kimi-code/` receipt locations.

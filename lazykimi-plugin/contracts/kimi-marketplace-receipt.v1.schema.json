@@ -18,7 +18,7 @@
       "const": 1
     },
     "type": {
-      "const": "kimi-marketplace-full-plugin"
+      "const": "kimi-plugin-manifest-full-plugin"
     },
     "source": {
       "type": "object",

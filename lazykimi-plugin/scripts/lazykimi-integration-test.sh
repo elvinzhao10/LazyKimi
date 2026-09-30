@@ -67,13 +67,15 @@ else
   fail "doctor did not pass or did not report 16 hooks"
 fi
 
-# Step 5: load-check must report 17/17 skills, 11/11 agents, 16/16 hooks, 6/6 MCP.
+# Step 5: load-check must report the v1.3.3 inventory: 19/19 skills, 20/20
+# commands, 13/13 agents, 16/16 inline hook events, 6/6 MCP servers.
 if node "$CLI" load-check >"$TMP/load.out" 2>&1 \
-  && grep -q '17/17 skills' "$TMP/load.out" \
-  && grep -q '11/11 agents' "$TMP/load.out" \
-  && grep -q '16/16 hooks' "$TMP/load.out" \
-  && grep -q '6/6 MCP servers' "$TMP/load.out"; then
-  pass "load-check reports 17/17, 11/11, 16/16, 6/6"
+  && grep -q '19/19' "$TMP/load.out" \
+  && grep -q '20/20' "$TMP/load.out" \
+  && grep -q '13/13' "$TMP/load.out" \
+  && grep -q '16/16' "$TMP/load.out" \
+  && grep -q '6/6 MCP' "$TMP/load.out"; then
+  pass "load-check reports 19/19 skills, 20/20 commands, 13/13 agents, 16/16 hooks, 6/6 MCP"
 else
   cat "$TMP/load.out" >&2
   fail "load-check counts mismatch"

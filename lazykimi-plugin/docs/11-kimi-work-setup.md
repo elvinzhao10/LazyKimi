@@ -22,7 +22,7 @@ Only the 17 `lazy-*` skills can be imported.
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/elvinzhao10/LazyKimi.git
+   git clone --branch v1.3.3 https://github.com/elvinzhao10/LazyKimi.git
    cd LazyKimi
    ```
 

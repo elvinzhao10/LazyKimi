@@ -134,9 +134,16 @@ function inventory(pluginRoot, policy) {
   return records;
 }
 
-function validateArtifact(file, expectedDigest, expectedVersion) {
+function validateArtifact(file, expectedDigest, expectedVersion, { identityArtifact = false } = {}) {
   const parsed = jsonFile(file, 'MARKETPLACE_MANIFEST_INVALID');
   if (digest(parsed.bytes) !== expectedDigest) {
+    // LazyKimi's marketplace.json v2 carries the route identity (single plugin
+    // entry, id + source) and no plugin version, so any byte drift there is an
+    // identity break; the plugin manifest carries the version, so its drift
+    // still classifies by version comparison.
+    if (identityArtifact) {
+      throw new LifecycleError('MARKETPLACE_IDENTITY_INVALID', `marketplace artifact bytes changed: ${file}`);
+    }
     const version = parsed.value?.version ?? parsed.value?.plugins?.[0]?.version;
     const code = version === expectedVersion ? 'MARKETPLACE_IDENTITY_INVALID' : 'MARKETPLACE_VERSION_MISMATCH';
     throw new LifecycleError(code, `marketplace artifact bytes changed: ${file}`);
@@ -176,7 +183,9 @@ function validateMarketplaceRoutes(releaseRoot) {
   const policy = contract();
   const artifacts = {};
   for (const [relative, expectedDigest] of Object.entries(policy.artifacts)) {
-    artifacts[relative] = validateArtifact(path.join(releaseRoot, relative), expectedDigest, policy.version);
+    artifacts[relative] = validateArtifact(path.join(releaseRoot, relative), expectedDigest, policy.version, {
+      identityArtifact: relative === MARKETPLACE_ARTIFACT,
+    });
   }
   // LazyKimi's single marketplace.json v2 serves both the local marketplace
   // route and the GitHub-hosted route; the identity check runs once for both.
