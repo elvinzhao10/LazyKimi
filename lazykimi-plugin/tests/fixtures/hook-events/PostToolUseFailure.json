@@ -1,0 +1,1 @@
+{"session_id":"session-fixture-001","cwd":"${PROJECT_DIR}","hook_event_name":"PostToolUseFailure","tool_name":"Bash","tool_input":{"command":"ls -la"},"error":"ls: no such file or directory","error_type":"ENOENT"}

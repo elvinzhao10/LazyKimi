@@ -34,11 +34,11 @@ Idempotent: skips entries whose command string is already present in
 config.toml. A backup config.toml.bak is written before the first new entry
 is appended. Restart Kimi Code CLI after running this script.
 
-Events wired (8 blockable/critical hooks; the 8 advisory hooks
-  in the manifest run only when the plugin is enabled via /plugins
-  install and do not need config.toml registration):
-  SessionStart, UserPromptSubmit, PreToolUse (Bash), PostToolUse, Stop,
-  SubagentStop, PreCompact, PostCompact.
+Events wired (the critical 8 — exactly the events carrying v1.3.3
+  gating semantics per contracts/kimi-hook-consumers.v1.json; the 8 advisory
+  events activate only through the plugin manifest route):
+  SessionStart, UserPromptSubmit, PreToolUse (Bash), PostToolUse,
+  PostToolUseFailure, Stop, PermissionRequest, PermissionResult.
 EOF
 }
 
@@ -87,17 +87,18 @@ else
   exit 1
 fi
 
-# Define the 8 blockable/critical hooks: event|matcher|script|timeout
-# (the 8 advisory hooks in the manifest are plugin-only and not wired here)
+# Define the critical 8 hooks: event|matcher|script|timeout
+# (the 8 advisory hooks in the manifest are plugin-only and not wired here;
+# the split matches contracts/kimi-hook-consumers.v1.json)
 HOOKS=(
   "SessionStart||session-start.sh|10"
   "UserPromptSubmit||user-prompt-submit.sh|5"
   "PreToolUse|Bash|pre-tool-use.sh|5"
   "PostToolUse||post-tool-use.sh|5"
+  "PostToolUseFailure||post-tool-use-failure.sh|5"
   "Stop||stop-gate.sh|10"
-  "SubagentStop||subagent-stop.sh|5"
-  "PreCompact||pre-compact.sh|5"
-  "PostCompact||post-compact.sh|5"
+  "PermissionRequest||permission-request.sh|5"
+  "PermissionResult||permission-result.sh|5"
 )
 
 # Verify all 8 hook scripts exist

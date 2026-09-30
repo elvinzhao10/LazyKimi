@@ -1,54 +1,159 @@
 #!/usr/bin/env bash
-# LazyKimi — Stop hook
-# Verifies completion evidence before allowing stop. Fail-open by default.
-# Set LAZYKIMI_STRICT=1 to enforce blocking (exit 2) when gates are unmet.
-set -euo pipefail
-trap 'echo "[LazyKimi] stop-gate internal error; failing open" >&2; exit 0' ERR
+# stop-gate.sh — Kimi Stop hook: completion-gate reminder.
+# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+#
+# Reads completion status via the launcher (scripts/completion-assessment.js)
+# when resolvable, otherwise falls back to reading .lazykimi state directly
+# (active run + unchecked plan checkboxes). Emits {"additionalContext": ...}.
+#
+# Kimi output contract: print EITHER strict JSON OR nothing on stdout.
+# ADVISORY — ALWAYS exits 0. This hook never blocks Stop, it only reminds.
+set -uo pipefail
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
-CWD="$PWD"
-if [ -n "$INPUT" ] && command -v jq >/dev/null 2>&1; then
-  CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // ""' 2>/dev/null || echo "")
-  [ -z "$CWD" ] && CWD="$PWD"
+# --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
+INPUT=$(head -c 1048576 || true)
+
+# --- Context pressure detection: pass through gracefully ---
+for marker in "context compacted" "context_length_exceeded" "skill descriptions were shortened" "context_too_large"; do
+    if printf '%s' "$INPUT" | grep -qi "$marker"; then
+        exit 0
+    fi
+done
+
+# --- Stop hook active guard: don't re-remind (prevents loops) ---
+STOP_ACTIVE=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('stop_hook_active',''))" 2>/dev/null || echo "")
+if [ "$STOP_ACTIVE" = "True" ] || [ "$STOP_ACTIVE" = "true" ]; then
+    exit 0
 fi
 
-STATE_DIR="$CWD/.lazykimi/state"
-EVIDENCE_DIR="$CWD/.lazykimi/evidence"
-BOULDER="$STATE_DIR/boulder.json"
-STRICT="${LAZYKIMI_STRICT:-0}"
+CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+[ -n "$CWD" ] || CWD="$PWD"
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-warn_count=0
-warn() {
-  echo "[LazyKimi] STOP GATE WARNING: $1" >&2
-  warn_count=$((warn_count + 1))
-}
+REMINDER=""
 
-# 1. In-progress tasks in boulder.json
-if [ -f "$BOULDER" ] && command -v jq >/dev/null 2>&1; then
-  in_progress=$(jq -r '[.tasks[]? | select(.status=="in_progress")] | length' "$BOULDER" 2>/dev/null || echo "0")
-  if [ "${in_progress:-0}" -gt 0 ]; then
-    warn "boulder.json has $in_progress task(s) with status in_progress"
-  fi
+# --- Preferred path: completion status via the launcher ---
+if [ -f "$PLUGIN_ROOT/scripts/completion-assessment.js" ] && command -v node >/dev/null 2>&1; then
+    ASSESSMENT=$(node "$PLUGIN_ROOT/scripts/completion-assessment.js" --root "$CWD" 2>/dev/null || true)
+    if [ -n "$ASSESSMENT" ]; then
+        REMINDER=$(printf '%s' "$ASSESSMENT" | python3 -c '
+import json, sys
+try:
+    a = json.load(sys.stdin)
+except Exception:
+    raise SystemExit(0)
+status = a.get("status", "")
+reason = a.get("reason_code", "")
+remediation = a.get("remediation", "show_run_status")
+if status == "ready":
+    raise SystemExit(0)
+if status == "uninitialized" and reason == "AUTHORITY_ABSENT":
+    # No completion authority — the direct .lazykimi state check below decides.
+    raise SystemExit(3)
+print(
+    f"[LazyKimi] Completion gate: {status} ({reason}). "
+    f"Do not claim completion without verification. Remediation: {remediation}. "
+    "Finish the remaining plan criteria with recorded evidence before stopping."
+)
+' 2>/dev/null)
+        LAUNCHER_STATUS=$?
+        if [ "$LAUNCHER_STATUS" = "0" ]; then
+            # ready, or a reminder was produced
+            if [ -n "$REMINDER" ]; then
+                printf '%s' "$REMINDER" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))'
+            fi
+            exit 0
+        fi
+        # status uninitialized/AUTHORITY_ABSENT (or launcher output unparseable) -> fall through
+        if [ "$LAUNCHER_STATUS" != "3" ]; then
+            REMINDER=""
+        fi
+    fi
 fi
 
-# 2. Evidence files
-if [ -d "$EVIDENCE_DIR" ]; then
-  ev_count=$(find "$EVIDENCE_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
-  if [ "${ev_count:-0}" -eq 0 ]; then
-    warn "no evidence files present in .lazykimi/evidence/"
-  fi
+# --- Fallback: read .lazykimi state directly ---
+RUNS_DIR="$CWD/.lazykimi/runs"
+if [ ! -d "$RUNS_DIR" ]; then
+    exit 0
+fi
+
+ACTIVE_RUN=""
+for run_dir in "$RUNS_DIR"/*/; do
+    state_file="${run_dir}state.json"
+    if [ -f "$state_file" ]; then
+        STATUS=$(python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); print(d.get("status", ""))' "$state_file" 2>/dev/null || echo "")
+        if [ "$STATUS" = "active" ] || [ "$STATUS" = "paused" ] || [ "$STATUS" = "executing" ] || [ "$STATUS" = "verifying" ] || [ "$STATUS" = "reviewing" ] || [ "$STATUS" = "blocked" ] || [ "$STATUS" = "created" ] || [ "$STATUS" = "planning" ]; then
+            ACTIVE_RUN="$run_dir"
+            ACTIVE_STATE="$state_file"
+            break
+        fi
+    fi
+done
+
+if [ -z "$ACTIVE_RUN" ]; then
+    exit 0
+fi
+
+PLAN_REF=$(python3 -c 'import json, sys; d = json.load(open(sys.argv[1])); print(d.get("plan_reference", ""))' "$ACTIVE_STATE" 2>/dev/null || echo "")
+[ -n "$PLAN_REF" ] || exit 0
+
+if [[ "$PLAN_REF" == /* ]]; then
+    PLAN_PATH="$PLAN_REF"
 else
-  warn "no .lazykimi/evidence/ directory found"
+    PLAN_PATH="$CWD/$PLAN_REF"
 fi
 
-# 3. Decision
-if [ "$warn_count" -gt 0 ]; then
-  echo "[LazyKimi] Stop gate: $warn_count warning(s). Run lazy-verifier or record evidence before completing." >&2
-  if [ "$STRICT" = "1" ]; then
-    echo "[LazyKimi] STRICT mode active — blocking stop." >&2
-    exit 2
-  fi
+[ -f "$PLAN_PATH" ] || exit 0
+
+# Count top-level work outside fenced examples in supported plan sections.
+UNCHECKED=$(python3 - "$PLAN_PATH" <<'PY' 2>/dev/null || true
+import re
+import sys
+with open(sys.argv[1]) as handle:
+    lines = handle.readlines()
+headings_to_count = {'TODOs', 'Todos', 'Final Verification Wave'}
+in_section = False
+fence = None
+unchecked = []
+for line in lines:
+    stripped = line.strip()
+    marker = re.match(r'^ {0,3}(`{3,}|~{3,})', line)
+    if marker:
+        token = marker.group(1)
+        if fence is None:
+            fence = token
+        elif token[0] == fence[0] and len(token) >= len(fence) and stripped == token:
+            fence = None
+        continue
+    if fence is not None:
+        continue
+    if stripped.startswith('## '):
+        in_section = stripped[3:].strip() in headings_to_count
+        continue
+    if not in_section:
+        continue
+    checkbox = re.match(r'^-\s+\[ \]\s+(.+)$', line.rstrip())
+    if checkbox:
+        unchecked.append(checkbox.group(1))
+if unchecked:
+    title = unchecked[0]
+    print(f"{len(unchecked)} {title[:77] + '...' if len(title) > 80 else title}")
+else:
+    print('0')
+PY
+)
+[ -n "$UNCHECKED" ] || UNCHECKED=0
+
+if [ "$UNCHECKED" = "0" ]; then
+    exit 0
 fi
 
+REMAINING=$(printf '%s' "$UNCHECKED" | awk '{print $1}')
+NEXT_TASK=$(printf '%s' "$UNCHECKED" | cut -d ' ' -f2-)
+PLAN_NAME=$(basename "$PLAN_PATH" .md)
+
+REMINDER="[LazyKimi] Completion gate: $REMAINING unfinished task(s) in plan \`$PLAN_NAME\`. Next: $NEXT_TASK. Do not claim completion without verification. Run /lazy-start-work $PLAN_NAME to continue the planned work."
+
+# --- Emit strict JSON only: {"additionalContext": "<reminder>"} ---
+printf '%s' "$REMINDER" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))'
 exit 0

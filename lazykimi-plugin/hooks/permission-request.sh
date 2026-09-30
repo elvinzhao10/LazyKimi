@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
-# LazyKimi — PermissionRequest hook
-# Advisory: logs permission requests to stderr. Never blocks.
-set -euo pipefail
-trap 'echo "[LazyKimi] permission-request internal error; failing open" >&2; exit 0' ERR
-
-[ -t 0 ] && exit 0
-payload=$(cat)
-truncated=${payload:0:200}
-ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-
-echo "[${ts}] PermissionRequest: ${truncated}" >&2
-exit 0
+# permission-request.sh — Kimi PermissionRequest hook (critical event).
+# Advisory audit consumer: records a normalized, redacted approval-request
+# event into the workspace .lazykimi/ ledger. See permission-record.js for
+# the ported v1.3.3 consumer semantics (contracts/kimi-hook-consumers.v1.json).
+#
+# Kimi output contract: print NOTHING on stdout; diagnostics to stderr.
+# ALWAYS exits 0 — this hook never denies a permission request.
+set -u
+exec node "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/permission-record.js" PermissionRequest

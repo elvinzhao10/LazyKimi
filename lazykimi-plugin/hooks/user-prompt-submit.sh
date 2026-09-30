@@ -1,43 +1,181 @@
 #!/usr/bin/env bash
-# LazyKimi — UserPromptSubmit hook
-# Detects ultrawork/ulw keywords (injects skill pointer) and context-pressure markers.
-# Advisory only — always exits 0.
-set -euo pipefail
-trap 'echo "[LazyKimi] user-prompt-submit internal error; failing open" >&2; exit 0' ERR
+# user-prompt-submit.sh — Kimi UserPromptSubmit hook: adaptive intake.
+# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+#
+# Keeps the adaptive dual-entry logic:
+#   1. runtime_freshness present in the event  -> scripts/runtime-freshness-entry.js resume
+#   2. otherwise                               -> tooling/lazykimi_adaptive_runtime.py
+# Both are called only when present (graceful degradation when absent).
+# Also detects context-pressure markers (surface run state and pressure
+# signals on every user prompt) and LazyKimi command keywords.
+#
+# Kimi output contract: print EITHER strict JSON ({"additionalContext": "..."})
+# OR nothing on stdout; diagnostics go to stderr. Nothing may block: ALWAYS
+# exits 0, never emits a deny/continue-false payload.
+set -uo pipefail
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
-[ -z "$INPUT" ] && exit 0
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+PLUGIN_ROOT="$(cd -P -- "$SCRIPT_DIR/.." && pwd -P)"
 
-# Extract prompt (prefer jq, fall back to python3)
-prompt=""
-if command -v jq >/dev/null 2>&1; then
-  prompt=$(printf '%s' "$INPUT" | jq -r '.prompt // .user_prompt // .message // ""' 2>/dev/null || true)
-elif command -v python3 >/dev/null 2>&1; then
-  prompt=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('prompt','') or d.get('user_prompt','') or d.get('message',''))" 2>/dev/null || true)
-fi
-[ -z "$prompt" ] && exit 0
+# --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
+INPUT=$(head -c 1048576 || true)
+INPUT_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-ups.XXXXXX")
+trap 'rm -f "$INPUT_FILE"' EXIT
+printf '%s' "$INPUT" >"$INPUT_FILE"
 
-# ULTRAWORK trigger detection — inject skill pointer
-if printf '%s' "$prompt" | grep -qiE '\b(ultrawork|ulw)\b'; then
-  cat <<'ULW_DIRECTIVE'
-[LazyKimi] ULTRAWORK MODE DETECTED
-Skill pointer: invoke the `lazy-ulw-loop` / `lazy-ulw-plan` skill before continuing.
-Execution loop: PIN -> RED -> GREEN -> SURFACE -> CLEAN
-Stop rules: no completion claim without evidence. Say "exit ultrawork" to leave this mode.
-ULW_DIRECTIVE
-fi
+NOTES="$(ADAPTIVE_RUNTIME="$PLUGIN_ROOT/tooling/lazykimi_adaptive_runtime.py" \
+FRESHNESS_ENTRY="$PLUGIN_ROOT/scripts/runtime-freshness-entry.js" \
+python3 - "$INPUT_FILE" <<'PY'
+import json
+import os
+import re
+import subprocess
+import sys
 
-# LazyKimi workflow keyword detection
-keywords="ulw-loop|start-work|ulw-plan|handoff|init-deep|review-work|remove-ai-slops|verifier|reviewer"
-if printf '%s' "$prompt" | grep -qiE "\b($keywords)\b"; then
-  echo "[LazyKimi] Workflow keyword detected — ensure the matching lazy-* skill is loaded."
-fi
+with open(sys.argv[1], encoding='utf-8', errors='replace') as handle:
+    raw = handle.read()
+if len(raw) > 1024 * 1024:
+    raw = raw[:1024 * 1024]
 
-# Context-pressure detection
-CONTEXT_MARKERS="context compacted|context_length_exceeded|skill descriptions were shortened|context_too_large|ran out of room|exceeds the context window|long threads and multiple compactions"
-if printf '%s' "$prompt" | grep -qiE "($CONTEXT_MARKERS)"; then
-  echo "[LazyKimi] Context pressure detected. Consider /compact or re-injecting .lazykimi/ state."
+notes = []
+
+
+def add(text):
+    if text:
+        notes.append(text)
+
+
+def run(cmd, payload):
+    try:
+        proc = subprocess.run(cmd, input=payload.encode('utf-8'), stdout=subprocess.PIPE,
+                              stderr=subprocess.DEVNULL, timeout=8)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return proc.stdout.decode('utf-8', 'replace').strip() or None
+
+
+try:
+    payload = json.loads(raw)
+    if not isinstance(payload, dict):
+        payload = {}
+except json.JSONDecodeError:
+    payload = {}
+
+prompt = payload.get('prompt') or payload.get('user_prompt') or payload.get('message') or ''
+if not isinstance(prompt, str):
+    prompt = ''
+
+# --- Context-pressure markers (surface run state and pressure signals) ---
+PRESSURE_MARKERS = (
+    'context compacted',
+    'context_length_exceeded',
+    'skill descriptions were shortened',
+    'context_too_large',
+    "ran out of room in the model's context window",
+    'exceeds the context window',
+    'long threads and multiple compactions',
+)
+pressure = next((m for m in PRESSURE_MARKERS if m in prompt.lower()), None)
+if pressure:
+    add(
+        '[LazyKimi] Context pressure detected (marker: ' + pressure + '). '
+        'Recover context before continuing: re-read the active run state under '
+        '.lazykimi/runs/ (state.json, events.jsonl) and the plan under .lazykimi/plans/ '
+        'instead of trusting stale in-context pointers.'
+    )
+
+# --- Adaptive dual-entry (degrade gracefully when machinery is absent) ---
+directive = None
+freshness = payload.get('runtime_freshness')
+freshness_json = ''
+if isinstance(freshness, str):
+    freshness_json = freshness.strip()
+elif freshness is not None:
+    freshness_json = json.dumps(freshness, separators=(',', ':'))
+
+freshness_entry = os.environ.get('FRESHNESS_ENTRY', '')
+adaptive_runtime = os.environ.get('ADAPTIVE_RUNTIME', '')
+
+if freshness_json and freshness_entry and os.path.isfile(freshness_entry):
+    result_text = run(['node', freshness_entry, 'resume'], freshness_json)
+    if result_text is None:
+        result_text = '{"status":"blocked","completion":"blocked","reason":"malformed-runtime-context"}'
+    try:
+        result = json.loads(result_text)
+    except json.JSONDecodeError:
+        result = {'status': 'blocked'}
+    status = result.get('status', 'blocked') if isinstance(result, dict) else 'blocked'
+    if status != 'resumed':
+        blocked = 'blocked:capacity'
+        if status == 'stale':
+            blocked = 'blocked:stale-context'
+        directive = {
+            'kind': 'lazykimi-adaptive-directive',
+            'continuation': 'stale-rejected',
+            'dispatched': blocked,
+            'runtimeFreshness': result if isinstance(result, dict) else {'status': 'blocked'},
+        }
+        add('[LazyKimi] Adaptive continuation rejected (' + blocked + '). '
+            'Resume via /lazy-start-work with a fresh plan; do not continue stale work.')
+    elif adaptive_runtime and os.path.isfile(adaptive_runtime):
+        out = run(['python3', adaptive_runtime], raw)
+        if out:
+            try:
+                directive = json.loads(out)
+                directive['continuation'] = 'resumed'
+                directive['runtimeFreshness'] = result
+            except json.JSONDecodeError:
+                add(out)  # plain-text notice (e.g. secret redaction warning)
+elif adaptive_runtime and os.path.isfile(adaptive_runtime):
+    out = run(['python3', adaptive_runtime], raw)
+    if out:
+        try:
+            directive = json.loads(out)
+        except json.JSONDecodeError:
+            add(out)  # plain-text notice (e.g. secret redaction warning)
+
+if isinstance(directive, dict):
+    if directive.get('dispatched') == 'blocked:malformed-input':
+        # Fail closed with a fixed directive (never echoing input) when the
+        # event could not be resolved to a project root.
+        directive = {
+            'kind': 'lazykimi-adaptive-directive',
+            'dispatched': 'blocked:malformed-input',
+            'persistence': 'skipped:malformed-input',
+        }
+    add('[LazyKimi] Adaptive intake directive: ' + json.dumps(directive, ensure_ascii=False, separators=(',', ':'), sort_keys=True))
+
+# --- Command keyword detection (explicit entry routes) ---
+KEYWORD_ROUTES = (
+    (r'\bulw-loop\b', 'ulw-loop', '/lazy-ulw-loop'),
+    (r'\bulw-plan\b', 'ulw-plan', '/lazy-ulw-plan'),
+    (r'\bultrawork\b|\bulw\b', 'ultrawork', '/lazy-ultrawork'),
+    (r'\bstart-work\b', 'start-work', '/lazy-start-work'),
+    (r'\bhandoff\b', 'handoff', '/lazy-handoff'),
+    (r'\bstop-continuation\b', 'stop-continuation', '/lazy-stop-continuation'),
+    (r'\bralph-loop\b', 'ralph-loop', '/lazy-ralph-loop'),
+    (r'\binit-deep\b', 'init-deep', '/lazy-init-deep'),
+    (r'\breview-work\b', 'review-work', '/lazy-review-work'),
+    (r'\bremove-ai-slops\b', 'remove-ai-slops', 'the `lazy-remove-ai-slops` skill'),
+)
+matched = set()
+for pattern, keyword, route in KEYWORD_ROUTES:
+    if re.search(pattern, prompt, re.I):
+        matched.add(keyword)
+        if keyword == 'ultrawork' and ('ulw-loop' in matched or 'ulw-plan' in matched):
+            continue  # specific ulw-* keyword already routed
+        if route.startswith('/'):
+            add(f"[LazyKimi] Command keyword '{keyword}' detected — use the `{route}` command (skill `lazy-{keyword}`) for this request.")
+        else:
+            add(f"[LazyKimi] Command keyword '{keyword}' detected — use {route} for this request.")
+
+if notes:
+    print(json.dumps({'additionalContext': '\n'.join(notes)}))
+PY
+)" || NOTES=""
+
+if [ -n "$NOTES" ]; then
+    printf '%s\n' "$NOTES"
 fi
 
 exit 0

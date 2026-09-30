@@ -91,8 +91,8 @@
       "hook_events": 16,
       "mcp_servers": 6
     },
-    "file_count": 107,
-    "inventory_sha256": "c4e430f964014dbf0ca7146df2af27b516c277d32e248f43fe3b3d81e4f9f7c8"
+    "file_count": 108,
+    "inventory_sha256": "8e25b0a5a9b77b438955dd99d6ad1b351f77d5196f2744339ccb634945bf30e1"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

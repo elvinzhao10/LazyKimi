@@ -1,13 +1,23 @@
 #!/usr/bin/env bash
-# LazyKimi — SubagentStart hook
-# Advisory: logs subagent start to stderr. Never blocks.
-set -euo pipefail
-trap 'echo "[LazyKimi] subagent-start internal error; failing open" >&2; exit 0' ERR
+# subagent-start.sh — Kimi SubagentStart hook (advisory).
+# Dispatch ledger event: appends a subagent_started event to the active run's
+# events.jsonl via the scripts/state append machinery (transactional).
+#
+# Kimi output contract: print NOTHING on stdout; diagnostics to stderr.
+# Advisory only — ALWAYS exits 0.
+set -uo pipefail
 
-[ -t 0 ] && exit 0
-payload=$(cat)
-truncated=${payload:0:200}
-ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+INPUT=$(head -c 1048576 || true)
+CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+[ -n "$CWD" ] || CWD="$PWD"
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-echo "[${ts}] SubagentStart: ${truncated}" >&2
+AGENT=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('agent_type') or d.get('agent_type_name') or d.get('agent_name') or '')" 2>/dev/null || true)
+
+RID=$(CWD="$CWD" bash "$PLUGIN_ROOT/scripts/state/latest-run.sh" 2>/dev/null || true)
+[ -n "$RID" ] || exit 0
+
+printf '{"agent":"%s","source":"SubagentStart"}' "${AGENT//\"/}" \
+  | CWD="$CWD" bash "$PLUGIN_ROOT/scripts/state/append-event.sh" "$RID" subagent_started >/dev/null 2>&1 || true
+
 exit 0

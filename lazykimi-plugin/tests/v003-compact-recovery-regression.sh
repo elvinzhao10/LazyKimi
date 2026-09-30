@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
 # v003-compact-recovery-regression.sh
-# Verify post-compact recovery flag is set by pre-compact.sh and cleared by
-# session-start.sh, with a recovery hint printed. Fail-open if sessions.json is
-# missing. No jq dependency.
+# v1.3.3 port: PreCompact/PostCompact carry context-recovery semantics —
+# pre-compact.sh records a pre_compact ledger event on the active run;
+# post-compact.sh writes a context-recovery checkpoint under
+# .lazykimi/runs/<id>/checkpoints/, records a post_compact event, and
+# re-anchors context via additionalContext. Without an active run both hooks
+# stay silent no-ops (pre-compact) / reminder-only (post-compact). Fail-open.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-DIST_INDEX="${PLUGIN_ROOT}/dist/index.js"
-PRE_COMPACT="${PLUGIN_ROOT}/hooks/pre-compact.sh"
-SESSION_START="${PLUGIN_ROOT}/hooks/session-start.sh"
-
-if [ ! -f "${DIST_INDEX}" ]; then
-  echo "ERROR: ${DIST_INDEX} not found. Run npm run build first." >&2
-  exit 1
-fi
 
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
@@ -22,65 +17,35 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/lazykimi-compact-test.XXXXXX")"
 cleanup() { rm -rf "$TMP"; }
 trap cleanup EXIT
 
-# 1. init into a temp project (HOME isolated so ~/.kimi-code/config.toml is untouched).
-HOME="$TMP" node "${DIST_INDEX}" init --target "$TMP" >"$TMP/init.out" 2>&1 \
-  || { cat "$TMP/init.out" >&2; fail "init failed"; }
+# 1. Seed a temp project with an active run (v1.3.3 state model).
+mkdir -p "$TMP"
+CWD="$TMP" bash "$PLUGIN_ROOT/scripts/state/create-run.sh" compact-test "compact recovery regression" >/dev/null \
+  || fail "create-run failed"
 
-[ -d "$TMP/.kimi-code/rules" ] || fail ".kimi-code/rules/ not created"
-[ -f "$TMP/.lazykimi/state/sessions.json" ] || fail "sessions.json not created"
+EVENTS="$TMP/.lazykimi/runs/compact-test/events.jsonl"
 
+# 2. PreCompact with no cwd in payload falls back to PWD; run hooks from $TMP.
 cd "$TMP"
+printf '{"hook_event_name":"PreCompact"}\n' | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" \
+  || fail "pre-compact.sh exited non-zero"
 
-# 2. simulate PreCompact hook
-printf '{"hook_event_name":"PreCompact"}\n' | bash "$PRE_COMPACT" >"$TMP/pre-compact.out" 2>&1 \
-  || { cat "$TMP/pre-compact.out" >&2; fail "pre-compact.sh exited non-zero"; }
+grep -q '"event": *"pre_compact"' "$EVENTS" || fail "pre_compact ledger event missing"
 
-RECOVERY_FLAG_AFTER_PRE=$(python3 -c "import json; d=json.load(open('.lazykimi/state/sessions.json')); print(d.get('post_compact_recovery_needed', 'MISSING'))")
-[ "$RECOVERY_FLAG_AFTER_PRE" = "True" ] || fail "expected post_compact_recovery_needed=True after pre-compact, got $RECOVERY_FLAG_AFTER_PRE"
+# 3. PostCompact writes a checkpoint + ledger event + additionalContext reminder.
+OUT=$(printf '{"hook_event_name":"PostCompact","cwd":"%s"}\n' "$TMP" | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/post-compact.sh")
+grep -q 'additionalContext' <<<"$OUT" || fail "post-compact must emit additionalContext: $OUT"
+grep -Eq 'AGENTS|restoration' <<<"$OUT" || fail "post-compact must re-anchor project memory: $OUT"
+grep -q '"event": *"post_compact"' "$EVENTS" || fail "post_compact ledger event missing"
+CKPTS=$(find "$TMP/.lazykimi/runs/compact-test/checkpoints" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+[ "$CKPTS" -ge 1 ] || fail "context-recovery checkpoint missing"
 
-RULES_HASH_AFTER_PRE=$(python3 -c "import json; d=json.load(open('.lazykimi/state/sessions.json')); print(d.get('rules_hash_pre_compact', 'MISSING'))")
-[ -n "$RULES_HASH_AFTER_PRE" ] || fail "expected non-empty rules_hash_pre_compact after pre-compact"
-[ "$RULES_HASH_AFTER_PRE" != "MISSING" ] || fail "rules_hash_pre_compact missing after pre-compact"
+# 4. SessionStart stays advisory (strict JSON or nothing, always exit 0).
+OUT=$(printf '{"hook_event_name":"SessionStart","cwd":"%s"}\n' "$TMP" | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/session-start.sh")
+grep -Eq '^[{].*additionalContext' <<<"$OUT" || fail "session-start must emit strict JSON additionalContext: $OUT"
 
-# 3. simulate SessionStart hook
-printf '{"hook_event_name":"SessionStart"}\n' | bash "$SESSION_START" >"$TMP/session-start.out" 2>&1 \
-  || { cat "$TMP/session-start.out" >&2; fail "session-start.sh exited non-zero"; }
+# 5. Fail-open: hooks survive empty payloads and unknown projects.
+printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" || fail "pre-compact must fail open"
+printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/post-compact.sh" >/dev/null 2>&1 || fail "post-compact must fail open"
+printf 'not-json{{{' | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" >/dev/null 2>&1 || fail "pre-compact must fail open on malformed input"
 
-if ! grep -q 'Compact recovery needed' "$TMP/session-start.out"; then
-  cat "$TMP/session-start.out" >&2
-  fail "session-start.sh did not print compact recovery hint"
-fi
-
-if ! grep -q 'Active plan:' "$TMP/session-start.out"; then
-  cat "$TMP/session-start.out" >&2
-  fail "session-start.sh did not print active plan path"
-fi
-
-if ! grep -q 'Rule files:' "$TMP/session-start.out"; then
-  cat "$TMP/session-start.out" >&2
-  fail "session-start.sh did not print rule file list"
-fi
-
-RECOVERY_FLAG_AFTER_START=$(python3 -c "import json; d=json.load(open('.lazykimi/state/sessions.json')); print(d.get('post_compact_recovery_needed', 'MISSING'))")
-[ "$RECOVERY_FLAG_AFTER_START" = "False" ] || fail "expected post_compact_recovery_needed=False after session-start, got $RECOVERY_FLAG_AFTER_START"
-
-# 4. fail-open when sessions.json is missing
-rm -f "$TMP/.lazykimi/state/sessions.json"
-printf '{"hook_event_name":"SessionStart"}\n' | bash "$SESSION_START" >"$TMP/session-start-missing.out" 2>&1 \
-  || { cat "$TMP/session-start-missing.out" >&2; fail "session-start.sh should fail open when sessions.json is missing"; }
-
-# 5. fail-open when sessions.json is malformed
-printf 'not-json{{{' > "$TMP/.lazykimi/state/sessions.json"
-printf '{"hook_event_name":"SessionStart"}\n' | bash "$SESSION_START" >"$TMP/session-start-bad.out" 2>&1 \
-  || { cat "$TMP/session-start-bad.out" >&2; fail "session-start.sh should fail open when sessions.json is malformed"; }
-
-# 6. fail-open when sessions.json is valid but has no recovery flag
-echo '{"sessions":[]}' > "$TMP/.lazykimi/state/sessions.json"
-printf '{"hook_event_name":"SessionStart"}\n' | bash "$SESSION_START" >"$TMP/session-start-noflag.out" 2>&1 \
-  || { cat "$TMP/session-start-noflag.out" >&2; fail "session-start.sh should fail open when recovery flag is absent"; }
-
-if grep -q 'Compact recovery needed' "$TMP/session-start-noflag.out"; then
-  fail "session-start.sh printed recovery hint when flag was absent"
-fi
-
-echo "PASS: v003 compact recovery regression"
+echo "PASS: v003 compact recovery regression (v1.3.3 semantics)"

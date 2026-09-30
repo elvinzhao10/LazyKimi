@@ -1,68 +1,286 @@
 #!/usr/bin/env bash
-# LazyKimi — PreToolUse hook
-# Blocks destructive ops and secret leakage. Uses exit 2 to block (stderr shown to user).
-# Fail-open on internal errors (ERR trap -> exit 0). Deliberate blocks use exit 2.
+# pre-tool-use.sh — Kimi PreToolUse hook: block dangerous operations.
+# Ported from the LazyZCode v1.3.3 hardened deny policy (family parity).
 #
-# Blocks: rm -rf /, rm -rf ~, rm -rf $HOME, git push --force/-f to main|master,
-#         git reset --hard, sk-xxx secrets, curl/wget http://, chmod 777,
-#         dd if=/dev/zero of=/dev/.
-set -euo pipefail
+# v1.3.3 hardening applied here:
+#   - 1 MiB input cap with oversized-input rejection
+#   - malformed-payload rejection (missing mutating tool payload)
+#   - identity normalization (agent role fields) + wrapper resolution
+#     (`env`/`nohup`/`nice`/`xargs`-prefixed recursive deletes are still
+#     denied: the token scanner resolves wrapper prefixes before the rm scan)
+#   - role-scoped writes when the host supplies agent identity
+#   - secret-like path patterns (structured + generic)
+#   - destructive recursive delete, destructive git ops, external publish denial
+#
+# Kimi dual-key parsing per contracts/kimi-hook-consumers.v1.json:
+# tool_name|toolName and tool_input|toolInput are both accepted.
+#
+# Kimi output contract: to DENY, exit with code 2 and print the reason to
+# stderr; otherwise exit 0 and print NOTHING on stdout (any stdout is parsed
+# as strict JSON, so diagnostics must go to stderr). Internal errors fail
+# OPEN — a broken hook must never brick the session.
+set -uo pipefail
+export LC_ALL=C
 trap 'echo "[LazyKimi] pre-tool-use internal error; failing open" >&2; exit 0' ERR
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
-[ -z "$INPUT" ] && exit 0
-
-# Extract tool_name and command (prefer jq, fall back to python3)
-tool_name=""
-cmd=""
-if command -v jq >/dev/null 2>&1; then
-  tool_name=$(printf '%s' "$INPUT" | jq -r '.tool_name // .toolName // ""' 2>/dev/null || true)
-  cmd=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // .tool_input.cmd // .toolInput.command // ""' 2>/dev/null || true)
-elif command -v python3 >/dev/null 2>&1; then
-  tool_name=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_name','') or d.get('toolName',''))" 2>/dev/null || true)
-  cmd=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); ti=d.get('tool_input',d.get('toolInput',{})); print(ti.get('command','') or ti.get('cmd','') if isinstance(ti,dict) else '')" 2>/dev/null || true)
+# --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
+deny() {
+    echo "LazyKimi policy denial: $1" >&2
+    exit 2
+}
+if INPUT=$(python3 -c '
+import json, sys
+raw = sys.stdin.buffer.read(1048577)
+if len(raw) > 1048576:
+    sys.exit(3)
+try:
+    event = json.loads(raw)
+except (ValueError, UnicodeDecodeError, RecursionError):
+    sys.exit(2)
+if not isinstance(event, dict):
+    sys.exit(2)
+# Identity normalization: accept Kimi dual key styles (tool_name|toolName,
+# tool_input|toolInput) and emit the canonical snake_case event.
+tool_name = event.get("tool_name") if isinstance(event.get("tool_name"), str) else event.get("toolName")
+if not isinstance(tool_name, str):
+    sys.exit(2)
+event["tool_name"] = tool_name
+tool_input = event.get("tool_input", event.get("toolInput", {}))
+if tool_name in ("Write", "Edit", "Bash", "Shell", "RunCommand", "ExecuteCommand") and not isinstance(tool_input, dict):
+    sys.exit(2)
+event["tool_input"] = tool_input if isinstance(tool_input, dict) else {}
+sys.stdout.write(json.dumps(event, separators=(",", ":")))
+' 2>/dev/null); then
+    :
+else
+    status=$?
+    if [ "$status" -eq 3 ]; then
+        deny "Hook input exceeds the 1 MiB policy limit."
+    fi
+    deny "Hook input is malformed or missing a mutating tool payload."
 fi
-[ -z "$cmd" ] && exit 0
+TOOL_NAME=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_name',''))" 2>/dev/null || echo "")
+case "$TOOL_NAME" in Shell|RunCommand|ExecuteCommand) TOOL_NAME=Bash ;; esac
+TOOL_INPUT=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(json.dumps(d.get('tool_input',{})))" 2>/dev/null || echo "{}")
 
-block() { echo "[LazyKimi] BLOCKED: $1" >&2; exit 2; }
-
-# rm -rf (recursive rm) targeting root, home, or $HOME
-if printf '%s' "$cmd" | grep -qiE 'rm[[:space:]]+(-[a-z]*[rR][a-z]*|--recursive)' && \
-   printf '%s' "$cmd" | grep -qiE '(^|[[:space:]])/( |$)|[[:space:]]~($|/)|[$]HOME($|/)|[$][{]HOME[}]($|/)'; then
-  block "recursive delete of root, home, or \$HOME is not permitted"
+# Enforce role-scoped writes when the host supplies agent identity.
+ROLE_WRITE_DENIED=$(printf '%s' "$INPUT" | python3 -c '
+import json, os, sys
+try:
+    event = json.load(sys.stdin)
+except (ValueError, TypeError):
+    raise SystemExit(0)
+roles = {event[key].strip().lower() for key in ("agent_type", "agent_type_name", "agent_name", "subagent_type") if isinstance(event.get(key), str)}
+restricted = roles & {"lazykimi-verifier", "lazykimi-orchestrator"}
+if len(restricted) > 1:
+    print("deny")
+    raise SystemExit(0)
+role = next(iter(restricted), "")
+tool = event.get("tool_name")
+if tool not in ("Write", "Edit", "Bash", "Shell", "RunCommand", "ExecuteCommand"):
+    raise SystemExit(0)
+if not role:
+    if os.environ.get("LAZYKIMI_RESTRICTED_RUN") == "1":
+        print("deny")
+    raise SystemExit(0)
+if tool in ("Bash", "Shell", "RunCommand", "ExecuteCommand"):
+    print("deny")
+    raise SystemExit(0)
+tool_input = event.get("tool_input")
+if not isinstance(tool_input, dict):
+    print("deny")
+    raise SystemExit(0)
+path = next((tool_input.get(key) for key in ("file_path", "path", "filePath") if isinstance(tool_input.get(key), str)), "")
+cwd = event.get("cwd") if isinstance(event.get("cwd"), str) else os.getcwd()
+root = os.path.realpath(os.path.join(cwd, ".lazykimi"))
+target = os.path.realpath(os.path.join(cwd, path)) if path else ""
+inside = target.startswith(root + os.sep)
+if os.path.islink(os.path.join(cwd, ".lazykimi")):
+    print("deny")
+    raise SystemExit(0)
+if role == "lazykimi-orchestrator":
+    relative = os.path.relpath(target, root).split(os.sep) if inside else []
+    verifier_report = len(relative) == 4 and relative[0] == "runs" and relative[2] == "evidence" and relative[3].endswith(".verification.md")
+    allowed = inside and not verifier_report
+else:
+    relative = os.path.relpath(target, root).split(os.sep) if inside else []
+    allowed = tool == "Write" and len(relative) == 4 and relative[0] == "runs" and relative[2] == "evidence" and relative[3].endswith(".verification.md")
+    if allowed:
+        active_runs = []
+        try:
+            for entry in os.scandir(os.path.join(root, "runs")):
+                state_path = os.path.join(entry.path, "state.json")
+                if not entry.is_dir(follow_symlinks=False) or os.path.islink(state_path):
+                    continue
+                try:
+                    with open(state_path, encoding="utf-8") as state_file:
+                        status = json.load(state_file).get("status")
+                except (OSError, ValueError, TypeError, AttributeError):
+                    continue
+                if status in ("active", "paused", "created", "planning", "executing", "blocked", "verifying", "reviewing"):
+                    active_runs.append(entry.name)
+        except OSError:
+            pass
+        allowed = active_runs == [relative[1]] and (not isinstance(event.get("run_id"), str) or event["run_id"] == relative[1])
+if not allowed:
+    print("deny")
+' 2>/dev/null || true)
+if [ -n "$ROLE_WRITE_DENIED" ]; then
+    deny "Agent write is outside its permitted run-state or verification-report path."
 fi
 
-# git push --force / -f to main or master
-if printf '%s' "$cmd" | grep -qiE 'git[[:space:]]+push[[:space:]]+[^|;&]*(--force|-f\b)'; then
-  if printf '%s' "$cmd" | grep -qiE '(^|[[:space:]/])(main|master)([[:space:]]|$)'; then
-    block "force push to main/master is not permitted"
-  fi
+# --- DENY: Secret-like paths ---
+SECRET_PATTERNS=(
+    '.env' '.env.local' '.env.production' '.env.staging'
+    'credentials.json' 'service-account.json' 'private.key' 'id_rsa'
+    '.aws/credentials' '.ssh/id_' '.netrc' '.npmrc'
+    'secrets.yml' 'secrets.yaml' 'config/secrets'
+)
+
+if [ "$TOOL_NAME" = "Write" ] || [ "$TOOL_NAME" = "Edit" ]; then
+    STRUCTURED_SECRET_PATTERN=$(printf '%s' "$INPUT" | python3 -c '
+import json
+import sys
+
+try:
+    event = json.load(sys.stdin)
+    tool_input = event.get("tool_input")
+except (json.JSONDecodeError, AttributeError):
+    tool_input = None
+
+if not isinstance(tool_input, dict):
+    raise SystemExit(0)
+
+patterns = (
+    ".env", ".env.local", ".env.production", ".env.staging",
+    "credentials.json", "service-account.json", "private.key", "id_rsa",
+    ".aws/credentials", ".ssh/id_", ".netrc", ".npmrc",
+    "secrets.yml", "secrets.yaml", "config/secrets",
+)
+
+def components(path):
+    normalized = []
+    for component in path.replace("\\", "/").split("/"):
+        if not component or component == ".":
+            continue
+        if component == "..":
+            if normalized:
+                normalized.pop()
+            continue
+        normalized.append(component)
+    return normalized
+
+def matches(path_components, pattern):
+    pattern_components = pattern.split("/")
+    limit = len(path_components) - len(pattern_components) + 1
+    for start in range(max(limit, 0)):
+        candidate = path_components[start:start + len(pattern_components)]
+        if all(
+            actual.startswith(expected) if expected == "id_" else actual == expected
+            for actual, expected in zip(candidate, pattern_components)
+        ):
+            return True
+    return False
+
+for field in ("path", "file_path", "filePath", "filename", "fileName"):
+    value = tool_input.get(field)
+    if not isinstance(value, str):
+        continue
+    path_components = components(value)
+    for pattern in patterns:
+        if matches(path_components, pattern):
+            print(pattern)
+            raise SystemExit(0)
+' 2>/dev/null || true)
+    if [ -n "$STRUCTURED_SECRET_PATTERN" ]; then
+        deny "Access to secret-like path blocked: $STRUCTURED_SECRET_PATTERN. LazyKimi secret policy denies this operation."
+    fi
+else
+    for pattern in "${SECRET_PATTERNS[@]}"; do
+        if printf '%s' "$TOOL_INPUT" | grep -qF "$pattern"; then
+            deny "Access to secret-like path blocked: $pattern. LazyKimi secret policy denies this operation."
+        fi
+    done
 fi
 
-# git reset --hard
-if printf '%s' "$cmd" | grep -qiE 'git[[:space:]]+reset[[:space:]]+--hard'; then
-  block "git reset --hard is not permitted"
+# --- DENY: Destructive deletes (wrapper-resolution: env/nice/nohup/xargs
+# prefixes precede the rm token, so wrapper-hidden recursive deletes of
+# root/home/$HOME are still denied) ---
+if [ "$TOOL_NAME" = "Bash" ]; then
+    DESTRUCTIVE_DELETE=$(printf '%s' "$INPUT" | python3 -c '
+import json
+import shlex
+import sys
+
+try:
+    event = json.load(sys.stdin)
+    tool_input = event.get("tool_input")
+    command = tool_input.get("command") if isinstance(tool_input, dict) else None
+except (json.JSONDecodeError, AttributeError):
+    command = None
+
+if not isinstance(command, str):
+    raise SystemExit(0)
+
+try:
+    lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|")
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    tokens = list(lexer)
+except ValueError:
+    # An unparseable shell literal cannot be proven safe at this policy boundary.
+    print("deny")
+    raise SystemExit(0)
+
+def dangerous_operand(token):
+    # shlex has already removed shell quotes, but deliberately leaves variable
+    # and tilde expansion text intact for this literal-only policy.
+    return (
+        token.startswith("/")
+        or token == "~"
+        or token.startswith("~/")
+        or token == "$HOME"
+        or token.startswith("$HOME/")
+        or token == "${HOME}"
+        or token.startswith("${HOME}/")
+        or ".." in token.replace("\\", "/").split("/")
+    )
+
+for start, token in enumerate(tokens):
+    if token != "rm":
+        continue
+
+    recursive = False
+    options = True
+    for operand in tokens[start + 1:]:
+        if operand and all(char in ";&|" for char in operand):
+            break
+        if options and operand == "--":
+            options = False
+            continue
+        if options and operand.startswith("-") and operand != "-":
+            if operand == "--recursive" or (not operand.startswith("--") and ("r" in operand[1:] or "R" in operand[1:])):
+                recursive = True
+            continue
+        options = False
+        if recursive and dangerous_operand(operand):
+            print("deny")
+            raise SystemExit(0)
+' 2>/dev/null || true)
+    if [ -n "$DESTRUCTIVE_DELETE" ]; then
+        deny "Destructive recursive delete denied. LazyKimi policy requires explicit confirmation."
+    fi
 fi
 
-# API keys / secrets embedded in command
-if printf '%s' "$cmd" | grep -qE 'sk-[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|Bearer[[:space:]]+[A-Za-z0-9._/+=]{20,}|AKIA[0-9A-Z]{16}'; then
-  block "command appears to contain an API key or secret"
+# --- DENY: Force push / hard reset ---
+if printf '%s' "$TOOL_INPUT" | grep -qE 'git\s+push\s+--force|git\s+reset\s+--hard'; then
+    deny "Destructive git operation denied. LazyKimi policy requires explicit user confirmation."
 fi
 
-# curl/wget to non-HTTPS (http://) URLs
-if printf '%s' "$cmd" | grep -qE '(curl|wget)[[:space:]]+[^|;&]*http://'; then
-  block "curl/wget to non-HTTPS (http://) URL is not permitted"
+# --- DENY: Publishing / deployment (unapproved network writes) ---
+if printf '%s' "$TOOL_INPUT" | grep -qE 'npm\s+publish|pip\s+upload|docker\s+push'; then
+    deny "External publish operation denied. LazyKimi policy requires approval."
 fi
 
-# chmod 777
-if printf '%s' "$cmd" | grep -qE 'chmod[[:space:]]+777\b'; then
-  block "chmod 777 is not permitted"
-fi
-
-# dd from /dev/zero to a device
-if printf '%s' "$cmd" | grep -qE 'dd[[:space:]]+[^|;&]*if=/dev/zero[^|;&]*of=/dev/'; then
-  block "dd from /dev/zero to a device is not permitted"
-fi
-
+# --- Allow: safe operations pass through silently ---
 exit 0

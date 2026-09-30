@@ -1,90 +1,103 @@
 #!/usr/bin/env bash
-# LazyKimi — PostToolUse hook
-# Checks for file drift (writes to state/evidence paths), recommends tools,
-# and prints relevant .kimi-code/rules/ advisories.
-# Advisory only — always exits 0.
-set -euo pipefail
-trap 'echo "[LazyKimi] post-tool-use internal error; failing open" >&2; exit 0' ERR
+# post-tool-use.sh — Kimi PostToolUse hook: append tool-use summary to the
+# active run's events.jsonl and grep changed files for AI-slop comment markers.
+# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+#
+# Kimi output contract: print NOTHING on stdout; diagnostics go to stderr.
+# Advisory only — ALWAYS exits 0.
+set -uo pipefail
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
-[ -z "$INPUT" ] && exit 0
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
-# Extract tool_name, single file path, and changed_files list (prefer jq, fall back to python3)
-tool_name=""
-file_path=""
-changed_files=""
-if command -v jq >/dev/null 2>&1; then
-  tool_name=$(printf '%s' "$INPUT" | jq -r '.tool_name // .toolName // ""' 2>/dev/null || true)
-  file_path=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // .tool_input.filePath // .tool_input.path // .tool_input.target // ""' 2>/dev/null || true)
-  changed_files=$(printf '%s' "$INPUT" | jq -r '(.changed_files // [])[]' 2>/dev/null || true)
-elif command -v python3 >/dev/null 2>&1; then
-  tool_name=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_name','') or d.get('toolName',''))" 2>/dev/null || true)
-  file_path=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); ti=d.get('tool_input',d.get('toolInput',{})); print((ti.get('file_path','') or ti.get('filePath','') or ti.get('path','') or ti.get('target','')) if isinstance(ti,dict) else '')" 2>/dev/null || true)
-  changed_files=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('\\n'.join(d.get('changed_files',[])))" 2>/dev/null || true)
-fi
+# --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
+INPUT=$(head -c 1048576 || true)
+INPUT_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-ptu.XXXXXX")
+trap 'rm -f "$INPUT_FILE"' EXIT
+printf '%s' "$INPUT" >"$INPUT_FILE"
 
-# Collect file paths to inspect
-files_to_inspect=""
-[ -n "$changed_files" ] && files_to_inspect="$changed_files" || { [ -n "$file_path" ] && files_to_inspect="$file_path"; }
+SLOP_HIT=$(python3 - "$INPUT_FILE" <<'PY'
+import datetime
+import glob
+import json
+import os
+import re
+import sys
 
-[ -z "$tool_name" ] && [ -z "$files_to_inspect" ] && exit 0
+with open(sys.argv[1], encoding='utf-8', errors='replace') as handle:
+    try:
+        payload = json.loads(handle.read())
+    except json.JSONDecodeError:
+        raise SystemExit(0)
 
-# Only inspect write/edit tools when relying on the legacy single file path
-case "$tool_name" in
-  Write|Edit|MultiEdit|apply_patch|delete_files|DeleteFile|"") ;;
-  *) [ -z "$changed_files" ] && exit 0 ;;
-esac
+if not isinstance(payload, dict):
+    raise SystemExit(0)
 
-# File drift: flag writes that look like unauthorized state mutation
-if [ -n "$files_to_inspect" ]; then
-  while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    case "$f" in
-      *.lazykimi/state/*|*/.lazykimi/state/*) echo "[LazyKimi] State file touched: $f — ensure this is an authorized state mutation." ;;
-      *.lazykimi/evidence/*|*/.lazykimi/evidence/*) echo "[LazyKimi] Evidence file written: $f — keep evidence receipts current." ;;
-      */AGENTS.md|*/.kimi-code/AGENTS.md) echo "[LazyKimi] AGENTS.md modified — re-read it to keep context current." ;;
-      *) echo "[LazyKimi] File changed: $f" ;;
-    esac
-  done <<< "$files_to_inspect"
-fi
+tool_name = payload.get('tool_name') if isinstance(payload.get('tool_name'), str) else payload.get('toolName')
+if not isinstance(tool_name, str):
+    raise SystemExit(0)
 
-# Dynamic rule matching: map a file extension to a rule file name.
-rule_file_for_extension() {
-  case "$1" in
-    ts|tsx) echo "typescript.md" ;;
-    py) echo "python.md" ;;
-    js|jsx) echo "javascript.md" ;;
-    sh|bash) echo "bash.md" ;;
-    md|markdown) echo "markdown.md" ;;
-    json) echo "json.md" ;;
-    yaml|yml) echo "yaml.md" ;;
-    css) echo "css.md" ;;
-    html) echo "html.md" ;;
-  esac
-}
+cwd = payload.get('cwd', os.getcwd())
+if not isinstance(cwd, str) or not cwd:
+    raise SystemExit(0)
 
-RULES_DIR="./.kimi-code/rules"
-if [ -d "$RULES_DIR" ]; then
-  matched_rules=""
-  while IFS= read -r f; do
-    [ -z "$f" ] && continue
-    ext="${f##*.}"
-    [ "$ext" = "$f" ] && continue
-    rule_name=$(rule_file_for_extension "$ext")
-    [ -z "$rule_name" ] && continue
-    [ -f "$RULES_DIR/$rule_name" ] && matched_rules="${matched_rules:+$matched_rules$'\n'}$rule_name"
-  done <<< "$files_to_inspect"
+runs_dir = os.path.join(cwd, '.lazykimi', 'runs')
+if not os.path.isdir(runs_dir):
+    raise SystemExit(0)
 
-  if [ -n "$matched_rules" ]; then
-    printf '%s' "$matched_rules" | sort -u | while IFS= read -r r; do
-      [ -z "$r" ] && continue
-      echo "RULE: $r"
-    done
-  fi
-fi
+active_run = None
+for run_dir in sorted(glob.glob(os.path.join(runs_dir, '*/'))):
+    state_file = os.path.join(run_dir, 'state.json')
+    try:
+        with open(state_file, encoding='utf-8') as state_handle:
+            state = json.load(state_handle)
+    except FileNotFoundError:
+        continue
+    except (json.JSONDecodeError, IsADirectoryError, OSError):
+        print(json.dumps({'error': 'active_state_unreadable'}), file=sys.stderr)
+        continue
+    if isinstance(state, dict) and state.get('status') in ('active', 'paused', 'created', 'planning', 'executing', 'blocked', 'verifying', 'reviewing'):
+        active_run = run_dir
+        break
 
-# Recommend tools based on the edit
-echo "[LazyKimi] Tip: lazy-debugging for failures, lazy-reviewer before claiming done, lazy-verifier to run gates."
+if active_run is None:
+    raise SystemExit(0)
+
+event = {'tool': tool_name, 'timestamp': datetime.datetime.utcnow().isoformat() + 'Z'}
+tool_input = payload.get('tool_input', payload.get('toolInput'))
+if not isinstance(tool_input, dict):
+    tool_input = {}
+
+changed_file = None
+if tool_name in ('Write', 'Edit'):
+    file_path = tool_input.get('file_path') or tool_input.get('filePath')
+    if isinstance(file_path, str) and file_path:
+        event['files'] = [file_path]
+        normalized_path = file_path.replace(chr(92), '/')
+        if '.lazykimi/' not in normalized_path and '/.kimi-code/' not in normalized_path and not normalized_path.endswith('AGENTS.md'):
+            event['boundary_warning'] = 'write outside .lazykimi/ - verify caller is implementer not orchestrator (G-016)'
+        # --- AI-slop comment grep on the changed file ---
+        if os.path.isfile(file_path):
+            slop_markers = re.compile(
+                r'(?:AI[- ]generated|generated (?:by|with)[^.\n]{0,40}AI|Co-Authored-By:[^\n]*(?:AI|assistant)|'
+                r'AI (?:assistant|agent)[^\n]{0,40}(?:wrote|generated|created)|TODO\s*\(AI\))',
+                re.I,
+            )
+            try:
+                with open(file_path, encoding='utf-8', errors='replace') as file_handle:
+                    for line_number, line in enumerate(file_handle, 1):
+                        if slop_markers.search(line):
+                            event['ai_slop_comment'] = f'line {line_number}'
+                            print('slop')
+                            break
+            except OSError:
+                pass
+
+try:
+    with open(os.path.join(active_run, 'events.jsonl'), 'a', encoding='utf-8') as event_handle:
+        event_handle.write(json.dumps(event, default=str) + '\n')
+except OSError:
+    print(json.dumps({'error': 'events_append_failed'}), file=sys.stderr)
+PY
+) || SLOP_HIT=""
 
 exit 0

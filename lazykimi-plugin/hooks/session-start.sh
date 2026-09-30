@@ -1,93 +1,168 @@
 #!/usr/bin/env bash
-# LazyKimi — SessionStart hook
-# Loads .kimi-code/AGENTS.md, detects .lazykimi/ state, prints readiness.
-# Fail-open: never blocks a session. Always exits 0 on internal error.
-set -euo pipefail
-trap 'echo "[LazyKimi] session-start internal error; failing open" >&2; exit 0' ERR
+# session-start.sh — Kimi SessionStart hook: bootstrap .lazykimi state, run the
+# package load-check, and summarize boulder / active-loop / active-run state.
+# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+#
+# Kimi output contract: print EITHER strict JSON ({"additionalContext": "..."})
+# OR nothing on stdout; diagnostics go to stderr. This hook is advisory and
+# ALWAYS exits 0 — a degraded package must never break session startup.
+set -uo pipefail
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
-CWD="$PWD"
-if [ -n "$INPUT" ] && command -v jq >/dev/null 2>&1; then
-  CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // ""' 2>/dev/null || echo "")
-  [ -z "$CWD" ] && CWD="$PWD"
-fi
+# --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
+INPUT=$(head -c 1048576 || true)
+CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd','.'))" 2>/dev/null || true)
+[ -n "$CWD" ] || CWD="$PWD"
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-AGENTS_MD="$CWD/.kimi-code/AGENTS.md"
-STATE_DIR="$CWD/.lazykimi/state"
-EVIDENCE_DIR="$CWD/.lazykimi/evidence"
-BOULDER="$STATE_DIR/boulder.json"
+NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-session-start.XXXXXX")
+trap 'rm -f "$NOTES_FILE"' EXIT
+note() { printf '%s\n' "$1" >>"$NOTES_FILE"; }
 
-echo "[LazyKimi] Session starting — checking project state..."
+note "(LazyKimi v1.3.3): Session starting — checking project state..."
 
-# 1. AGENTS.md presence
-if [ -f "$AGENTS_MD" ]; then
-  echo "[LazyKimi] AGENTS.md loaded: $AGENTS_MD"
+# --- Bootstrap the .lazykimi/ directory tree so skills/agents that read
+# plans/, context/, drafts/, rules/, ulw-loop/, or runs/ don't crash on a
+# fresh workspace. create-run.sh creates runs/<run_id>/ on demand; this
+# ensures the parents exist.
+if mkdir -p "$CWD/.lazykimi"/{plans,context,drafts,rules,runs,ulw-loop} 2>/dev/null; then
+    note "(LazyKimi): .lazykimi state directories present (plans, context, drafts, rules, runs, ulw-loop)."
 else
-  echo "[LazyKimi] NOTE: .kimi-code/AGENTS.md missing. Run lazy-init-deep to bootstrap project memory."
+    note "(LazyKimi): WARNING could not create $CWD/.lazykimi state directories."
 fi
 
-# 2. .lazykimi/ state directory
-if [ -d "$CWD/.lazykimi" ]; then
-  echo "[LazyKimi] State dir present: .lazykimi/"
+# --- Package readiness (load-check; the standalone script lands with the
+# verify-runner port — until then the CLI load-check is the readiness source) ---
+if [ ! -d "$PLUGIN_ROOT" ]; then
+    note "(LazyKimi): WARNING plugin root unavailable — package readiness unknown (SESSIONSTART_READINESS=failed reason=plugin-root-unavailable)."
+elif [ -f "$PLUGIN_ROOT/scripts/lazykimi-load-check.sh" ]; then
+    if load_check=$(bash "$PLUGIN_ROOT/scripts/lazykimi-load-check.sh" 2>&1); then
+        if grep -q '^PACKAGE_READINESS=full$' <<<"$load_check"; then
+            note "(LazyKimi): Package readiness: full."
+            note "SESSIONSTART_READINESS=full"
+        elif grep -q '^PACKAGE_READINESS=degraded$' <<<"$load_check"; then
+            note "(LazyKimi): Package readiness: degraded — some verification gates may be unavailable."
+            note "SESSIONSTART_READINESS=degraded"
+        else
+            note "(LazyKimi): Package readiness: unknown (missing readiness result)."
+            note "SESSIONSTART_READINESS=degraded reason=missing-package-readiness-result"
+        fi
+    else
+        note "(LazyKimi): Package readiness check failed — continuing in degraded mode."
+        note "SESSIONSTART_READINESS=degraded reason=package-readiness-failed"
+    fi
+elif command -v node >/dev/null 2>&1 && [ -f "$PLUGIN_ROOT/dist/index.js" ]; then
+    if node "$PLUGIN_ROOT/dist/index.js" load-check >/dev/null 2>&1; then
+        note "(LazyKimi): Package readiness: full (CLI load-check)."
+        note "SESSIONSTART_READINESS=full"
+    else
+        note "(LazyKimi): Package readiness: degraded — CLI load-check reported missing inventory."
+        note "SESSIONSTART_READINESS=degraded reason=package-readiness-failed"
+    fi
 else
-  echo "[LazyKimi] NOTE: .lazykimi/ missing — initializing minimal state dirs."
-  mkdir -p "$STATE_DIR" "$EVIDENCE_DIR" 2>/dev/null || true
+    note "(LazyKimi): Package readiness unknown — no load-check available (SESSIONSTART_READINESS=degraded reason=load-check-unavailable)."
 fi
 
-# 3. Boulder active task summary (jq required for structured read)
-if [ -f "$BOULDER" ] && command -v jq >/dev/null 2>&1; then
-  active_plan=$(jq -r '.plan_path // .active_plan // "(none)"' "$BOULDER" 2>/dev/null || echo "(none)")
-  in_progress=$(jq -r '[.tasks[]? | select(.status=="in_progress")] | length' "$BOULDER" 2>/dev/null || echo "0")
-  next_task=$(jq -r '[.tasks[]? | select(.status=="in_progress" or .status=="pending")][0].description // "(none)"' "$BOULDER" 2>/dev/null || echo "(none)")
-  echo "[LazyKimi] Active plan: $active_plan"
-  echo "[LazyKimi] In-progress tasks: $in_progress"
-  echo "[LazyKimi] Next task: $next_task"
+# --- Check for project memory (Kimi project memory is AGENTS.md) ---
+if [ -f "$CWD/AGENTS.md" ] || [ -f "$CWD/.kimi-code/AGENTS.md" ]; then
+    note "(LazyKimi): Project memory found (AGENTS.md)."
+else
+    note "(LazyKimi): Project memory (AGENTS.md) missing. Run /lazy-init-deep or ask to initialize project memory."
 fi
 
-# 4. Evidence directory inventory
-if [ -d "$EVIDENCE_DIR" ]; then
-  count=$(find "$EVIDENCE_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
-  echo "[LazyKimi] Evidence files: $count"
+# --- Check for project rules ---
+if [ -d "$CWD/.kimi-code/rules" ] && [ "$(ls -A "$CWD/.kimi-code/rules"/*.md 2>/dev/null)" ]; then
+    note "(LazyKimi): Project rules loaded."
 fi
 
-# 5. Post-compact recovery hint (fail-open, no jq required).
-if command -v python3 >/dev/null 2>&1; then
-  python3 -c "
-import json, os
-sessions_path = '$STATE_DIR/sessions.json'
-boulder_path = '$BOULDER'
-rules_dir = '$CWD/.kimi-code/rules'
-hint_lines = []
+# --- Boulder summary (legacy v0.x durable work tracking under .lazykimi/state/) ---
+BOULDER_FILE="$CWD/.lazykimi/state/boulder.json"
+if [ -f "$BOULDER_FILE" ]; then
+    BOULDER=$(python3 - "$BOULDER_FILE" <<'PY' 2>/dev/null || true
+import json, sys
 try:
-    if os.path.isfile(sessions_path):
-        with open(sessions_path, 'r') as f:
-            data = json.load(f)
-        if isinstance(data, dict) and data.get('post_compact_recovery_needed'):
-            plan_path = '(none)'
-            if os.path.isfile(boulder_path):
-                with open(boulder_path, 'r') as bf:
-                    boulder = json.load(bf)
-                if isinstance(boulder, dict):
-                    plan_path = boulder.get('plan_path') or boulder.get('active_plan') or '(none)'
-            rule_files = []
-            if os.path.isdir(rules_dir):
-                for root, dirs, files in os.walk(rules_dir):
-                    for name in sorted(files):
-                        path = os.path.join(root, name)
-                        rule_files.append(os.path.relpath(path, rules_dir))
-            hint_lines.append('[LazyKimi] Compact recovery needed — context may have been compacted.')
-            hint_lines.append('[LazyKimi] Active plan: ' + plan_path)
-            hint_lines.append('[LazyKimi] Rule files: ' + ','.join(rule_files))
-            data['post_compact_recovery_needed'] = False
-            with open(sessions_path, 'w') as f:
-                json.dump(data, f, indent=2)
+    d = json.load(open(sys.argv[1]))
 except Exception:
-    pass
-for line in hint_lines:
-    print(line)
-" 2>/dev/null || true
+    raise SystemExit(0)
+work_id = d.get('active_work_id')
+works = d.get('works', {})
+if isinstance(work_id, str) and work_id and isinstance(works, dict):
+    work = works.get(work_id)
+    detail = ''
+    if isinstance(work, dict):
+        detail = f" (status: {work.get('status', 'unknown')})"
+    print(f"(LazyKimi): Boulder active work: {work_id}{detail}")
+PY
+)
+    [ -n "$BOULDER" ] && note "$BOULDER"
 fi
 
-echo "[LazyKimi] Readiness: ready"
+# --- Active-loop summary (legacy v0.x loop bridge; ulw-loop/ supersedes it) ---
+ACTIVE_LOOP_FILE="$CWD/.lazykimi/state/active-loop.json"
+if [ -f "$ACTIVE_LOOP_FILE" ]; then
+    ACTIVE_LOOP=$(python3 - "$ACTIVE_LOOP_FILE" <<'PY' 2>/dev/null || true
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    raise SystemExit(0)
+if not isinstance(d, dict):
+    raise SystemExit(0)
+plan = d.get('plan_name') or d.get('plan') or d.get('goal') or 'unknown'
+print(f"(LazyKimi): Active loop present: {plan}. Continue with /lazy-ulw-loop or /lazy-start-work.")
+PY
+)
+    [ -n "$ACTIVE_LOOP" ] && note "$ACTIVE_LOOP"
+fi
+
+# --- Active run summary (v1.3.3 run state under .lazykimi/runs/) ---
+RUNS_DIR="$CWD/.lazykimi/runs"
+if [ -d "$RUNS_DIR" ]; then
+    for run_dir in "$RUNS_DIR"/*/; do
+        state_file="${run_dir}state.json"
+        if [ -f "$state_file" ]; then
+            STATUS=$(python3 - "$state_file" <<'PY' 2>/dev/null || echo ""
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    raise SystemExit(1)
+print(d.get('status', ''))
+PY
+)
+            if [ "$STATUS" = "active" ] || [ "$STATUS" = "paused" ] || [ "$STATUS" = "executing" ] || [ "$STATUS" = "verifying" ] || [ "$STATUS" = "reviewing" ]; then
+                PLAN=$(python3 - "$state_file" <<'PY' 2>/dev/null || echo "unknown"
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    raise SystemExit(1)
+print(d.get('plan_name', d.get('run_id', '')))
+PY
+)
+                PROGRESS=$(python3 - "$state_file" <<'PY' 2>/dev/null || echo "?/?"
+import json, sys
+try:
+    d = json.load(open(sys.argv[1]))
+except Exception:
+    raise SystemExit(1)
+p = d.get('progress', {})
+print(f"{p.get('completed_checkboxes', p.get('completed', 0))}/{p.get('total_checkboxes', p.get('total', 0))}")
+PY
+)
+                note "(LazyKimi): Active run found: $PLAN (status: $STATUS, progress: $PROGRESS)"
+                note "(LazyKimi): Run /lazy-start-work or ask to continue the planned work."
+            fi
+            break
+        fi
+    done
+fi
+
+# --- Emit strict JSON only: {"additionalContext": "<summary text>"} ---
+NOTES="$(cat "$NOTES_FILE")" python3 - <<'PY'
+import json, os
+notes = os.environ.get('NOTES', '')
+if notes.strip():
+    print(json.dumps({"additionalContext": notes}))
+PY
+
 exit 0

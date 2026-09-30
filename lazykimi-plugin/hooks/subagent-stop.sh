@@ -1,59 +1,55 @@
 #!/usr/bin/env bash
-# LazyKimi — SubagentStop hook
-# Verifies sub-agent evidence before allowing stop. Fail-open with warnings.
-set -euo pipefail
-trap 'echo "[LazyKimi] subagent-stop internal error; failing open" >&2; exit 0' ERR
+# subagent-stop.sh — Kimi SubagentStop hook (advisory executor-evidence gate).
+# v1.3.3 mapped semantics: Kimi having this event is an ADDITIVE reminder —
+# the authoritative executor-evidence gate stays in the review skills, so
+# behavior matches LazyZCode v1.3.3 (the family gate is skill-side).
+#
+# Verifies the implementer/coder sub-agent reported an EVIDENCE_RECORDED
+# marker pointing at a non-empty evidence file and appends an advisory
+# evidence-reminder (additionalContext) when it did not; also records the
+# stop in the active run's ledger.
+#
+# Kimi output contract: print EITHER strict JSON ({"additionalContext": ...})
+# OR nothing on stdout; diagnostics to stderr. Advisory only — ALWAYS exits 0.
+set -uo pipefail
 
-INPUT=""
-[ ! -t 0 ] && INPUT=$(cat) || true
+INPUT=$(head -c 1048576 || true)
 [ -z "$INPUT" ] && exit 0
+CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+[ -n "$CWD" ] || CWD="$PWD"
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Extract fields (prefer jq, fall back to python3)
-agent_type=""
-last_msg=""
-cwd=""
-if command -v jq >/dev/null 2>&1; then
-  agent_type=$(printf '%s' "$INPUT" | jq -r '.agent_type // .agent_type_name // ""' 2>/dev/null || true)
-  last_msg=$(printf '%s' "$INPUT" | jq -r '.last_assistant_message // ""' 2>/dev/null || true)
-  cwd=$(printf '%s' "$INPUT" | jq -r '.cwd // ""' 2>/dev/null || true)
-elif command -v python3 >/dev/null 2>&1; then
-  agent_type=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('agent_type','') or d.get('agent_type_name',''))" 2>/dev/null || true)
-  last_msg=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('last_assistant_message',''))" 2>/dev/null || true)
-  cwd=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || true)
+AGENT_TYPE=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('agent_type','') or d.get('agent_type_name','') or '')" 2>/dev/null || true)
+LAST_MSG=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('last_assistant_message',''))" 2>/dev/null || true)
+
+# Ledger record (best-effort, transactional via the state scripts).
+RID=$(CWD="$CWD" bash "$PLUGIN_ROOT/scripts/state/latest-run.sh" 2>/dev/null || true)
+if [ -n "$RID" ]; then
+    printf '{"agent":"%s","source":"SubagentStop"}' "${AGENT_TYPE//\"/}" \
+      | CWD="$CWD" bash "$PLUGIN_ROOT/scripts/state/append-event.sh" "$RID" subagent_stopped >/dev/null 2>&1 || true
 fi
-[ -z "$cwd" ] && cwd="$PWD"
 
-# Only verify implementer/coder sub-agents
-case "$agent_type" in
+# Only gate implementer/coder-class sub-agents.
+case "$AGENT_TYPE" in
   *implementer*|*coder*|*qa-executor*) ;;
   *) exit 0 ;;
 esac
+[ -n "$LAST_MSG" ] || { echo '[LazyKimi] SubagentStop: implementer output empty — no evidence recorded.' >&2; exit 0; }
 
-[ -z "$last_msg" ] && exit 0
+EV_PATH=$(printf '%s' "$LAST_MSG" | python3 -c "import sys,re; m=re.search(r'EVIDENCE_RECORDED:\s*(\S+)', sys.stdin.read()); print(m.group(1) if m else '')" 2>/dev/null || true)
 
-# Look for EVIDENCE_RECORDED: <path> marker
-ev_path=""
-if command -v python3 >/dev/null 2>&1; then
-  ev_path=$(printf '%s' "$last_msg" | python3 -c "import sys,re; m=re.search(r'EVIDENCE_RECORDED:\s*(\S+)', sys.stdin.read()); print(m.group(1) if m else '')" 2>/dev/null || true)
+REMINDER=""
+if [ -z "$EV_PATH" ]; then
+    REMINDER="[LazyKimi] SubagentStop: no EVIDENCE_RECORDED marker found in implementer output. The executor-evidence gate (review skills) requires recorded evidence before work is accepted — record evidence now or expect the review gate to reject the claim."
 else
-  ev_path=$(printf '%s' "$last_msg" | grep -oE 'EVIDENCE_RECORDED:[[:space:]]*[^[:space:]]+' | sed 's/.*:[[:space:]]*//' 2>/dev/null || true)
+    [ "${EV_PATH:0:1}" != "/" ] && EV_PATH="$CWD/$EV_PATH"
+    if [ ! -f "$EV_PATH" ] || [ ! -s "$EV_PATH" ]; then
+        REMINDER="[LazyKimi] SubagentStop: evidence file missing or empty: $EV_PATH. The executor-evidence gate (review skills) requires non-empty recorded evidence — repair it now or expect the review gate to reject the claim."
+    fi
 fi
 
-if [ -z "$ev_path" ]; then
-  echo "[LazyKimi] SubagentStop: no EVIDENCE_RECORDED marker found in implementer output." >&2
-  exit 0
+if [ -n "$REMINDER" ]; then
+    printf '%s' "$REMINDER" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))'
 fi
 
-# Verify evidence file exists and is non-empty
-[ "${ev_path:0:1}" != "/" ] && ev_path="$cwd/$ev_path"
-if [ ! -f "$ev_path" ]; then
-  echo "[LazyKimi] SubagentStop: evidence file does not exist: $ev_path" >&2
-  exit 0
-fi
-if [ ! -s "$ev_path" ]; then
-  echo "[LazyKimi] SubagentStop: evidence file is empty: $ev_path" >&2
-  exit 0
-fi
-
-echo "[LazyKimi] SubagentStop: evidence verified at $ev_path"
 exit 0

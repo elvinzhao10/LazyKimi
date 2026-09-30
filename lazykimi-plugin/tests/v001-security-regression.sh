@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # v001-security-regression.sh
 # Verify no secrets in hooks, destructive ops are blocked, and fail-open is present.
+# v1.3.3 port: the deny policy is the LazyZCode v1.3.3 family set — destructive
+# recursive deletes, destructive git ops, external publish, secret-like paths,
+# oversized/malformed input. (v0.x extras — plain-http curl denial, chmod 777,
+# embedded-secret-value denial — were not family policy and retired with the
+# port; the full adversarial battery lives in
+# tests/v103-execution-context-hardening-regression.sh.)
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,7 +40,7 @@ done
 grep -qE 'trap.*(ERR.*exit 0|exit 0.*ERR)' "$PRE" \
   || fail "pre-tool-use.sh missing fail-open ERR trap"
 
-# 3. Destructive commands are blocked at runtime (exit 2).
+# 3. Family v1.3.3 destructive-command policy (exit 2 = deny).
 rpc() {
   local cmd="$1"
   printf '%s' "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"$cmd\"}}" | bash "$PRE"
@@ -45,9 +51,8 @@ expect_rejected "rm -rf ~"            rpc "rm -rf ~"
 expect_rejected "rm -rf \$HOME"       rpc 'rm -rf $HOME'
 expect_rejected "git push --force main" rpc "git push --force origin main"
 expect_rejected "git reset --hard"    rpc "git reset --hard HEAD~1"
-expect_rejected "curl http://"        rpc "curl http://127.0.0.1:9/"
-expect_rejected "chmod 777"           rpc "chmod 777 file"
-expect_rejected "embedded secret"     rpc "export TOKEN=sk-aaaaaaaaaaaaaaaaaaaa"
+expect_rejected "npm publish"         rpc "npm publish"
+expect_rejected "secret-like path"    rpc "cat .env.production"
 
 # 4. Safe command is allowed (no output, exit 0).
 out=$(printf '%s' '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' | bash "$PRE" 2>&1) \
