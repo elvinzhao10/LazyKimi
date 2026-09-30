@@ -1,0 +1,52 @@
+name: Paired automatic-tooling contract parity
+
+on:
+  workflow_dispatch:
+    inputs:
+      lazyzcode_ref:
+        description: LazyZCode release ref to compare
+        required: true
+        type: string
+      lazytrae_ref:
+        description: Optional LazyTrae release ref for the family triad presence check
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Check out paired LazyZCode release
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: elvinzhao10/LazyZCode
+          ref: ${{ inputs.lazyzcode_ref }}
+          path: .lazyzcode-contract
+          persist-credentials: false
+
+      - name: Validate paired contract
+        run: test -f "$GITHUB_WORKSPACE/.lazyzcode-contract/plugins/lazyzcode/contracts/automatic-tooling-contract.v1.json"
+
+      - name: Run automatic-tooling contract parity
+        run: bash lazykimi-plugin/tests/v103-automatic-tooling-contract-parity.sh --lazyzcode-root "$GITHUB_WORKSPACE/.lazyzcode-contract" --lazykimi-root "$GITHUB_WORKSPACE"
+
+      - name: Check out paired LazyTrae release (optional triad check)
+        if: ${{ inputs.lazytrae_ref != '' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: elvinzhao10/LazyTrae
+          ref: ${{ inputs.lazytrae_ref }}
+          path: .lazytrae-contract
+          persist-credentials: false
+
+      - name: Validate LazyTrae family contract presence
+        if: ${{ inputs.lazytrae_ref != '' }}
+        run: test -f "$GITHUB_WORKSPACE/.lazytrae-contract/lazytrae-plugin/packages/cli/contracts/automatic-tooling-contract.v1.json"
