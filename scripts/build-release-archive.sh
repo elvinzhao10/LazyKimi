@@ -25,7 +25,7 @@ if find "$STAGE/payload" \( -name node_modules -o -name '*.pyc' -o -name __pycac
     echo 'Release payload contains dependency directories or Python bytecode.' >&2
     exit 1
 fi
-ARCHIVE_EPOCH="$(git -C "$REPOSITORY_ROOT" show -s --format=%ct "$REVISION")"
+ARCHIVE_EPOCH="$(git -C "$REPOSITORY_ROOT" show -s --format=%ct "${REVISION}^{commit}")"
 python3 - "$OUTPUT" "$STAGE/payload" "$ARCHIVE_EPOCH" <<'PY'
 import gzip
 import os

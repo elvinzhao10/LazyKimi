@@ -62,7 +62,9 @@ jobs:
         run: bash lazykimi-plugin/tests/publication-regression.sh
 
       - name: Build and exercise extracted release archive
-        run: bash scripts/build-release-archive.sh "$RELEASE_TAG" "lazykimi-${RELEASE_TAG}.tar.gz"
+        run: |
+          release_commit="$(git rev-parse "${RELEASE_TAG}^{commit}")"
+          bash scripts/build-release-archive.sh "$release_commit" "lazykimi-${RELEASE_TAG}.tar.gz"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:

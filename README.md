@@ -93,8 +93,8 @@ byte-identically with its sibling ports (see
 Open an AI coding assistant in your project and paste this:
 
 > Help me install LazyKimi from https://github.com/elvinzhao10/LazyKimi for
-> this project. Read AGENTS.md and the current install guide. Use the repaired
-> main-branch source until the corrected 1.3.4 release is published. Run safe
+> this project. Read AGENTS.md and the current install guide. Use the
+> versioned v1.3.4 source and run safe
 > package checks first, choose one explicitly project-bound route, and ask me
 > before changing plugins, global hooks, MCP, credentials or trust settings.
 
@@ -107,16 +107,15 @@ for the MCP servers. The lifecycle also accepts Node.js 20 for compatibility.
 Follow [AGENTS.md](AGENTS.md) and the
 [installation guide](docs/03-install-and-host-verification.md).
 
-The original public `v1.3.4` tag predates the bootstrap repair. Until its
-replacement is approved and published, use this immutable repaired source:
+The corrected `v1.3.4` tag includes the bootstrap repair and family
+documentation at commit `6b5984e`. Clone the versioned source:
 
 ```bash
-git clone --no-checkout https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.3.4 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
-git checkout 39d87bb2eb8ea06317c9f323c62d77bedf12e7af
 ```
 
-Source checkouts need a CLI build; the prepared release archive includes it:
+Source checkouts need a CLI build; the release archive includes it:
 
 ```bash
 cd lazykimi-plugin

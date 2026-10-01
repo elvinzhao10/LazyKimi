@@ -39,8 +39,9 @@ MCP connections are observed. The README links the selected host's setup guide.
 Use the receipt-aware upgrade route with an explicit project binding. Preserve project evidence and unknown host configuration. No credentials or production host settings are changed by package verification.
 
 Read [AGENTS.md](AGENTS.md) and [the install guide](docs/03-install-and-host-verification.md).
-Until the repaired tag is approved, use the immutable repaired source linked in
-the README rather than the original public v1.3.4 tag. Choose one route, check the installed package version, and restart the host.
+The corrected `v1.3.4` tag selects verified source `6b5984e`, including the
+public bootstrap repair. Choose one route, check the installed package version,
+and restart the host.
 Source checkouts and release archives have different build requirements; follow
 the documented route. Do not reset populated runs merely to upgrade.
 
