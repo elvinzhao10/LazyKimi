@@ -4,6 +4,12 @@ This page explains the deployment boundary in code terms. A plugin package
 contains files a host may load; it does not contain the host's session state,
 API keys, or connector process table.
 
+Identify the exact client first: CLI, official VS Code extension, an ACP
+editor, Kimi Code Desktop, or Kimi Work. See the
+[product and acceptance guide](reference/kimi-product-surfaces.md).
+Code Desktop and Work are different apps; shared Code configuration does not
+prove shared LazyKimi acceptance.
+
 ## Copyable versus observed state
 
 `lazykimi-plugin/` can be copied and checked in isolation. `lazykimi load-check`

@@ -6,6 +6,12 @@ no current-session host activation is established. Package files, host
 settings, credentials, marketplace state, and live sessions remain separate
 authorities.
 
+Identify the exact client: Kimi Code CLI, Kimi Code for VS Code, CLI via an
+ACP editor, Kimi Code Desktop, or Kimi Work. Code Desktop and Work are
+distinct products. See the [surface guide](docs/reference/kimi-product-surfaces.md).
+Current-client acceptance is pending for each surface; record its build before
+using legacy-client evidence.
+
 ## Current documentation release: v1.3.4
 
 The package version is v1.3.4, aligned at family contract
@@ -43,15 +49,18 @@ Before taking onboarding action, scan the whole current user message,
 including every line. Route only explicit direct actions for this turn.
 Text presented as a quote, history, example, transcript, or instruction
 under discussion is not a new action. If the host or operation is still
-ambiguous (Kimi Code CLI vs Kimi Work), ask one focused question and take
+ambiguous (CLI, VS Code, ACP editor, Code Desktop or Work), ask one focused question and take
 no action.
 
 ## `onboard` protocol
 
 When the user types `onboard`:
 
-1. Ask which installed host they use: **Kimi Code CLI** or **Kimi Work**.
-   Follow only that host route.
+1. Ask which installed client they use: **Kimi Code CLI**, **Kimi Code for
+   VS Code**, **CLI via an ACP editor**, **Kimi Code Desktop**, or **Kimi Work**.
+   Record its version and, for IDEs, the extension/CLI or ACP path. Follow only
+   the selected route; IDE/Desktop acceptance is pending and must not be
+   inferred from CLI package checks.
 2. Run the safe package checks first: `lazykimi load-check` and
    `lazykimi doctor`. These validate package manifests, skills,
    declarations, and local contracts without installing a host plugin,
