@@ -10,7 +10,7 @@
   "started_at": "2026-08-28T00:00:00Z",
   "finished_at": "2026-08-28T00:00:01Z",
   "artifact": {
-    "path": "artifacts/criterion.log",
+    "path": "artifacts/criterion.txt",
     "sha256": "8b1880449a5fedfb5ceadc8e5cbeefb5db484b549a9062f2dee5ded643738d22"
   },
   "executor": {
