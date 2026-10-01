@@ -5,7 +5,8 @@
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-node --test \
+# Summarize failures at the end so bounded runner tails retain their causes.
+node --test --test-reporter=spec \
     "${PLUGIN_ROOT}/tests/lifecycle-source-inventory.test.js" \
     "${PLUGIN_ROOT}/tests/lifecycle-entrypoint.test.js" \
     "${PLUGIN_ROOT}/tests/lifecycle-entrypoint-bootstrap.test.js" \
