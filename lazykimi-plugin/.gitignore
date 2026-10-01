@@ -7,15 +7,11 @@ __pycache__/
 .DS_Store
 *.tsbuildinfo
 
-# Personal host overrides and transient output; preserve pinned fixture evidence.
+# Personal host overrides and transient output (pinned evidence uses .txt).
 .kimi-code/*.local.json
 .kimi-code/*.local.toml
 *.log
 logs/
-!lazykimi-plugin/contracts/fixtures/**/*.log
-!lazykimi-plugin/tests/fixtures/**/*.log
-!contracts/fixtures/**/*.log
-!tests/fixtures/**/*.log
 Thumbs.db
 .idea/
 .vscode/
