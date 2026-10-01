@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync } from 'fs';
 import path from 'path';
 import {
   getPluginKimiCodeDir,
@@ -11,11 +11,9 @@ import {
   getPluginRoot,
 } from '../lib/paths';
 import { rewriteMcpPaths } from './init';
-import { readReceipt, sha256OfFile, writeReceipt } from '../lib/receipt';
+import { readReceipt, sha256OfFile, writeReceipt, safeProjectPath } from '../lib/receipt';
 
-const PLUGIN_VERSION = '1.3.3';
-const MANAGED_START = '<!-- lazykimi:managed:start -->';
-const MANAGED_END = '<!-- lazykimi:managed:end -->';
+const PLUGIN_VERSION = '1.3.4';
 
 interface SyncOptions {
   readonly dryRun: boolean;
@@ -26,9 +24,8 @@ function printHelp(): void {
   console.log(`Usage: lazykimi sync [options]
 
 Update an existing LazyKimi installation with the current plugin templates.
-Copies missing files and updates managed blocks in place. Files that are
-user-owned (changed since install and containing no managed blocks) are
-skipped. Runtime state under .lazykimi/state/ is never modified.
+Copies missing files and updates unchanged receipt-owned files.
+Unknown and modified files are preserved. Runtime state under .lazykimi/state/ is never modified.
 
 Options:
   --help, -h        Show this help message
@@ -48,48 +45,6 @@ function parseArgs(args: string[]): SyncOptions {
   return { dryRun, target };
 }
 
-function hasManagedBlocks(content: string): boolean {
-  return content.includes(MANAGED_START) && content.includes(MANAGED_END);
-}
-
-function extractManagedBlocks(content: string): string[] {
-  const blocks: string[] = [];
-  const pattern = new RegExp(`${escapeRegex(MANAGED_START)}[\\s\\S]*?${escapeRegex(MANAGED_END)}`, 'g');
-  let match: RegExpExecArray | null;
-  while ((match = pattern.exec(content)) !== null) {
-    blocks.push(match[0]);
-  }
-  return blocks;
-}
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function mergeManagedBlocks(targetContent: string, sourceContent: string): string {
-  const sourceBlocks = extractManagedBlocks(sourceContent);
-  if (sourceBlocks.length === 0) {
-    // Nothing to merge; leave target unchanged.
-    return targetContent;
-  }
-  let index = 0;
-  let merged = targetContent.replace(
-    new RegExp(`${escapeRegex(MANAGED_START)}[\\s\\S]*?${escapeRegex(MANAGED_END)}`, 'g'),
-    (match) => {
-      if (index < sourceBlocks.length) {
-        return sourceBlocks[index++];
-      }
-      // Source has fewer blocks than target; preserve the extra target block
-      // to avoid deleting user-adjacent content.
-      return match;
-    },
-  );
-  if (index < sourceBlocks.length) {
-    merged += '\n' + sourceBlocks.slice(index).join('\n');
-  }
-  return merged;
-}
-
 function syncFile(
   srcPath: string,
   destPath: string,
@@ -100,6 +55,8 @@ function syncFile(
   receiptHashes: ReadonlyMap<string, string>,
 ): void {
   const rel = path.relative(target, destPath);
+  if (rel === '.kimi-code/mcp.json') return;
+  if (!safeProjectPath(target, rel)) { actions.push(`skip ${rel} (linked)`); return; }
   if (!existsSync(destPath)) {
     if (!dryRun) {
       mkdirSync(path.dirname(destPath), { recursive: true });
@@ -111,30 +68,16 @@ function syncFile(
     return;
   }
 
-  const targetContent = readFileSync(destPath, 'utf-8');
   const targetHash = sha256OfFile(destPath);
   const receiptHash = receiptHashes.get(rel);
   const unchangedFromReceipt = receiptHash !== undefined && receiptHash === targetHash;
 
   if (unchangedFromReceipt) {
-    actions.push(`unchanged ${rel}`);
-    return;
-  }
-
-  if (hasManagedBlocks(targetContent)) {
-    const sourceContent = readFileSync(srcPath, 'utf-8');
-    if (!hasManagedBlocks(sourceContent)) {
-      // Source template has no managed blocks, so we cannot safely preserve
-      // user-owned surrounding content. Treat as user-owned.
-      actions.push(`skip ${rel} (user-owned)`);
-      return;
+    if (sha256OfFile(srcPath) === targetHash) { actions.push(`unchanged ${rel}`); return; }
+    if (!dryRun) {
+      copyFileSync(srcPath, destPath);
+      if (srcPath.endsWith('.sh')) chmodSync(destPath, 0o755);
     }
-    const merged = mergeManagedBlocks(targetContent, sourceContent);
-    if (merged === targetContent) {
-      actions.push(`unchanged ${rel}`);
-      return;
-    }
-    if (!dryRun) writeFileSync(destPath, merged, 'utf-8');
     synced.push(rel);
     actions.push(`update ${rel}`);
     return;
@@ -155,6 +98,7 @@ function syncDir(
   if (!existsSync(src)) return;
   const entries = readdirSync(src, { withFileTypes: true });
   for (const entry of entries) {
+    if (['node_modules', '__pycache__', '.git'].includes(entry.name) || /\.py[co]$/.test(entry.name)) continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(destDir, entry.name);
     if (entry.isDirectory()) {
@@ -200,10 +144,7 @@ export function run(args: string[]): number {
     receiptHashes,
   );
 
-  // Rewrite MCP server paths only if mcp.json was actually synced.
-  if (synced.includes('.kimi-code/mcp.json')) {
-    rewriteMcpPaths(target, opts.dryRun, actions);
-  }
+  const ownedMcp = rewriteMcpPaths(target, opts.dryRun, actions, null);
 
   // Sync .lazykimi/ templates only (schemas). Never touch runtime state.
   syncDir(
@@ -217,14 +158,14 @@ export function run(args: string[]): number {
   );
 
   // Update receipt: keep all existing entries that still exist, add/update synced files.
-  const receiptFiles = new Set(receipt.files.map(f => f.path));
+  const receiptFiles = new Set(receipt.files.filter(f => f.path !== '.kimi-code/mcp.json').map(f => f.path));
   for (const rel of Array.from(receiptFiles)) {
-    if (!existsSync(path.join(target, rel))) receiptFiles.delete(rel);
+    if (!safeProjectPath(target, rel) || !existsSync(path.join(target, rel)) || (!synced.includes(rel) && receiptHashes.get(rel) !== sha256OfFile(path.join(target, rel)))) receiptFiles.delete(rel);
   }
   for (const rel of synced) receiptFiles.add(rel);
 
   if (!opts.dryRun) {
-    writeReceipt(target, Array.from(receiptFiles), PLUGIN_VERSION);
+    writeReceipt(target, Array.from(receiptFiles), PLUGIN_VERSION, ownedMcp);
     actions.push('write .kimi-code/.lazykimi-receipt.json');
   }
 

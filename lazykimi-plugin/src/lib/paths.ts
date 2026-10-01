@@ -49,7 +49,7 @@ export function getHomeDir(): string {
 }
 
 export function getKimiConfigDir(): string {
-  return path.join(homedir(), '.kimi-code');
+  return process.env.KIMI_CODE_HOME ? path.resolve(process.env.KIMI_CODE_HOME) : path.join(homedir(), '.kimi-code');
 }
 
 export function getKimiConfigFile(): string {

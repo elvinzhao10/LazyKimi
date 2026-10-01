@@ -27,7 +27,7 @@ flowchart TB
 
 `.kimi-code/skills/` and `agents/` are prompt-facing policy. Each describes a
 bounded workflow and its expected evidence. `agents/` provides focused roles
-mapped to Kimi Code CLI's three sub-agent channels. These files have no
+declared as named native profiles with tool and delegation restrictions. These files have no
 process authority by themselves; they are loaded only if the host accepts the
 package.
 
@@ -55,7 +55,8 @@ Each declaration is a recipe for a host. It becomes a service only when Kimi
 Code CLI starts it over stdio. The shipped template uses the
 `__KIMI_PLUGIN_ROOT__` placeholder (Kimi does not interpolate environment
 variables in `mcp.json`); `lazykimi init` rewrites it to the absolute
-`lazykimi-plugin/` directory path at init time.
+`lazykimi-plugin/` directory and explicit project/mode adapter arguments at init
+time. Unbound manifest launchers fail closed; managed plugin cwd is not a project.
 
 ## TypeScript CLI
 
@@ -67,32 +68,33 @@ provides these commands:
 | `init` | Copy package assets into `.kimi-code/` and `.lazykimi/`; rewrite `__KIMI_PLUGIN_ROOT__`; persist the MCP mode. |
 | `doctor` | Package health diagnostics (hook wiring, MCP mode, honest host-readiness). |
 | `load-check` | Package readiness: inventories, declarations, executable scripts. |
-| `verify` | Aggregate verification gate (suite selector `core\|lifecycle\|all`). |
+| `verify` | Doctor, shell regressions and active-work evidence gates; use the master shell runner for the full release matrix. |
 | `mcp` | MCP server lifecycle inspection. |
 | `tooling` | Adaptive tooling layer: capability-status, codegraph lifecycle. |
 | `lifecycle` | Durable onboard/update/status/offboard/recover-bootstrap-lock. |
-| `sync` | Bridge v0.x user-managed state into the run-state model. |
+| `sync` | Refresh unchanged receipt-owned templates; preserve unknown/modified assets, MCP mode and runtime state. |
 | `handoff` | Parseable handoff summary from `.lazykimi/` state. |
 | `completion-status` | Read the verification store's completion evidence. |
-| `uninstall` | Remove package-owned assets; preserve host state. | |
+| `uninstall` | Remove unchanged receipt-owned project assets; preserve unknown content, runtime state and unrelated host settings. |
 
 The CLI is the package's control plane. It does not start MCP servers itself
 — that is the host's job. It does not install hooks — that is
 `scripts/install-hooks.sh`. It does not modify `~/.kimi-code/config.toml`
-except through the explicit hook installer.
+except for exact receipt-owned hook cleanup during uninstall or an explicitly
+selected soft hook-removal action. The installer is a separate host mutation.
 
 ## Trace one request through the code
 
 1. A user request selects a skill and, where applicable, a role definition.
-   Kimi Code CLI dispatches to the appropriate sub-agent channel
-   (`coder`, `explore`, or `plan`).
+   Kimi Code CLI loads a named native profile with its supported tool and
+   delegation restrictions.
 2. Host tool activity can produce a structured hook event. `pre-tool-use.sh`
    and `post-tool-use.sh` inspect supported fields, while the package avoids
    granting authority based on free-form text.
 3. State scripts under `scripts/state/` create or update a run, task, event,
    or checkpoint under `.lazykimi/runs/<id>/`. Plan checkboxes advance one
    task at a time and stay authoritative.
-4. `lazykimi verify` runs package-owned checks. Each check gets an owned
+4. `scripts/lazykimi-verify.sh` runs the full package matrix. Each check gets an owned
    process group, a deadline, JSON status/reason, and best-effort cleanup.
    This is not a security sandbox; untrusted commands need VM or
    container-backed isolation.

@@ -9,7 +9,7 @@
   "exit_code": 0,
   "started_at": "2026-09-19T00:00:00Z",
   "finished_at": "2026-09-19T00:00:01Z",
-  "artifact": { "path": "artifacts/criterion.log", "sha256": "e7d3d49bdb106033b33121050b055c28fdf817fdbbca19c87a85c6009db5c5f9" },
+  "artifact": { "path": "artifacts/criterion.txt", "sha256": "e7d3d49bdb106033b33121050b055c28fdf817fdbbca19c87a85c6009db5c5f9" },
   "executor": { "identity": "agent/executor-1" },
   "verifier": { "identity": "agent/verifier-1" },
   "review": { "verdict": "approved", "source_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" }

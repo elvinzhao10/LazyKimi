@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pre-compact.sh — Kimi PreCompact hook (advisory, context-recovery).
-# v1.3.3 mapped semantics: records a pre_compact ledger event on the active
+# v1.3.4 mapped semantics: records a pre_compact ledger event on the active
 # run so context-recovery checkpoints (written by post-compact.sh into
 # .lazykimi/runs/<id>/checkpoints/) can be tied to the compaction boundary.
 #

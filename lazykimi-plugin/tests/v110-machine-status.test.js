@@ -36,7 +36,11 @@ test('installed-only package load check validates machine status without release
   // Given: an exact plugin copy whose parent has no marketplace release artifacts.
   const parent = fs.mkdtempSync(path.join(os.tmpdir(), 'lazykimi-installed-only-'));
   const installed = path.join(parent, 'lazykimi');
-  fs.cpSync(PLUGIN_ROOT, installed, { recursive: true });
+  fs.cpSync(PLUGIN_ROOT, installed, {
+    recursive: true,
+    filter: source => !path.relative(PLUGIN_ROOT, source).split(path.sep).some(component =>
+      ['node_modules', '.git', '__pycache__'].includes(component)) && !/\.py[co]$/.test(source),
+  });
   t.after(() => fs.rmSync(parent, { recursive: true, force: true }));
 
   // When: the installed plugin runs its public package load check.
@@ -52,8 +56,8 @@ test('installed-only package load check validates machine status without release
   assert.match(result.stdout, /machine status v2/i);
 });
 
-test('machine status publishes authoritative v1.3.3 Kimi route boundaries', () => {
-  // Given: the checked-in v1.3.3 package and its marketplace route declarations.
+test('machine status publishes authoritative v1.3.4 Kimi route boundaries', () => {
+  // Given: the checked-in v1.3.4 package and its marketplace route declarations.
   const expectedHosts = [
     ['kimi', 'kimi-plugin-manifest', 'invoke-documented', 'documented-tested'],
   ];
@@ -66,7 +70,7 @@ test('machine status publishes authoritative v1.3.3 Kimi route boundaries', () =
   const report = JSON.parse(result.stdout);
   assert.equal(report.schema_version, 2);
   assert.equal(report.contract_version, '2.0.0');
-  assert.equal(report.version, '1.3.3');
+  assert.equal(report.version, '1.3.4');
   assert.deepEqual(report.package_readiness, { status: 'ready', scope: 'package' });
   assert.deepEqual(report.host_readiness, { status: 'pending' });
   assert.deepEqual(report.hosts.map((row) => [row.host, row.route, row.native_mode, row.public_label]), expectedHosts);
@@ -105,17 +109,17 @@ test('authoritative version fields advance in lockstep with the shipped lifecycl
     path.join(PLUGIN_ROOT, 'marketplace.json'), 'utf8',
   ));
 
-  // Then: every current authority is v1.3.3, the marketplace entry is the
+  // Then: every current authority is v1.3.4, the marketplace entry is the
   // single lazykimi plugin, and the shipped lifecycle example stays in
   // lockstep (LazyKimi has no pre-1.0 receipt history — its 0.x past is
   // preserved as labeled-historical docs, not lifecycle receipts).
-  assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.3'));
+  assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.4'));
   assert.equal(marketplace.version, '2');
   assert.equal(marketplace.plugins.length, 1);
   assert.equal(marketplace.plugins[0].id, 'lazykimi');
   assert.equal(marketplace.plugins[0].source, './');
-  assert.equal(historical.manifest.version, '1.3.3');
-  assert.match(historical.release.id, /^1\.3\.3-/);
+  assert.equal(historical.manifest.version, '1.3.4');
+  assert.match(historical.release.id, /^1\.3\.4-/);
 });
 
 test('machine status rejects prompt-shaped metadata and is byte-stable', () => {

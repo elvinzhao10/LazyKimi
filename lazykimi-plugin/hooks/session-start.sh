@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # session-start.sh — Kimi SessionStart hook: bootstrap .lazykimi state, run the
 # package load-check, and summarize boulder / active-loop / active-run state.
-# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+# Ported from the LazyZCode v1.3.4 hook semantics (family parity).
 #
 # Kimi output contract: print EITHER strict JSON ({"additionalContext": "..."})
 # OR nothing on stdout; diagnostics go to stderr. This hook is advisory and
@@ -18,7 +18,7 @@ NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-session-start.XXXXXX")
 trap 'rm -f "$NOTES_FILE"' EXIT
 note() { printf '%s\n' "$1" >>"$NOTES_FILE"; }
 
-note "(LazyKimi v1.3.3): Session starting — checking project state..."
+note "(LazyKimi v1.3.4): Session starting — checking project state..."
 
 # --- Bootstrap the .lazykimi/ directory tree so skills/agents that read
 # plans/, context/, drafts/, rules/, ulw-loop/, or runs/ don't crash on a
@@ -114,7 +114,7 @@ PY
     [ -n "$ACTIVE_LOOP" ] && note "$ACTIVE_LOOP"
 fi
 
-# --- Active run summary (v1.3.3 run state under .lazykimi/runs/) ---
+# --- Active run summary (v1.3.4 run state under .lazykimi/runs/) ---
 RUNS_DIR="$CWD/.lazykimi/runs"
 if [ -d "$RUNS_DIR" ]; then
     for run_dir in "$RUNS_DIR"/*/; do
@@ -151,8 +151,8 @@ PY
 )
                 note "(LazyKimi): Active run found: $PLAN (status: $STATUS, progress: $PROGRESS)"
                 note "(LazyKimi): Run /lazy-start-work or ask to continue the planned work."
+                break
             fi
-            break
         fi
     done
 fi

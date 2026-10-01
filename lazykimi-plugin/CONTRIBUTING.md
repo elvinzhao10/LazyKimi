@@ -68,7 +68,7 @@ Node 22 / Python 3.13.
 ## Contract parity rules
 
 `lazykimi-plugin/contracts/` carries family-shared byte-identical contracts
-copied verbatim from LazyZCode v1.3.3. They are untouchable except via a
+copied verbatim from LazyZCode v1.3.4. They are untouchable except via a
 family-wide decision:
 
 - Copy with `cp`, never retype; verify with `cmp`

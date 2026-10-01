@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # pre-tool-use.sh — Kimi PreToolUse hook: block dangerous operations.
-# Ported from the LazyZCode v1.3.3 hardened deny policy (family parity).
+# Ported from the LazyZCode v1.3.4 hardened deny policy (family parity).
 #
-# v1.3.3 hardening applied here:
+# v1.3.4 hardening applied here:
 #   - 1 MiB input cap with oversized-input rejection
 #   - malformed-payload rejection (missing mutating tool payload)
 #   - identity normalization (agent role fields) + wrapper resolution
@@ -71,6 +71,7 @@ try:
 except (ValueError, TypeError):
     raise SystemExit(0)
 roles = {event[key].strip().lower() for key in ("agent_type", "agent_type_name", "agent_name", "subagent_type") if isinstance(event.get(key), str)}
+roles |= {"lazykimi-" + role for role in roles if role in ("verifier", "orchestrator")}
 restricted = roles & {"lazykimi-verifier", "lazykimi-orchestrator"}
 if len(restricted) > 1:
     print("deny")

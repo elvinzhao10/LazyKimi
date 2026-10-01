@@ -109,7 +109,7 @@ test('refuses an artifact that escapes through a symlinked parent directory', (t
   const escapedRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'lazyseries-artifact-escape-'));
   t.after(() => fs.rmSync(projectRoot, { recursive: true }));
   t.after(() => fs.rmSync(escapedRoot, { recursive: true }));
-  fs.copyFileSync(path.join(completionFixtures, 'artifacts', 'criterion.log'), path.join(escapedRoot, 'criterion.log'));
+  fs.copyFileSync(path.join(completionFixtures, 'artifacts', 'criterion.txt'), path.join(escapedRoot, 'criterion.txt'));
   fs.symlinkSync(escapedRoot, path.join(projectRoot, 'artifacts'), 'dir');
   const record = readFixture(completionFixtures, 'valid.json');
   // When

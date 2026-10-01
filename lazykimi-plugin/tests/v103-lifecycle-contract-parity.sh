@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v103-lifecycle-contract-parity.sh — compatibility entry point for the
 # current bounded explicit-root parity gate (family-shared contracts vs
-# LazyZCode). Ported from lazyzcode v1.3.3 tests/v103-lifecycle-contract-parity.sh,
+# LazyZCode). Ported from lazyzcode v1.3.4 tests/v103-lifecycle-contract-parity.sh,
 # which execs its v110 six-host gate; LazyKimi's bounded gate is the
 # v103-automatic-tooling-contract-parity.sh tooling-contract gate.
 # This is package evidence only. It does not inspect or claim host readiness.

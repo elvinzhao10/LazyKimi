@@ -13,7 +13,7 @@ const validatorPath = path.join(contracts, 'validate-lazyseries-record.js');
 const HEAD = 'a'.repeat(40);
 const LANES = ['goal-verification', 'manual-qa', 'code-quality', 'security', 'context-mining'];
 
-function record(artifactRef = 'plugins/lazyzcode/contracts/tests/execution-context-contract.test.js') {
+function record(artifactRef = 'contracts/tests/execution-context-contract.test.js') {
   return {
     schema_version: 'lazyseries.execution-context.v1',
     fixed_contract: 'TASK/DELTA/REFS/VERIFY',
@@ -50,7 +50,7 @@ function validator() {
   return require(validatorPath);
 }
 
-function trustedContext(input, projectRoot = path.resolve(__dirname, '..', '..', '..', '..')) {
+function trustedContext(input, projectRoot = path.resolve(__dirname, '..', '..')) {
   return {
     projectRoot,
     planCommands: input.command_validation.commands.map(({ argv }) => argv),

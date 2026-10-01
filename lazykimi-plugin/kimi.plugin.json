@@ -1,6 +1,6 @@
 {
   "name": "lazykimi",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "LazyKimi evidence-gated planning, execution, and review workflows for Kimi hosts.",
   "author": "LazyKimi contributors",
   "homepage": "https://github.com/elvinzhao10/LazyKimi",
@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "LazyKimi",
     "shortDescription": "Evidence-gated planning, execution, and review workflows for Kimi hosts",
-    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.3. Primary host: Kimi Code CLI (plugin manifest and project init routes). Secondary host: Kimi Work (skills import only).",
+    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.4. Primary host: Kimi Code CLI (plugin manifest and project init routes). Kimi Work supports full plugins; this package route remains experimental pending live proof. Manifest MCP servers require explicit project binding through the project init route.",
     "developerName": "LazyKimi contributors",
     "websiteURL": "https://github.com/elvinzhao10/LazyKimi"
   },
@@ -26,28 +26,46 @@
   "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /lazy-init-deep on first use.",
   "mcpServers": {
     "lazykimi-run-ledger": {
-      "command": "python3",
-      "args": ["./mcp/run-ledger/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "run-ledger"
+      ]
     },
     "lazykimi-verification": {
-      "command": "python3",
-      "args": ["./mcp/verification/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "verification"
+      ]
     },
     "lazykimi-status-dashboard": {
-      "command": "python3",
-      "args": ["./mcp/status-dashboard/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "status-dashboard"
+      ]
     },
     "lazykimi-context-graph": {
-      "command": "python3",
-      "args": ["./mcp/context-graph/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "context-graph"
+      ]
     },
     "lazykimi-code-intel": {
-      "command": "python3",
-      "args": ["./mcp/code-intel/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "code-intel"
+      ]
     },
     "lazykimi-docs": {
-      "command": "python3",
-      "args": ["./mcp/docs/server.py"]
+      "command": "node",
+      "args": [
+        "./scripts/kimi-project-mcp.js",
+        "docs"
+      ]
     }
   },
   "hooks": [
@@ -133,5 +151,6 @@
       "timeout": 5
     }
   ],
-  "commands": "./commands/"
+  "commands": "./commands/",
+  "agents": "./agents/"
 }

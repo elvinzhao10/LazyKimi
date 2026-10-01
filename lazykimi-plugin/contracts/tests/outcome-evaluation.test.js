@@ -135,3 +135,15 @@ test('refuses an outcome path that escapes through a symlinked parent', (t) => {
   // When / Then
   assert.throws(() => evaluation.evaluateManifest(record, evidenceRoot), /after resolving links/);
 });
+
+test('refuses missing or changed completion artifacts in an isolated fixture', (t) => {
+  const missingRoot = copiedFixture(t);
+  fs.rmSync(path.join(missingRoot, 'artifacts', 'criterion.txt'));
+  assert.throws(() => evaluation.evaluateManifest(fixture('manifest.json'), missingRoot),
+    /outcome\.evidence: artifact\.path: file does not exist/);
+
+  const changedRoot = copiedFixture(t);
+  fs.appendFileSync(path.join(changedRoot, 'artifacts', 'criterion.txt'), 'changed bytes\n');
+  assert.throws(() => evaluation.evaluateManifest(fixture('manifest.json'), changedRoot),
+    /artifact\.sha256/);
+});

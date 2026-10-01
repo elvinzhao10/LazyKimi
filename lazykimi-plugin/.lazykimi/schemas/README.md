@@ -1,12 +1,12 @@
-# .lazykimi/ state schemas — v0.x → v1.3.3 mapping
+# .lazykimi/ state schemas — v0.x → v1.3.4 mapping
 
 This directory ships the v0.x state schemas that `lazykimi sync` and the
-legacy loop bridge still read. The v1.3.3 family run-state model does not
+legacy loop bridge still read. The v1.3.4 family run-state model does not
 introduce new JSON-Schema files here (the family enforces run-state shape in
-`scripts/state/validate-state.sh`, mirroring LazyZCode v1.3.3); this note is
+`scripts/state/validate-state.sh`, mirroring LazyZCode v1.3.4); this note is
 the old→new mapping.
 
-## v1.3.3 state tree
+## v1.3.4 state tree
 
     .lazykimi/
       plans/            family work plans (TL;DR + ## TODOs + ## Final Verification Wave)
@@ -27,7 +27,7 @@ server's `create_run` tool); the top-level directories are bootstrapped by the
 
 ## Old → new mapping
 
-| v0.x artifact | v1.3.3 successor |
+| v0.x artifact | v1.3.4 successor |
 | --- | --- |
 | `.lazykimi/state/boulder.json` (`boulder.schema.json`) | `.lazykimi/runs/<id>/state.json` (task/progress state; validated by `scripts/state/validate-state.sh`) |
 | `.lazykimi/state/sessions.json` (`sessions.schema.json`) | run `session_ids` + `scripts/state/bind-session.py` |
@@ -35,4 +35,4 @@ server's `create_run` tool); the top-level directories are bootstrapped by the
 | `.lazykimi/evidence/*.md` (`evidence.schema.json`) | `.lazykimi/runs/<id>/evidence/` |
 
 `lazykimi sync` remains the bridge for v0.x projects; the v0.x artifacts are
-deprecated (CHANGELOG v1.3.3 migration note) and have no automatic migration.
+deprecated (CHANGELOG v1.3.4 migration note) and have no automatic migration.

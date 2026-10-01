@@ -139,7 +139,7 @@ def _fake_validator(path: Path, output: str) -> None:
 
 def _run_doctor(tmp_path: Path, output: str) -> subprocess.CompletedProcess[str]:
     plugin = tmp_path / "plugin"
-    shutil.copytree(PLUGIN_ROOT, plugin)
+    shutil.copytree(PLUGIN_ROOT, plugin, ignore=shutil.ignore_patterns('node_modules', '.git', '__pycache__', '*.pyc', '*.pyo'))
     fake_bin = tmp_path / "bin"
     fake_bin.mkdir()
     _fake_validator(fake_bin / "kimi", output)

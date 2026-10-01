@@ -1,10 +1,11 @@
-import { existsSync, readdirSync, unlinkSync, rmdirSync, readFileSync } from 'fs';
+import { existsSync, unlinkSync, readFileSync } from 'fs';
 import path from 'path';
 import { getKimiConfigFile } from '../lib/paths';
 import { removeHooksFromConfig } from '../lib/hooks-config';
-import { isFileModified, listInstalledFiles, receiptExists } from '../lib/receipt';
+import { isFileModified, listInstalledFiles, readReceipt, safeProjectPath, serverDigest } from '../lib/receipt';
+import { readJson, writeJson, isObject } from '../lib/json';
 
-const PLUGIN_VERSION = '1.3.3';
+const PLUGIN_VERSION = '1.3.4';
 
 interface UninstallOptions {
   readonly soft: boolean;
@@ -49,25 +50,10 @@ function confirm(message: string, opts: UninstallOptions): boolean {
 }
 
 function removeFile(abs: string): void {
-  try { unlinkSync(abs); } catch { /* ignore */ }
-}
-
-function removeDirIfEmpty(dir: string): void {
-  try { rmdirSync(dir); } catch { /* not empty or missing */ }
-}
-
-function removeTree(dir: string): void {
-  if (!existsSync(dir)) return;
-  const entries = readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      removeTree(full);
-    } else {
-      removeFile(full);
-    }
+  try { unlinkSync(abs); } catch (error) {
+    if (isObject(error) && error.code === 'ENOENT') return;
+    throw error;
   }
-  removeDirIfEmpty(dir);
 }
 
 export function run(args: string[]): number {
@@ -96,37 +82,51 @@ export function run(args: string[]): number {
     return 0;
   }
 
-  const hasReceipt = receiptExists(target);
+  const receipt = readReceipt(target);
   const installedFiles = listInstalledFiles(target);
+  const ownedHookPaths = installedFiles.filter(rel => rel.startsWith('.kimi-code/hooks/') && !isFileModified(target, rel, receipt)).map(rel => path.join(target, rel));
   const kimiCodeDir = path.join(target, '.kimi-code');
 
-  if (hasReceipt && installedFiles.length > 0) {
+  if (receipt) {
+    // Inventory the entire receipt before the first deletion.
+    const deletable = installedFiles.filter(rel => !isFileModified(target, rel, receipt));
     for (const rel of installedFiles) {
       const abs = path.join(target, rel);
       if (!existsSync(abs)) continue;
-      if (isFileModified(target, rel)) {
+      if (!deletable.includes(rel)) {
         preserved.push(rel);
         continue;
       }
       removeFile(abs);
       removed.push(rel);
     }
-    removeFile(path.join(kimiCodeDir, '.lazykimi-receipt.json'));
+    const mcpPath = path.join(kimiCodeDir, 'mcp.json');
+    if (safeProjectPath(target, '.kimi-code/mcp.json') && existsSync(mcpPath) && receipt.mcpServers) {
+      try {
+        const current = readJson(mcpPath);
+        if (isObject(current) && isObject(current.mcpServers)) {
+          for (const [name, digest] of Object.entries(receipt.mcpServers)) {
+            if (Object.hasOwn(current.mcpServers, name) && serverDigest(current.mcpServers[name]) === digest) { delete current.mcpServers[name]; removed.push(`MCP ${name}`); }
+            else preserved.push(`MCP ${name}`);
+          }
+          writeJson(mcpPath, current);
+        }
+      } catch (error) { if (error instanceof SyntaxError) preserved.push('.kimi-code/mcp.json'); else throw error; }
+    }
+    if (preserved.length === 0) removeFile(path.join(kimiCodeDir, '.lazykimi-receipt.json'));
   } else if (existsSync(kimiCodeDir)) {
-    console.log('No receipt found. Removing entire .kimi-code/ directory.');
-    removeTree(kimiCodeDir);
-    removed.push('.kimi-code/');
+    console.log('No valid receipt found. Preserving .kimi-code/ and host configuration.');
+    preserved.push('.kimi-code/');
   }
 
   if (opts.purgeState) {
     const lazykimiDir = path.join(target, '.lazykimi');
     if (existsSync(lazykimiDir)) {
-      removeTree(lazykimiDir);
-      removed.push('.lazykimi/');
+      preserved.push('.lazykimi/ (state is not receipt-owned)');
     }
   }
 
-  const hookResult = removeHooksFromConfig(getKimiConfigFile(), target);
+  const hookResult = receipt && ownedHookPaths.length > 0 ? removeHooksFromConfig(getKimiConfigFile(), target, ownedHookPaths) : { changed: false };
   if (hookResult.changed) removed.push('hooks from ~/.kimi-code/config.toml');
 
   console.log('=== Removed ===');

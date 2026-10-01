@@ -19,7 +19,7 @@ The TypeScript CLI must build cleanly before any package check is meaningful:
 
 ```bash
 cd lazykimi-plugin
-npm install
+npm ci --ignore-scripts --no-audit --fund=false
 npm run build
 ```
 
@@ -29,7 +29,7 @@ failed build invalidates all downstream checks — `load-check`, `doctor`, and
 
 ## Read the aggregate result
 
-`lazykimi verify` calls doctor, load-check, MCP protocol, hook pipeline, and
+The master runner, `bash scripts/lazykimi-verify.sh`, calls doctor, load-check, MCP protocol, hook pipeline, and
 classified regression checks. It uses bounded execution for package-owned
 checks so the JSON result contains a status and reason instead of a bare exit
 code. A timeout or failed check is a failure; an unavailable host-side
@@ -46,33 +46,31 @@ that need to execute untrusted input need a **VM or container-backed runner**.
 # From lazykimi-plugin/ after npm run build.
 node dist/index.js load-check     # package readiness
 node dist/index.js doctor         # package health
-node dist/index.js verify --must-pass   # aggregate gate
+node dist/index.js verify --must-pass   # doctor, shell regressions and work evidence
+LAZYKIMI_VERIFY_SUITE=all bash scripts/lazykimi-verify.sh  # full release matrix
 ```
 
-The expected package evidence is respectively `PACKAGE_READINESS=full`,
-`Doctor check: ALL PASS`, and aggregate JSON containing `"all_pass":true`.
+The Node CLI prints its own readiness/doctor/verification summaries. The full
+shell runner emits aggregate JSON containing `"all_pass":true` only when every
+selected required check passes. Do not substitute one command's output for
+another command's evidence.
 
 ## CI workflow
 
 The CI workflow at `.github/workflows/ci.yml` runs on every push and pull
 request to `main`:
 
-```yaml
-jobs:
-  test:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: cd lazykimi-plugin && npm install
-      - run: cd lazykimi-plugin && npm run build
-      - run: cd lazykimi-plugin && bash scripts/lazykimi-verify.sh
-```
+Its supported-floor job checks Node 20.0.0. Its core job uses Node 22 and
+Python 3.13 on macOS, installs pytest 8.4.2 plus locked CLI/tooling dependencies
+with `npm ci`, builds the CLI and runs the `all` suite, naming guard and
+publication verification. The final validation job requires both blocking
+jobs to succeed. See the workflow itself for the pinned action revisions.
 
-CI runs on macOS-latest with Node 22, matching the package's verified scope.
-A failed build or failed verify gate blocks merge.
+The release workflow builds compiled `dist/` before assembling the archive.
+`scripts/build-release-archive.sh` includes that compiled CLI, excludes
+dependencies/bytecode, normalizes archive metadata and tests the extracted
+candidate before upload. Local success does not claim that GitHub Actions or
+publication has already run.
 
 ## Release boundary
 
@@ -116,16 +114,16 @@ follow the smallest source function named in the failure. Do not "fix" a
 release check by weakening its assertion: each assertion encodes a published
 ownership or evidence contract.
 
-## Family test-stack port: inventory and skip list (v1.3.3)
+## Family test-stack port: inventory and skip list (v1.3.4)
 
-The v1.3.3 test stack mirrors the lazyzcode layout: `tests/*.test.js`
-(node:test), `tests/test_lazykimi_*.py` plus `tooling/test_lazykimi_*.py`
-(pytest, python3.10+ resolved by `scripts/lazykimi-python-resolver.sh`),
+The v1.3.4 test stack mirrors the lazyzcode layout: `tests/*.test.js`
+(node:test), `tests/test_*.py` plus `tooling/test_lazykimi_*.py`
+(pytest, Python 3.10+ selected by the runner),
 `tests/v*.sh` and `tests/publication-regression.sh` (bash), `tests/fixtures/`,
 and `scripts/assets/` fixture libraries. Existing `v001`–`v003` regressions
-keep their numbers; ports new in v1.3.3 use the `v103*` family prefix.
+keep their numbers; ports new in v1.3.4 use the `v103*` family prefix.
 
-Current committed inventory: 32 node:test files, 26 pytest files (15 in
+Current source inventory: 34 node:test files, 28 pytest files (17 in
 `tests/`, 11 in `tooling/`), and 41 bash regressions (24 historical `v001`–
 `v003` + 17 `v103`/`v2`/`v104`/publication ports), of which the paired-only
 parity checks and the publication regression run outside the normal suite
@@ -145,7 +143,7 @@ Skipped lazyzcode tests, with reasons:
 | `v110-six-host-contract-parity.sh` (+ `-regression.sh`) | Gates the LazyTrae/LazyZCode sibling pair by explicit root; lazykimi's family parity runs through `v103-automatic-tooling-contract-parity.sh`, `v103-lifecycle-contract-parity.sh`, and `v2-lifecycle-contract-parity.sh` against LazyZCode. |
 | `host-capability-routes.test.js` | Enumerates the ZCode host-capability route table; lazykimi's host surface is Kimi-only and is asserted by `marketplace-route-contract.test.js` and `v110-machine-status.test.js`. |
 | `product-naming.test.js` | Replaced by the repo-root naming guard ported in T20 (`scripts/check-product-naming.js` + `.product-naming-allowlist.json` + its negative test), which covers the whole active surface instead of test-local fixtures. |
-| `zcode-connector-reference.test.js` | ZCode connector-manifest specifics with no Kimi counterpart (Kimi Work connectors are documented in `docs/reference/host-routes.md` and verified on-host in T21). |
+| `zcode-connector-reference.test.js` | ZCode connector-manifest specifics with no Kimi counterpart; Kimi Work connectors are documented in `docs/reference/host-routes.md`, with current full-plugin/project-binding readiness still pending. |
 | `zcode-observation-bundle.test.js` | ZCode observation-bundle packaging; lazykimi's equivalent receipt machinery (`kimi-observation*`, `kimi-receipt.js`) is covered by `lifecycle-host-handoff.test.js` and `kimi-receipt-path.test.js`. |
 | remaining `v015`–`v12x` host/UI regressions (cwd-injection, capability broker/detector, provider lifecycle, LSP, remote capabilities, zcode package preparation, zcode observation bundle, state-task schema, etc.) | They drive ZCode host surfaces (ZCode UI hooks, ZCode capability broker, ZCode provider registry) that lazykimi does not ship; the Kimi equivalents are covered by the ported `v103-*` set, the six MCP servers' own contract tests, and `lazykimi-hook-pipeline-test.sh`. |
 

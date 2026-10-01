@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # post-compact.sh — Kimi PostCompact hook (advisory, context-recovery).
-# v1.3.3 mapped semantics: writes a context-recovery checkpoint for the
+# v1.3.4 mapped semantics: writes a context-recovery checkpoint for the
 # active run (state snapshot under .lazykimi/runs/<id>/checkpoints/), records
 # a post_compact ledger event, and re-anchors context with an
 # additionalContext reminder pointing at durable state instead of stale

@@ -3,7 +3,7 @@
 > Self-contained evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.
 
 This package belongs to the LazyKimi project, the Kimi-native family port of
-the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.3.
+the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.4.
 Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
@@ -40,15 +40,15 @@ package evidence, not proof of live host loading or MCP connection.
 ## What this plugin provides
 
 LazyKimi provides a workflow harness for Kimi Code CLI (primary) and Kimi
-Work (secondary, skills import only). Host plugin/marketplace behavior must
+Work (secondary, full-plugin route experimental; skills fallback available). Host plugin/marketplace behavior must
 be verified in a live session:
 
 - **Hierarchical project memory** (`lazy-init-deep`) — generates `AGENTS.md`
   with directory scoring and a `.lazykimi/context/` knowledge base.
 - **Decision-complete planning** (`lazy-ulw-plan`) — one plan per request;
   never writes product code. Maps to Kimi's `plan` sub-agent and `/plan on`.
-- **Orchestrated execution** (`lazy-start-work`) — delegates to sub-agents
-  via the `coder` channel; the orchestrator never implements directly.
+- **Orchestrated execution** (`lazy-start-work`) — delegates to named agents
+  through the host's native Agent/AgentSwarm tools; the orchestrator never implements directly.
 - **Verified completion loop** (`lazy-ulw-loop`) — evidence-backed done claims
   with adversarial verification; maps to `/goal <objective>`.
 - **Independent review** (`lazy-review-work` / `lazy-reviewer`) — the
@@ -65,15 +65,15 @@ be verified in a live session:
 
 | Directory | Purpose | Status |
 |-----------|---------|--------|
-| `.kimi-code/skills/` | 19 portable workflow skills | Kimi Code CLI plugin content; verified Kimi Work local import source |
-| `.kimi-code/AGENTS.md` | Project agent catalog (13 roles mapped to 3 Kimi sub-agents + main) | Loaded by Kimi Code CLI session |
-| `.kimi-code/mcp.json` | 6 local MCP server declarations (`__KIMI_PLUGIN_ROOT__` template) | Kimi Code CLI declarations; manual connector configuration is the verified Kimi Work fallback |
+| `.kimi-code/skills/` | 19 portable workflow skills | Kimi Code CLI plugin content; Kimi Work fallback import source |
+| `.kimi-code/AGENTS.md` | Project workflow instructions for 13 roles | Host discovery requires session observation |
+| `.kimi-code/mcp.json` | 6 local MCP server declarations with explicit project binding | Kimi Code CLI project route; manual Kimi Work connectors require live proof |
 | `agents/` | 13 family role-agent definitions | Used by the orchestrator for role dispatch |
 | `commands/` | 20 named slash-command workflows | Host entry points incl. lifecycle commands |
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 32 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
-| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.3 |
+| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.4 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |
 | `scripts/` | State scripts, loop orchestration, lifecycle, verification utilities | Used by package readiness and workflow checks |
 
@@ -86,13 +86,13 @@ specification):
 - **Plugin manifest route (recommended):** `/plugins marketplace add` via
   `lazykimi-plugin/marketplace.json` (v2), then install the `lazykimi`
   plugin. Kimi Code CLI reads `kimi.plugin.json`, activates skills and
-  commands, registers all 16 inline hooks, and starts the 6 inline MCP
-  servers (always-orchestrated profile). A loaded session must still confirm
-  activation.
+  commands and declares 16 inline hooks and 6 MCP launchers. Unbound manifest
+  MCP launchers fail closed: managed plugin cwd is not the user's project.
+  Use the project route for project-bound MCP. Live activation remains experimental.
 - **Project config route (for cloned repos):** `lazykimi init [--mcp-mode
   <mode>]` copies `.kimi-code/`, `.lazykimi/`, and `mcp.json` into the
   project root — rewriting the `__KIMI_PLUGIN_ROOT__` placeholder to absolute
-  paths and injecting the MCP mode env stanza — then run
+  plugin/project paths and explicit `--project`/`--mode` adapter arguments — then run
   `bash lazykimi-plugin/scripts/install-hooks.sh --project-root <path>` to
   append the eight critical `[[hooks]]` entries to `~/.kimi-code/config.toml`.
 - **Kimi Work skills fallback (secondary):**
@@ -100,16 +100,18 @@ specification):
   Skills UI; commands, agents, and hooks are not delivered on this route.
   See [docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md).
 
-For **Kimi Code CLI**, ensure v0.26.0 or later is installed at
-`~/.kimi-code/bin/kimi`, then open the cloned repository and let Kimi Code
-CLI auto-discover `.kimi-code/`.
+Use an installed **Kimi Code CLI** with the documented plugin or project
+configuration capabilities. Run `lazykimi init --target <absolute-project>`
+before opening that project; cloning the repository alone does not configure
+its root. Host configuration uses `KIMI_CODE_HOME` when set, otherwise
+`~/.kimi-code/`. See the [host routes](docs/reference/host-routes.md).
 
 ### Development validation
 
 ```bash
 # From lazykimi-plugin/: build the CLI and validate the package.
 cd lazykimi-plugin
-npm install
+npm ci --ignore-scripts --no-audit --fund=false
 npm run build
 node dist/index.js load-check
 node dist/index.js doctor
@@ -124,7 +126,7 @@ bash lazykimi-plugin/scripts/install-hooks.sh
 ```
 
 The installer appends eight critical `[[hooks]]` entries — `SessionStart`,
-`UserPromptSubmit`, `PreToolUse` (matcher `Bash`), `PostToolUse`,
+`UserPromptSubmit`, `PreToolUse` (matcher `Write|Edit|Bash`), `PostToolUse`,
 `PostToolUseFailure`, `Stop`, `PermissionRequest`, `PermissionResult` — to
 `~/.kimi-code/config.toml`. The remaining eight advisory hooks
 (`SubagentStart`, `SubagentStop`, `PreCompact`, `PostCompact`, `SessionEnd`,
@@ -143,24 +145,19 @@ registration interactively, use `/mcp` (list servers) and `/mcp-config`
 (configure servers) inside a Kimi Code CLI session. The shipped template uses
 the `__KIMI_PLUGIN_ROOT__` placeholder — Kimi does not interpolate
 environment variables in `mcp.json` — and `lazykimi init` rewrites it to the
-absolute `lazykimi-plugin/` directory path (plus the `LAZYKIMI_MCP_MODE`/
-`CWD` env stanza). The default profile is `orchestrated` (all six servers);
+absolute plugin path and explicit `--project`/`--mode` adapter arguments. The default profile is `orchestrated` (all six servers);
 `lazykimi init --mcp-mode direct|assisted|planned|orchestrated|long-horizon`
-re-rewrites the declarations idempotently and records the mode in
-`.lazykimi/config.json`.
+merges receipt-owned declarations idempotently. Existing config and runtime state are preserved.
 
 ## Uninstall
 
-Use `lazykimi uninstall --yes` to remove package-owned assets. Then perform
-the manual host step: remove the eight critical `[[hooks]]` entries from
-`~/.kimi-code/config.toml` and remove MCP servers via `/mcp-config` in a
-Kimi Code CLI session. For Kimi Work, remove imported skills through its
-Skills UI. Never guess, scan for, or delete host-managed installation paths,
-`~/.kimi-code/` global state, or MCP configuration belonging to another
-host. The copied repository is independent of host removal and may be
-deleted only after the host confirms the skills and connectors are gone.
-The root `offboard` protocol records this package result separately from
-the user-observed host result.
+Choose the installed scope first. Run `lazykimi uninstall --yes` from the
+selected project directory. It removes only unchanged receipt-owned project assets
+and MCP keys. Missing, malformed or unsafe receipts preserve assets; runtime
+state and modified or unknown content stay in place. Durable lifecycle
+offboarding is a separate plan-first operation. Remove host-managed plugins,
+imported skills and connectors through their selected host route. See
+[safe removal](docs/08-safe-removal.md) for exact scope and hook ownership.
 
 ## Verify
 
@@ -169,7 +166,7 @@ the user-observed host result.
 node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
-LAZYKIMI_VERIFY_SUITE=core|lifecycle|all bash scripts/lazykimi-verify.sh
+LAZYKIMI_VERIFY_SUITE=all bash scripts/lazykimi-verify.sh
 ```
 
 `lazykimi verify --must-pass` checks **PACKAGE READINESS** — copied assets,
@@ -235,29 +232,30 @@ inside a `/swarm` or as the closing checkpoint of a `/goal`.
 
 ## Agent list (13)
 
-| Agent | Channel | Responsibility |
+| Agent | Native profile | Responsibility |
 | --- | --- | --- |
-| `lazykimi-orchestrator` | Main | Workflow lifecycle; never implements |
-| `lazykimi-planner` | `plan` | Author ONE plan per request |
-| `lazykimi-implementer` | `coder` | Deep autonomous implementation |
-| `lazykimi-verifier` | Main | Post-implementation review; gate enforcement |
-| `lazykimi-reviewer` | Main | Code review lane; consolidates the review panel |
-| `lazykimi-security-auditor` | Main | Security review lane |
-| `lazykimi-qa-executor` | `coder` | QA execution lane |
-| `lazykimi-gate-reviewer` | Main | Final gate review |
-| `lazykimi-explorer` | `explore` | Codebase search |
-| `lazykimi-librarian` | `explore` | External docs and memory |
-| `lazykimi-context-indexer` | `plan` | Project indexing for planning |
-| `lazykimi-context-miner` | `explore` | Context mining; review-panel context lane |
-| `lazykimi-migration-planner` | `coder` | Foreign-host adaptation |
+| `lazykimi-orchestrator` | `orchestrator` | Workflow lifecycle; implementation delegated |
+| `lazykimi-planner` | `planner` | Return ONE plan per request for caller persistence |
+| `lazykimi-implementer` | `implementer` | Deep autonomous implementation |
+| `lazykimi-verifier` | `verifier` | Post-implementation review; gate enforcement |
+| `lazykimi-reviewer` | `reviewer` | Code review lane; consolidates the review panel |
+| `lazykimi-security-auditor` | `security-auditor` | Security review lane |
+| `lazykimi-qa-executor` | `qa-executor` | QA execution lane |
+| `lazykimi-gate-reviewer` | `gate-reviewer` | Final gate review |
+| `lazykimi-explorer` | `explorer` | Codebase search |
+| `lazykimi-librarian` | `librarian` | Read available documentation and return findings |
+| `lazykimi-context-indexer` | `context-indexer` | Return project indexing findings |
+| `lazykimi-context-miner` | `context-miner` | Context mining; review-panel context lane |
+| `lazykimi-migration-planner` | `migration-planner` | Return foreign-host adaptation plan |
 
-The thirteen roles map to Kimi Code CLI's three built-in sub-agent channels
-(`coder`, `explore`, `plan`) plus the main session (orchestrator, verifier,
-reviewer, security-auditor, gate-reviewer as main-session peers), preserving
-the planner/implementer/verifier separation the five evidence gates depend
-on. Frontmatter uses Kimi's `disallowed` denylist (the intended allowlist is
-stated in each agent body) with `model: kimi-k3` and an `effort` budget; see
-[docs/reference/model-routing.md](docs/reference/model-routing.md).
+The thirteen custom profiles are discoverable by their native role names. Their
+`tools`, `disallowedTools`, and `subagents` fields are enforced by Kimi both
+when tools are exposed and before execution. Read-only profiles allow only
+Read/Grep/Glob and deny mutation, shell, and delegation tools. The verifier
+retains Bash and Write for test execution and evidence; its shell commands
+still require the independent hook permission layer. Model, effort, turn
+budgets, and worktree isolation are plan/session decisions, not agent header
+enforcement. See [native adapter boundaries](docs/reference/native-adapter.md).
 
 ## Hook list (16)
 
@@ -265,7 +263,7 @@ stated in each agent body) with `model: kimi-k3` and an `effort` budget; see
 | --- | --- | --- |
 | `SessionStart` | `session-start.sh` | Bootstrap `.lazykimi/` state; report `SESSIONSTART_READINESS`; strict-JSON `additionalContext` |
 | `UserPromptSubmit` | `user-prompt-submit.sh` | Adaptive intake: run state and pressure signals |
-| `PreToolUse` (Bash) | `pre-tool-use.sh` | v1.3.3 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
+| `PreToolUse` (Write/Edit/Bash) | `pre-tool-use.sh` | v1.3.4 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
 | `PostToolUse` | `post-tool-use.sh` | Append redacted tool-use event to the run ledger |
 | `PostToolUseFailure` | `post-tool-use-failure.sh` | Append failure event to the run ledger |
 | `Stop` | `stop-gate.sh` | Unchecked-plan-task detection; advisory completion reminder |
@@ -304,13 +302,11 @@ protocol evidence, not a host connection claim.
 
 ## Kimi Work (Secondary Host)
 
-Kimi Work is the secondary host. **Kimi Work has no plugin manifest support**;
-LazyKimi supports it via skill import only. The `lazykimi-*` MCP connectors
-must be added manually through Kimi Work's MCP configuration, and a loaded
-session must be observed before claiming host readiness. Package evidence
-proves only that the source skills are present and importable; it does not
-prove that Kimi Work loaded them. See
-[docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md) for the import walk-through.
+Kimi Work supports the full plugin definition, including skills, MCP, agents,
+hooks, and commands ([official overview](https://www.kimi.com/en/help/plugins-and-skills/overview)).
+LazyKimi's full-plugin route there remains experimental until a fresh live
+session proves loading and project binding. The skills import script remains
+a recovery route. See [Kimi Work setup](docs/11-kimi-work-setup.md).
 
 ## Workflow phases and evidence gates
 
@@ -319,8 +315,8 @@ LazyKimi follows the canonical evidence-led loop:
 1. **Explore** — `lazy-init-deep` or `/swarm` with parallel explorer,
    librarian, and context-miner. Output: hierarchical repo understanding and
    prior state reconstruction.
-2. **Plan** — `lazy-ulw-plan` or `/plan on` then the `plan` sub-agent.
-   Output: ONE plan file at `.lazykimi/plans/<slug>.md`.
+2. **Plan** — `lazy-ulw-plan` or `/plan on` then the named planner.
+   Output: ONE plan returned for caller persistence at `.lazykimi/plans/<slug>.md`.
 3. **Implement** — `lazy-start-work` or `/goal <objective>`. Output:
    changed files, commits, per-task evidence.
 4. **Verify** — `lazy-verifier`. Output: APPROVE / ITERATE / REJECT verdict
@@ -354,8 +350,8 @@ MIT — see the package [LICENSE](LICENSE) and [NOTICE](NOTICE).
 ---
 
 _This is the installable Kimi Code CLI package for LazyKimi. The copied
-repository is not a verified Kimi Work installer; Kimi Work uses its
-documented Skills UI with a live-session check, or the verified local
-skills import plus manual MCP fallback. The `~/.kimi-code/` global
+repository is not a verified Kimi Work installer; its full-plugin route is
+experimental pending live proof. The local skills import and manual MCP
+fallback also require host observation. The default `~/.kimi-code/` global
 configuration directory is host-managed development state and is
 intentionally not part of the release package._

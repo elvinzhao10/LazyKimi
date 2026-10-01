@@ -3,9 +3,8 @@ set -euo pipefail
 
 # install-kimi-work.sh — Install LazyKimi skills into Kimi Work (secondary host).
 #
-# Kimi Work is a desktop agent (Beta, 2026-06-03) with Agent Swarm + built-in
-# Skills system. It has NO plugin manifest support — only skills can be
-# imported. MCP servers must be configured manually through Kimi Work's UI.
+# This helper is the skills-only fallback. Kimi Work supports full plugins;
+# this package's full-plugin loading remains experimental pending live proof.
 #
 # This script copies lazy-* skill directories from lazykimi-plugin/.kimi-code/skills/
 # into the detected Kimi Work skills directory. It is idempotent: existing
@@ -23,16 +22,16 @@ Copies LazyKimi skills (lazy-* directories) from
   ${SKILLS_SRC}
 into the detected Kimi Work skills directory.
 
-Kimi Work has no plugin manifest support. Only skills are imported. MCP
-servers must be configured manually through Kimi Work's MCP configuration UI
+This helper imports only skills. Kimi Work supports full plugins; LazyKimi's
+full-plugin route remains experimental pending live proof. Configure local MCP
+servers manually through Kimi Work's MCP configuration UI
 (see docs/11-kimi-work-setup.md for the 6 server commands).
 
 Idempotent: skills with identical SKILL.md content are skipped.
 
 Limitations:
-  - No plugin manifest (no hooks, no sessionStart.skill).
-  - No /plugins install route.
-  - MCP servers must be added manually.
+  - This fallback does not install agents, commands, hooks, or sessionStart.skill.
+  - MCP servers require explicit project binding and manual configuration.
 
 Restart Kimi Work after running this script to activate imported skills.
 EOF

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v103-execution-context-hardening-regression.sh
-# Adversarial battery for the v1.3.3 hardened PreToolUse policy, ported from
-# the LazyZCode v1.3.3 fixture set plus the execution-context-security
+# Adversarial battery for the v1.3.4 hardened PreToolUse policy, ported from
+# the LazyZCode v1.3.4 fixture set plus the execution-context-security
 # contract's wrapper rules: oversized input, wrapper-hidden destructive
 # command, secret path (structured + generic), role-scoped write violations,
 # malformed-payload rejection, and fail-open internals.

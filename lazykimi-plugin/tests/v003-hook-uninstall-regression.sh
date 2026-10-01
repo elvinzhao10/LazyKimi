@@ -148,6 +148,8 @@ fi
 
 # ---------------------------------------------------------------------------
 # Adversarial: hooks installed from plugin source layout (<project>/hooks/).
+# Without a receipt, full uninstall preserves them; explicit --soft is the
+# separate user-authorized request to remove these host hook registrations.
 # ---------------------------------------------------------------------------
 cd /
 reset_home
@@ -157,6 +159,12 @@ HOME="${TMP_HOME}" bash "${INSTALL_HOOKS}" --project-root "${PROJECT_ROOT}"
 HOOKS_BEFORE="$(grep -c '\[\[hooks\]\]' "${CONFIG_FILE}" || true)"
 cd "${PROJECT_ROOT}"
 run_uninstall
+HOOKS_AFTER="$(grep -c '\[\[hooks\]\]' "${CONFIG_FILE}" || true)"
+if [ "${HOOKS_AFTER}" -ne "${HOOKS_BEFORE}" ]; then
+  echo "FAIL: unreceipted source-layout hooks must be preserved" >&2
+  exit 1
+fi
+run_uninstall --soft
 HOOKS_AFTER="$(grep -c '\[\[hooks\]\]' "${CONFIG_FILE}" || true)"
 if [ "${HOOKS_AFTER}" -ne 0 ]; then
   echo "FAIL: source-layout hooks should be removed, got ${HOOKS_AFTER}" >&2

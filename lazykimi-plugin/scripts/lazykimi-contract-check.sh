@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lazykimi-contract-check.sh — ported from lazyzcode v1.3.3
+# lazykimi-contract-check.sh — ported from lazyzcode v1.3.4
 # scripts/lazyzcode-contract-check.sh. The automatic tooling contract is a
 # family-shared byte-identical file, so this check is a verbatim port with
 # naming adapted only.

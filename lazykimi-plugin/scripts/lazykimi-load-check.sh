@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # noqa: SIZE_OK - standalone package-readiness gate remains self-contained in installed plugins.
-# lazykimi-load-check.sh — v1.3.3 package readiness gate (ported from
-# lazyzcode v1.3.3 scripts/lazyzcode-load-check.sh, Kimi-adapted).
+# lazykimi-load-check.sh — v1.3.4 package readiness gate (ported from
+# lazyzcode v1.3.4 scripts/lazyzcode-load-check.sh, Kimi-adapted).
 #
 # Emits PACKAGE_READINESS=full|degraded|failed and never claims host state.
 set -euo pipefail
@@ -76,7 +76,7 @@ EXPECTED_AGENTS = 13
 EXPECTED_HOOK_EVENTS = 16
 EXPECTED_MCP_SERVERS = 6
 EXPECTED_MCP_TOOLS = 32
-EXPECTED_VERSION = "1.3.3"
+EXPECTED_VERSION = "1.3.4"
 KIMI_HOOK_EVENTS = {
     "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse",
     "PostToolUseFailure", "Stop", "SubagentStop", "SubagentStart",

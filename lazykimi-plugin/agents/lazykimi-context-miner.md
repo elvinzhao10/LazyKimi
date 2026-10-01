@@ -1,21 +1,27 @@
 ---
 name: context-miner
 description: "Use as the context-mining lane of the 5-agent review: git history, docs, and cross-references the other lanes missed. Do not use for correctness review or implementation."
-model: kimi-k3
-effort: high
-maxTurns: 80
-disallowed:
-  - Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+disallowedTools:
   - Write
-isolation: true
+  - Edit
+  - Bash
+  - Agent
+  - AgentSwarm
+subagents: []
 ---
 
 # lazykimi-context-miner
-> **Maps to Kimi**: ported from the LazyZCode v1.3.3 `lazyzcode-context-miner` agent — ZCode Agent-tool dispatch became Kimi explore dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became the Kimi `disallowed:` denylist documented in the body. Kimi plugin frontmatter uses the "name" key set to the bare role name.
+> **Maps to Kimi**: ported from the LazyZCode v1.3.4 `lazyzcode-context-miner` agent — ZCode Agent-tool dispatch became Kimi explore dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became native Kimi `tools` and `disallowedTools` restrictions. Kimi plugin frontmatter uses the "name" key set to the bare role name.
 
 ## Kimi dispatch channel
 
-**`explore` sub-agent** — dispatched through Kimi Code CLI's `explore` sub-agent channel. Strictly read-only: the `disallowed: [Edit, Write]` frontmatter denylist encodes the intended read-only allowlist (Read, Bash) as the denylist of its complement within Kimi's file-mutation tools.
+Dispatched by the native custom profile name `context-miner`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 

@@ -74,10 +74,10 @@ result inspectable after the original conversation has ended.
 
 LazyKimi maps the request shape onto Kimi Code CLI's native modes:
 
-- A vague or large request enters `/plan on` and the `plan` sub-agent
-  (lazykimi-planner) authors the plan.
+- A vague or large request enters `/plan on`; the named planner returns a
+  complete plan for the authorized caller to persist.
 - An approved plan with independent tasks may be handed to `/swarm <task>`
-  for parallel execution across the `coder` and `explore` channels.
+  for parallel execution using the named implementation and investigation profiles.
 - A single large objective with a clear goal may be handed to
   `/goal <objective>` for durable autonomous execution under the
   orchestrator.

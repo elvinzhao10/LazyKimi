@@ -1,6 +1,6 @@
 #!/bin/bash
 # lazykimi-security-check.sh — Secret/credential leak scanner
-# Ported from lazyzcode v1.3.3 scripts/lazyzcode-security-check.sh.
+# Ported from lazyzcode v1.3.4 scripts/lazyzcode-security-check.sh.
 #
 # Scans plugin files for known secret patterns: API keys, private keys, bearer tokens.
 # Outputs a JSON summary. Exit code 0 if no secrets found; exit code 1 if secrets detected.

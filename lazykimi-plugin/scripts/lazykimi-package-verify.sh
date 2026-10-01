@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lazykimi-package-verify.sh — ported from lazyzcode v1.3.3
+# lazykimi-package-verify.sh — ported from lazyzcode v1.3.4
 # scripts/lazyzcode-package-verify.sh: full verify against a pristine,
 # dependency-isolated tooling install (never the working tree's node_modules).
 set -euo pipefail

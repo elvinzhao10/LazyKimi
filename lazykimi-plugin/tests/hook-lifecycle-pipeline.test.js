@@ -16,7 +16,7 @@ const temporaryProjects = [];
 
 // Kimi's exactly-sixteen hook events, declared inline in kimi.plugin.json and
 // mapped one-to-one onto contracts/kimi-hook-consumers.v1.json consumers.
-// Ported from lazyzcode v1.3.3 tests/hook-lifecycle-pipeline.test.js, which
+// Ported from lazyzcode v1.3.4 tests/hook-lifecycle-pipeline.test.js, which
 // exercises ZCode's seven-event hooks.json surface.
 
 test.after(() => {

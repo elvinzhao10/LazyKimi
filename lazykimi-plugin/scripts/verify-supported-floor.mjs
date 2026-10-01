@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Ported from lazyzcode v1.3.3 scripts/verify-supported-floor.mjs.
+// Ported from lazyzcode v1.3.4 scripts/verify-supported-floor.mjs.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

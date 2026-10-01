@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v103-codegraph-uninstall-pid-identity-regression.sh — ported from lazyzcode v1.3.3 tests/v017-codegraph-uninstall-pid-identity-regression.sh; family
+# v103-codegraph-uninstall-pid-identity-regression.sh — ported from lazyzcode v1.3.4 tests/v017-codegraph-uninstall-pid-identity-regression.sh; family
 # versioning keeps the new port on the v103 prefix.
 set -euo pipefail
 

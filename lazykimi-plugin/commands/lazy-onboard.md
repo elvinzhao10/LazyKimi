@@ -113,7 +113,7 @@ Do not claim completion without verification.
 - `node lazykimi-plugin/dist/index.js doctor` — package doctor
   (host=package).
 - `node lazykimi-plugin/dist/index.js lifecycle <onboard|update|status|offboard|recover-bootstrap-lock>` —
-  durable lifecycle CLI (targets the v1.3.3 lifecycle wave).
+  durable lifecycle CLI (targets the v1.3.4 lifecycle wave).
 - `lazykimi-plugin/scripts/install-hooks.sh` — project-route hook installer
   (eight critical `[[hooks]]` TOML entries).
 - `lazykimi-plugin/scripts/install-kimi-work.sh` — Kimi Work skills fallback

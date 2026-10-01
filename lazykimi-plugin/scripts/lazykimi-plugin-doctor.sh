@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # noqa: SIZE_OK - standalone release-gate script kept self-contained for plugin installs.
-# lazykimi-plugin-doctor.sh — v1.3.3 package doctor (ported from lazyzcode
-# v1.3.3 scripts/lazyzcode-plugin-doctor.sh, Kimi-adapted).
+# lazykimi-plugin-doctor.sh — v1.3.4 package doctor (ported from lazyzcode
+# v1.3.4 scripts/lazyzcode-plugin-doctor.sh, Kimi-adapted).
 #
 # Validates the plugin structure: manifest exists + parses as JSON, all
 # component dirs exist, inline hook events resolve to executable consumers,
@@ -320,7 +320,7 @@ import sys
 
 status = json.loads(sys.argv[1])
 assert status.get("schema_version") == 2
-assert status.get("version") == "1.3.3"
+assert status.get("version") == "1.3.4"
 assert status.get("package_readiness") == {"status": "ready", "scope": "package"}
 assert status.get("host_readiness") == {"status": "pending"}
 hosts = status.get("hosts")
@@ -626,36 +626,15 @@ if len(servers) != 6:
 
 for name, server in sorted(servers.items()):
     bare = name[len("lazykimi-"):] if name.startswith("lazykimi-") else name
-    if server.get("command") != "bash":
-        errors.append(f"{name} command is {server.get('command')!r}, expected 'bash'")
-    args = server.get("args")
-    if not isinstance(args, list):
-        errors.append(f"{name} args must be a list")
-        continue
-    script = None
-    for arg in args:
-        if not isinstance(arg, str):
-            continue
-        resolved = os.path.realpath(arg.replace("__KIMI_PLUGIN_ROOT__", root))
-        if resolved.endswith(".sh"):
-            script = resolved
-            break
-    if script is None:
-        errors.append(f"{name} has no shell script arg")
-        continue
-    if not under_root(script):
-        errors.append(f"{name} script is outside plugin root: {script}")
-    elif not os.path.exists(script):
-        errors.append(f"{name} missing MCP server script: {script}")
-    elif not os.path.isfile(script):
-        errors.append(f"{name} MCP server script is not a file: {script}")
-    elif not os.access(script, os.X_OK):
-        errors.append(f"{name} MCP server script is not executable: {script}")
-    env = server.get("env")
-    if not isinstance(env, dict) or set(env) != {"LAZYKIMI_MCP_MODE", "CWD"} \
-        or env.get("LAZYKIMI_MCP_MODE") != "__KIMI_MCP_MODE__" \
-        or env.get("CWD") != "__KIMI_PROJECT_ROOT__":
-        errors.append(f"{name} has invalid placeholder env stanza")
+    expected_args = ["__KIMI_PLUGIN_ROOT__/scripts/kimi-project-mcp.js", bare,
+                     "--project", "__KIMI_PROJECT_ROOT__", "--mode", "__KIMI_MCP_MODE__"]
+    if server.get("command") != "node" or server.get("args") != expected_args:
+        errors.append(f"{name} must use the explicit project-bound node adapter")
+    script = os.path.realpath(os.path.join(root, "scripts", "kimi-project-mcp.js"))
+    if not under_root(script) or not os.path.isfile(script):
+        errors.append(f"{name} missing in-package MCP adapter: {script}")
+    if "env" in server or server.get("required") is not False:
+        errors.append(f"{name} must be optional and bind project through argv")
 
 if errors:
     print("; ".join(errors))

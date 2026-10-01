@@ -1,16 +1,17 @@
 import { existsSync, readdirSync, mkdirSync, copyFileSync, chmodSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginCommandsDir, getPluginContractsDir, getPluginToolingDir, getPluginRulesDir, getPluginRoot } from '../lib/paths';
-import { writeJson } from '../lib/json';
-import { writeReceipt } from '../lib/receipt';
+import { writeJson, readJson, isObject } from '../lib/json';
+import { writeReceipt, readReceipt, isFileModified, safeProjectPath, serverDigest, getReceiptPath } from '../lib/receipt';
+import type { Receipt } from '../lib/receipt';
 
-const PLUGIN_VERSION = '1.3.3';
+const PLUGIN_VERSION = '1.3.4';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
 const EXPECTED_MCP = 6;
 
-// v1.3.3 MCP profile modes (mcp/profile-gate.sh server-selection table).
+// v1.3.4 MCP profile modes (mcp/profile-gate.sh server-selection table).
 const MCP_MODES: readonly string[] = ['direct', 'assisted', 'planned', 'orchestrated', 'long-horizon'];
 const DEFAULT_MCP_MODE = 'orchestrated';
 
@@ -33,11 +34,9 @@ Options:
   --dry-run         Preview actions without writing any files
   --target <path>   Target directory (default: current directory)
   --mcp-mode <mode> MCP profile mode: direct | assisted | planned |
-                    orchestrated (default) | long-horizon. Persisted to
-                    .lazykimi/config.json and injected as the
-                    LAZYKIMI_MCP_MODE env stanza in the project
-                    .kimi-code/mcp.json (Kimi does not interpolate env
-                    vars, so the mode rides the init-time rewrite).`);
+                    orchestrated (default) | long-horizon. Bound through explicit --project/--mode adapter arguments
+                    in project .kimi-code/mcp.json. Existing config
+                    and runtime state are preserved.`);
 }
 
 function parseArgs(args: string[]): InitOptions {
@@ -67,21 +66,28 @@ function copyDir(
   dryRun: boolean,
   actions: string[],
   copied: string[],
+  receipt: Receipt | null = readReceipt(target),
 ): void {
   if (!existsSync(src)) return;
   const entries = readdirSync(src, { withFileTypes: true });
   for (const entry of entries) {
+    if (['node_modules', '__pycache__', '.git'].includes(entry.name) || /\.py[co]$/.test(entry.name)) continue;
     const srcPath = path.join(src, entry.name);
     const destPath = path.join(destDir, entry.name);
     if (entry.isDirectory()) {
-      copyDir(srcPath, destPath, target, dryRun, actions, copied);
+      copyDir(srcPath, destPath, target, dryRun, actions, copied, receipt);
     } else if (entry.isFile()) {
+      const rel = path.relative(target, destPath);
+      if (rel === '.kimi-code/mcp.json') continue;
+      if (!safeProjectPath(target, rel) || (existsSync(destPath) && isFileModified(target, rel, receipt))) {
+        actions.push(`preserve ${rel}`);
+        continue;
+      }
       if (!dryRun) {
         mkdirSync(path.dirname(destPath), { recursive: true });
         copyFileSync(srcPath, destPath);
         if (entry.name.endsWith('.sh')) chmodSync(destPath, 0o755);
       }
-      const rel = path.relative(target, destPath);
       copied.push(rel);
       actions.push(`copy ${rel}`);
     }
@@ -95,24 +101,31 @@ function copyFile(
   dryRun: boolean,
   actions: string[],
   copied: string[],
+  receipt: Receipt | null = readReceipt(target),
 ): void {
   if (!existsSync(src)) return;
   const destPath = path.join(destDir, path.basename(src));
+  const rel = path.relative(target, destPath);
+  if (!safeProjectPath(target, rel) || (existsSync(destPath) && isFileModified(target, rel, receipt))) {
+    actions.push(`preserve ${rel}`);
+    return;
+  }
   if (!dryRun) {
     mkdirSync(destDir, { recursive: true });
     copyFileSync(src, destPath);
   }
-  const rel = path.relative(target, destPath);
   copied.push(rel);
   actions.push(`copy ${rel}`);
 }
 
 function ensureDir(dir: string, dryRun: boolean, actions: string[], rel: string): void {
+  if (!safeProjectPath(path.resolve(dir, ...rel.split('/').map(() => '..')), `${rel}/.boundary`)) throw new Error(`Unsafe project directory: ${rel}`);
   if (!dryRun) mkdirSync(dir, { recursive: true });
   actions.push(`mkdir ${rel}`);
 }
 
 function writeSeedJson(rel: string, data: unknown, target: string, dryRun: boolean, actions: string[]): void {
+  if (!safeProjectPath(target, rel) || existsSync(path.join(target, rel))) { actions.push(`preserve ${rel}`); return; }
   if (!dryRun) writeJson(path.join(target, rel), data);
   actions.push(`write ${rel}`);
 }
@@ -131,35 +144,56 @@ function writeEvidenceTemplates(target: string, dryRun: boolean, actions: string
   ];
   for (const [name, content] of files) {
     const rel = path.join('.lazykimi', 'evidence', name);
+    if (!safeProjectPath(target, rel) || existsSync(path.join(target, rel))) { actions.push(`preserve ${rel}`); continue; }
     if (!dryRun) writeFileSync(path.join(target, rel), content, 'utf-8');
     actions.push(`write ${rel}`);
   }
 }
 
-export function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[], mcpMode: string = DEFAULT_MCP_MODE): void {
-  // Kimi Code CLI does not interpolate env vars in .kimi-code/mcp.json (per
-  // https://www.kimi.com/code/docs/kimi-code-cli/customization/mcp.html). The
-  // source template ships with __KIMI_PLUGIN_ROOT__/__KIMI_MCP_MODE__/
-  // __KIMI_PROJECT_ROOT__ placeholders that we rewrite at install time so the
-  // project-level mcp.json resolves server.sh regardless of CWD AND carries
-  // the MCP profile mode (LAZYKIMI_MCP_MODE) plus project CWD into every
-  // server's env stanza — the Kimi-native mode-plumbing mechanism. Re-running
-  // init re-copies the template and rewrites it, so a mode change is an
-  // idempotent re-rewrite with no duplicate keys.
+export function rewriteMcpPaths(target: string, dryRun: boolean, actions: string[], mcpMode: string | null = DEFAULT_MCP_MODE): Record<string, string> {
+  // Bind project and profile arguments at init time; merge only receipt-owned
+  // MCP keys, preserving foreign declarations and user modifications.
   const mcpPath = path.join(target, '.kimi-code', 'mcp.json');
-  if (!existsSync(mcpPath)) return;
+  const owned: Record<string, string> = {};
+  if (!safeProjectPath(target, '.kimi-code/mcp.json')) { actions.push('preserve linked mcp.json'); return owned; }
   const pluginRoot = getPluginRoot();
   if (dryRun) {
     actions.push(`rewrite mcp.json paths (__KIMI_PLUGIN_ROOT__ -> ${pluginRoot}; mode ${mcpMode})`);
-    return;
+    return owned;
   }
-  const raw = readFileSync(mcpPath, 'utf-8');
+  const raw = readFileSync(path.join(getPluginKimiCodeDir(), 'mcp.json'), 'utf-8');
   const rewritten = raw
-    .replace(/__KIMI_PLUGIN_ROOT__/g, pluginRoot)
-    .replace(/__KIMI_MCP_MODE__/g, mcpMode)
-    .replace(/__KIMI_PROJECT_ROOT__/g, target);
-  writeFileSync(mcpPath, rewritten, 'utf-8');
+    .replace(/__KIMI_PLUGIN_ROOT__/g, () => JSON.stringify(pluginRoot).slice(1, -1))
+    .replace(/__KIMI_MCP_MODE__/g, () => mcpMode ?? DEFAULT_MCP_MODE)
+    .replace(/__KIMI_PROJECT_ROOT__/g, () => JSON.stringify(target).slice(1, -1));
+  const template: unknown = JSON.parse(rewritten);
+  let current: unknown = {};
+  try { if (existsSync(mcpPath)) current = readJson(mcpPath); }
+  catch (error) { if (error instanceof SyntaxError) { actions.push('preserve malformed mcp.json'); return owned; } throw error; }
+  if (!isObject(current) || (current.mcpServers !== undefined && !isObject(current.mcpServers)) || !isObject(template) || !isObject(template.mcpServers)) {
+    actions.push('preserve invalid mcp.json'); return owned;
+  }
+  const servers = isObject(current.mcpServers) ? current.mcpServers : {};
+  const previous = readReceipt(target);
+  const legacyOwned = !isFileModified(target, '.kimi-code/mcp.json', previous);
+  for (const [name, server] of Object.entries(template.mcpServers)) {
+    if (Object.hasOwn(servers, name) && !legacyOwned && previous?.mcpServers?.[name] !== serverDigest(servers[name])) {
+      actions.push(`preserve MCP ${name}`); continue;
+    }
+    const prior = servers[name];
+    let rendered = server;
+    if (mcpMode === null && isObject(prior) && Array.isArray(prior.args) && isObject(server) && Array.isArray(server.args)) {
+      const mode: unknown = prior.args.at(-1);
+      if (prior.args.at(-2) === '--mode' && typeof mode === 'string' && MCP_MODES.includes(mode)) {
+        rendered = { ...server, args: [...server.args.slice(0, -1), mode] };
+      }
+    }
+    servers[name] = rendered;
+    owned[name] = serverDigest(rendered);
+  }
+  writeJson(mcpPath, { ...current, mcpServers: servers });
   actions.push(`rewrite mcp.json paths (absolute: ${pluginRoot}; mcp-mode: ${mcpMode})`);
+  return owned;
 }
 
 function defaultBoulderState(): unknown {
@@ -184,6 +218,11 @@ function defaultConfig(mcpMode: string): unknown {
 export function run(args: string[]): number {
   const opts = parseArgs(args);
   const target = path.resolve(opts.target);
+  if (!safeProjectPath(target, '.kimi-code/.boundary') || !safeProjectPath(target, '.lazykimi/.boundary')) {
+    console.error('lazykimi init: linked or unsafe project configuration directory; preserved');
+    return 1;
+  }
+  if (!existsSync(target) && !opts.dryRun) mkdirSync(target, { recursive: true });
   const actions: string[] = [];
   const copied: string[] = [];
 
@@ -197,7 +236,7 @@ export function run(args: string[]): number {
   //     placeholders in the copied mcp.json to absolute plugin-root paths, the
   //     selected MCP profile mode, and the project root (Kimi does not
   //     interpolate env vars in project-level mcp.json).
-  rewriteMcpPaths(target, opts.dryRun, actions, opts.mcpMode);
+  const ownedMcp = rewriteMcpPaths(target, opts.dryRun, actions, opts.mcpMode);
   // 1c. Copy rules/ -> .kimi-code/rules/ (also covered by step 1, but kept
   //     explicit so future rules additions are obvious).
   copyDir(getPluginRulesDir(), path.join(target, '.kimi-code', 'rules'), target, opts.dryRun, actions, copied);
@@ -254,8 +293,10 @@ export function run(args: string[]): number {
 
   // 6. Write receipt tracking installed .kimi-code/ files
   if (!opts.dryRun) {
-    writeReceipt(target, copied, PLUGIN_VERSION);
-    actions.push('write .kimi-code/.lazykimi-receipt.json');
+    if (safeProjectPath(target, '.kimi-code/.lazykimi-receipt.json') && (!existsSync(getReceiptPath(target)) || readReceipt(target))) {
+      writeReceipt(target, copied, PLUGIN_VERSION, ownedMcp);
+      actions.push('write .kimi-code/.lazykimi-receipt.json');
+    } else actions.push('preserve invalid existing receipt; newly copied assets remain unowned');
   }
 
   // Report
@@ -263,7 +304,7 @@ export function run(args: string[]): number {
   for (const a of actions) console.log(`  ${opts.dryRun ? '[dry-run] ' : ''}${a}`);
   console.log(`\n${opts.dryRun ? 'Preview complete' : 'Install complete'}. ${copied.length} file(s) ${opts.dryRun ? 'would be ' : ''}copied.`);
   console.log(`Expected: ${EXPECTED_SKILLS} skills, ${EXPECTED_AGENTS} agents, ${EXPECTED_HOOKS} hooks, ${EXPECTED_MCP} MCP servers.`);
-  console.log(`MCP profile mode: ${opts.mcpMode} (LAZYKIMI_MCP_MODE injected into .kimi-code/mcp.json env stanzas; change with \`lazykimi init --mcp-mode <mode>\`).`);
+  console.log(`MCP profile mode: ${opts.mcpMode} (explicit adapter arguments in .kimi-code/mcp.json; change with \`lazykimi init --mcp-mode <mode>\`).`);
   console.log('Run `lazykimi doctor` to verify, `lazykimi load-check` for package readiness.');
   return 0;
 }

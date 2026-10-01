@@ -1,7 +1,7 @@
 # Architecture tour
 
 LazyKimi is not one runtime. It is a package of declarative host assets plus
-small local executables, mapped onto Kimi Code CLI's native sub-agent channels
+small local executables, dispatched through Kimi Code CLI's named native agents
 and native modes. The technical question at every boundary is: *who owns this
 file or process, and what observation can prove it ran?*
 
@@ -9,7 +9,7 @@ file or process, and what observation can prove it ran?*
 flowchart LR
     Request["user request"] --> Policy["skill / SKILL.md"]
     Policy --> Role["agent role"]
-    Role --> SubAgent["Kimi sub-agent channel"]
+    Role --> SubAgent["named native agent profile"]
     SubAgent --> Host["host invokes tools"]
     Host --> Hook["hook payload"]
     Hook --> Script["shell policy script"]
@@ -22,8 +22,8 @@ flowchart LR
 
 The arrows are not all automatic. Skills are instructions that a host or agent
 may invoke; the host decides whether it loads them. The thirteen agent roles
-map to Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`,
-`plan`) plus the main agent, but the host decides which sub-agent to dispatch.
+declare native tool and delegation restrictions, but the host decides which
+profile to load and dispatch.
 Hook scripts receive host-provided structured input. MCP declarations merely
 tell a host how to start a local process. The package can validate every file
 in that path, but only a host observation proves loading or connection.
@@ -56,7 +56,7 @@ hooks block are host/user state, not package state.
 LazyKimi keeps runtime state under `.lazykimi/` and project configuration
 under `.kimi-code/`. The two never mix:
 
-- `.lazykimi/runs/<id>/` — the v1.3.3 run-state model: `state.json`,
+- `.lazykimi/runs/<id>/` — the v1.3.4 run-state model: `state.json`,
   `events.jsonl`, `checkpoints/`, `evidence/`, `verification/`
   (see [reference/state-model.md](reference/state-model.md) for the full tree
   and the v0.x old-to-new mapping).

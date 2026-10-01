@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v001-ssrf-regression.sh
 # Verify docs MCP server rejects non-registry URLs (code review + runtime test).
-# v1.3.3 port: the docs server is the family (LazyZCode-derived) curl-based
+# v1.3.4 port: the docs server is the family (LazyZCode-derived) curl-based
 # implementation — protections are the fixed-URL whitelist plus hardened curl
 # flags (HTTPS-only proto, redirects refused), checked before any fetch.
 set -euo pipefail

@@ -1,8 +1,10 @@
 # LazyKimi
 
+![LazyKimi](lazykimi-banner.png)
+
 > Kimi-native evidence-led agent workflow harness for **Kimi Code CLI** (primary)
-> and **Kimi Work** (secondary, skills import only). Current release:
-> **v1.3.3**, at family parity with LazyZCode v1.3.3.
+> and **Kimi Work** (experimental full-plugin route, skills fallback). Current release:
+> **v1.3.4**, at family parity with LazyZCode v1.3.4.
 
 > **Verified on macOS only.** Linux and Windows paths and host behaviour are
 > unverified. Package checks prove the copied package and its local contracts;
@@ -17,7 +19,7 @@ LazyKimi is a self-contained workflow harness that recreates the
 [LazyBuddy](https://github.com/elvinzhao10/LazyBuddy) and
 [LazyTrae](https://github.com/elvinzhao10/LazyTrae) evidence-led agent workflow
 harness design as a Kimi-native package. It targets Kimi Code CLI (primary
-host) and Kimi Work (secondary host, skills import only). The canonical design
+host) and Kimi Work (secondary host, full-plugin activation unverified). The canonical design
 reference is [lazycodex/OmO](https://github.com/code-yeongyu/lazycodex).
 
 ## Start with the outcome
@@ -36,8 +38,10 @@ prove it. Use the smallest workflow that fits the uncertainty and risk:
 | Long-running goal | `lazy-ulw-loop` | Keep durable state and checkpoints. |
 
 In a Kimi Code CLI session, skills are invoked via `/skill:lazy-<name>` or the
-`/<name>` shorthand. Kimi Work imports skills through its Skills UI; native
-modes `/swarm`, `/goal`, and `/plan` are available only in Kimi Code CLI.
+`/<name>` shorthand. Kimi Work supports full plugins; this package's full-plugin
+activation remains experimental, with a skills import fallback through its Skills UI.
+Kimi Code CLI documents native `/swarm`, `/goal`, and `/plan` modes. Equivalent
+Work mode behavior has not been verified for this release.
 
 ## Design mindset
 
@@ -84,7 +88,7 @@ Start from the immutable release, open the cloned folder in the host you want
 to use, and type `onboard` in the agent chat:
 
 ```bash
-git clone --branch v1.3.3 https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.3.4 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
 ```
 

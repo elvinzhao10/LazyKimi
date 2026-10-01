@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v003-dynamic-rules-regression.sh
-# v1.3.3 port: post-tool-use is the family's silent run-event-ledger consumer —
+# v1.3.4 port: post-tool-use is the family's silent run-event-ledger consumer —
 # it appends tool events (with file + boundary warnings) to the active run's
 # events.jsonl and greps changed files for AI-slop markers; stdout stays EMPTY
 # (the v0.x "RULE: <name>" rule-recommendation printing retired with the
@@ -63,4 +63,4 @@ printf '{"hook_event_name":"PostToolUse","cwd":"%s","tool_name":"Write","tool_in
 [ -s "$OUT2" ] && fail "hook printed output with no run state: $(cat "$OUT2")"
 echo "  [PASS] fail-open with no run state"
 
-echo "PASS: v003-dynamic-rules-regression (v1.3.3 semantics)"
+echo "PASS: v003-dynamic-rules-regression (v1.3.4 semantics)"

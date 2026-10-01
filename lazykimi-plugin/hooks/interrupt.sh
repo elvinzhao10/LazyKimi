@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # interrupt.sh — Kimi Interrupt hook (advisory, interrupt ledger).
-# v1.3.3 mapped semantics: records an interrupted event on the active run so
+# v1.3.4 mapped semantics: records an interrupted event on the active run so
 # abrupt stops remain visible in the run ledger.
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.

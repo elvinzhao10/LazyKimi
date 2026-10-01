@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v001-security-regression.sh
 # Verify no secrets in hooks, destructive ops are blocked, and fail-open is present.
-# v1.3.3 port: the deny policy is the LazyZCode v1.3.3 family set — destructive
+# v1.3.4 port: the deny policy is the LazyZCode v1.3.4 family set — destructive
 # recursive deletes, destructive git ops, external publish, secret-like paths,
 # oversized/malformed input. (v0.x extras — plain-http curl denial, chmod 777,
 # embedded-secret-value denial — were not family policy and retired with the
@@ -40,7 +40,7 @@ done
 grep -qE 'trap.*(ERR.*exit 0|exit 0.*ERR)' "$PRE" \
   || fail "pre-tool-use.sh missing fail-open ERR trap"
 
-# 3. Family v1.3.3 destructive-command policy (exit 2 = deny).
+# 3. Family v1.3.4 destructive-command policy (exit 2 = deny).
 rpc() {
   local cmd="$1"
   printf '%s' "{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"$cmd\"}}" | bash "$PRE"

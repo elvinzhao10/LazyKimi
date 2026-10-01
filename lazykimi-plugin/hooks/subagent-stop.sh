@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # subagent-stop.sh — Kimi SubagentStop hook (advisory executor-evidence gate).
-# v1.3.3 mapped semantics: Kimi having this event is an ADDITIVE reminder —
+# v1.3.4 mapped semantics: Kimi having this event is an ADDITIVE reminder —
 # the authoritative executor-evidence gate stays in the review skills, so
-# behavior matches LazyZCode v1.3.3 (the family gate is skill-side).
+# behavior matches LazyZCode v1.3.4 (the family gate is skill-side).
 #
 # Verifies the implementer/coder sub-agent reported an EVIDENCE_RECORDED
 # marker pointing at a non-empty evidence file and appends an advisory

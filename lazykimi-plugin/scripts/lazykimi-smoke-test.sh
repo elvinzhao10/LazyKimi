@@ -1,5 +1,5 @@
 #!/bin/bash
-# lazykimi-smoke-test.sh — ported from lazyzcode v1.3.3 scripts/lazyzcode-smoke-test.sh.
+# lazykimi-smoke-test.sh — ported from lazyzcode v1.3.4 scripts/lazyzcode-smoke-test.sh.
 # Checks each SKILL.md has valid YAML frontmatter, each command file is
 # non-empty Markdown, and the manifest declares the 16 inline Kimi events.
 #

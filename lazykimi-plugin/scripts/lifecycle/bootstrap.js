@@ -17,7 +17,7 @@ const { acquireLock, readActive } = require('./state');
 const { CURRENT_VERSION: VERSION } = require('./version');
 
 const CONTRACT_DIGESTS = Object.freeze({
-  'lazy-harness-lifecycle.v1.example.json': '1dc058e8575acefaace12ebf5284036b7ce2c216abf277c0766f11660148eb57',
+  'lazy-harness-lifecycle.v1.example.json': '8d22d31fd35c5094e61e5499612a8a369d775c005c6bd4010894dcfcf7f1c5e4',
   'lazy-harness-lifecycle.v1.schema.json': 'f1116ae101cb040c15c6891b4b05e8faf945b09515f2916004392d61f806a3cb',
 });
 const PRODUCTS = Object.freeze({

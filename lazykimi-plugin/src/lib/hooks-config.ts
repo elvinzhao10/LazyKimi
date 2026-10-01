@@ -90,7 +90,7 @@ export function isHooksInstalled(configPath: string): boolean {
   return false;
 }
 
-export function removeHooksFromConfig(configPath: string, projectRoot: string): HookResult {
+export function removeHooksFromConfig(configPath: string, projectRoot: string, ownedHookPaths?: readonly string[]): HookResult {
   if (!existsSync(configPath)) {
     return { changed: false, reason: 'config file not found' };
   }
@@ -109,7 +109,10 @@ export function removeHooksFromConfig(configPath: string, projectRoot: string): 
       }
       const blockLines = lines.slice(start, i);
       const command = extractCommand(blockLines);
-      const shouldRemove = command !== undefined && isLazyKimiCommand(command, projectRoot);
+      const scriptPath = command?.startsWith('bash ') ? command.slice(5) : command;
+      const shouldRemove = command !== undefined && isLazyKimiCommand(command, projectRoot)
+        && (ownedHookPaths === undefined || (scriptPath !== undefined && ownedHookPaths.some(owned =>
+          resolvePathPreservingSuffix(scriptPath) === resolvePathPreservingSuffix(owned))));
       if (shouldRemove) {
         removedCount += 1;
       } else {
@@ -132,5 +135,4 @@ export function removeHooksFromConfig(configPath: string, projectRoot: string): 
   writeFileSync(configPath, result.length > 0 ? result.join('\n') + '\n' : '', 'utf-8');
   return { changed: true, reason: `removed ${removedCount} LazyKimi hook block(s)` };
 }
-
 

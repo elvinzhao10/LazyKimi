@@ -16,12 +16,13 @@ fi
 fail() { echo "FAIL: $1" >&2; exit 1; }
 
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/lazykimi-sync.XXXXXX")"
-cleanup() { rm -rf "$TMP"; }
+HELP_OUT="$TMP/help.out"
+DRY_OUT="$TMP/dry.out"
+SYNC_OUT="$TMP/sync.out"
+cleanup() { rm -rf -- "$TMP"; }
 trap cleanup EXIT
 
 # 1. --help lists usage.
-HELP_OUT="$(mktemp)"
-trap 'rm -f "${HELP_OUT}"' EXIT
 
 node "${DIST_INDEX}" sync --help >"${HELP_OUT}" 2>&1
 if ! grep -qE '\bdry-run\b' "${HELP_OUT}"; then
@@ -42,8 +43,6 @@ rm -rf "$TMP/.kimi-code/commands"
 [ ! -d "$TMP/.kimi-code/commands" ] || fail "commands/ still present after removal"
 
 # 3. dry-run preview reports it would restore commands/ but does not write.
-DRY_OUT="$(mktemp)"
-trap 'rm -f "${HELP_OUT}" "${DRY_OUT}"' EXIT
 
 ( cd "$TMP" && HOME="$TMP" node "${DIST_INDEX}" sync --dry-run >"${DRY_OUT}" 2>&1 ) \
   || { cat "${DRY_OUT}" >&2; fail "sync --dry-run exited non-zero"; }
@@ -55,8 +54,6 @@ fi
 echo "  [PASS] sync --dry-run previews without writing"
 
 # 4. actual sync restores commands/.
-SYNC_OUT="$(mktemp)"
-trap 'rm -f "${HELP_OUT}" "${DRY_OUT}" "${SYNC_OUT}"' EXIT
 
 ( cd "$TMP" && HOME="$TMP" node "${DIST_INDEX}" sync >"${SYNC_OUT}" 2>&1 ) \
   || { cat "${SYNC_OUT}" >&2; fail "sync exited non-zero"; }

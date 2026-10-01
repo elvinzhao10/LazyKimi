@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 45
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
-      LAZYKIMI_VERIFY_SUITE: core
+      LAZYKIMI_VERIFY_SUITE: all
       LAZYKIMI_VERIFY_TIMEOUT_SECONDS: 360
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -35,6 +35,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Install pinned Python test runner
+        run: python -m pip install pytest==8.4.2
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "20"
@@ -45,7 +48,7 @@ jobs:
 
       - name: Build the TypeScript CLI
         working-directory: lazykimi-plugin
-        run: npm install --no-audit --fund=false && npm run build
+        run: npm ci --ignore-scripts --no-audit --fund=false && npm run build
 
       - name: Validate release tag and package version
         run: |
@@ -58,16 +61,8 @@ jobs:
       - name: Run publication verification
         run: bash lazykimi-plugin/tests/publication-regression.sh
 
-      - name: Build release archive
-        run: |
-          asset_name="lazykimi-${RELEASE_TAG}.tar.gz"
-          archive_root="$(mktemp -d "$RUNNER_TEMP/lazykimi-release.XXXXXX")"
-          git archive --format=tar.gz --output="$asset_name" "$RELEASE_TAG"
-          tar -xzf "$asset_name" -C "$archive_root"
-          if find "$archive_root" -type f \( -name '*.pyc' -o -path '*/__pycache__/*' \) -print -quit | grep -q .; then
-            echo "Release archive contains generated Python bytecode." >&2
-            exit 1
-          fi
+      - name: Build and exercise extracted release archive
+        run: bash scripts/build-release-archive.sh "$RELEASE_TAG" "lazykimi-${RELEASE_TAG}.tar.gz"
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -92,6 +87,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Install pinned Python test runner
+        run: python -m pip install pytest==8.4.2
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "22"
@@ -99,6 +97,10 @@ jobs:
       - name: Install locked tooling dependencies
         working-directory: lazykimi-plugin/tooling
         run: npm ci --ignore-scripts --no-audit --fund=false
+
+      - name: Build the TypeScript CLI with locked dependencies
+        working-directory: lazykimi-plugin
+        run: npm ci --ignore-scripts --no-audit --fund=false && npm run build
 
       - name: Run timing-sensitive lifecycle regressions
         run: bash lazykimi-plugin/scripts/lazykimi-verify.sh
