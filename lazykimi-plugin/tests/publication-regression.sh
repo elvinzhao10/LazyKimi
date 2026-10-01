@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # publication-regression.sh — publication-boundary regression for LazyKimi.
 # Ported from lazyzcode v1.3.4 tests/publication-regression.sh and adapted to
-# the lazykimi layout: docs live inside lazykimi-plugin/docs (the repo-root
-# docs/ is a tracked symlink onto it), there is ONE marketplace.json v2 inside
+# the lazykimi layout: docs live inside lazykimi-plugin/docs with regular
+# repo-root publication copies, there is ONE marketplace.json v2 inside
 # the plugin tree, and the publication set additionally pins the marketplace
 # identity, the version matrix, and the packaging boundary.
 set -euo pipefail
@@ -185,11 +185,11 @@ pass 'missing learner page fixture is rejected'
 copy_publication_fixture() {
     local fixture_root="$1"
     mkdir -p "$fixture_root/lazykimi-plugin/contracts"
-    # Reproduce the real publication shape: docs live in the plugin tree and
-    # the repo root exposes them through the tracked docs symlink.
+    # Reproduce the real publication shape: regular root publication pages
+    # plus the package's canonical documentation.
     mkdir -p "$fixture_root/lazykimi-plugin/docs"
     cp -RL "$PLUGIN_ROOT/docs/." "$fixture_root/lazykimi-plugin/docs/"
-    ln -s lazykimi-plugin/docs "$fixture_root/docs"
+    cp -R "$REPOSITORY_ROOT/docs" "$fixture_root/docs"
     cp "$REPOSITORY_ROOT/README.md" "$REPOSITORY_ROOT/AGENTS.md" "$REPOSITORY_ROOT/CONTRIBUTING.md" \
         "$REPOSITORY_ROOT/SECURITY.md" "$REPOSITORY_ROOT/RELEASE_NOTES.md" \
         "$REPOSITORY_ROOT/lazykimi-evaluation.md" "$fixture_root/"
@@ -215,11 +215,10 @@ assert_bad_link() {
 
 # Given malformed copied documentation, when the publication walker sees an
 # empty, missing, or escaping destination, then each invalid target is rejected.
-# (The escape fixture needs three levels: docs resolves through the plugin-tree
-# symlink, so ../../ lands inside the repository root.)
+# Root publication docs are real files, so ../../ escapes the repository.
 assert_bad_link empty-link '[empty]()' 'empty'
 assert_bad_link missing-link '[missing](not-a-page.md)' 'missing'
-assert_bad_link escaping-link '[escape](../../../outside.md)' 'escapes repository'
+assert_bad_link escaping-link '[escape](../../outside.md)' 'escapes repository'
 
 assert_bad_root_link() {
     local publication="$1"

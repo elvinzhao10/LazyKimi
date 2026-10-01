@@ -60,13 +60,13 @@ registrations, credentials, and live sessions.
 ```
 lazykimi/
 ├── AGENTS.md              # Agent instructions (onboard/offboard, conventions)
-├── LICENSE                # MIT (symlink to lazykimi-plugin/LICENSE)
-├── NOTICE                 # Upstream attribution (symlink to lazykimi-plugin/NOTICE)
+├── LICENSE                # MIT publication copy
+├── NOTICE                 # Upstream attribution publication copy
 ├── README.md              # This file (project overview)
-├── CODE_OF_CONDUCT.md     # symlink to lazykimi-plugin/CODE_OF_CONDUCT.md
-├── CONTRIBUTING.md        # symlink to lazykimi-plugin/CONTRIBUTING.md
-├── SECURITY.md            # symlink to lazykimi-plugin/SECURITY.md
-├── docs/                  # symlink to lazykimi-plugin/docs/
+├── CODE_OF_CONDUCT.md     # Regular publication copy
+├── CONTRIBUTING.md        # Regular publication copy
+├── SECURITY.md            # Regular publication copy
+├── docs/                  # Regular publication pages with rebased local links
 ├── lazykimi-evaluation.md # Public verification evidence
 ├── lazykimi-plugin/       # The installable plugin package (see lazykimi-plugin/README.md)
 │   ├── .kimi-code/         # Kimi Code CLI host entry (skills, mcp.json, AGENTS.md)

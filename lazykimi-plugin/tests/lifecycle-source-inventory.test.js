@@ -64,6 +64,35 @@ test('stageRelease still refuses a user-controlled source link', (t) => {
   expectOwnershipRefusal(() => stage(linked));
 });
 
+test('stageRelease excludes only the unchanged hooks bridge to its real canonical directory', t => {
+  const f = fixture();
+  t.after(() => fs.rmSync(f.sandbox, { recursive: true, force: true }));
+  const hooks = path.join(f.sourceRoot, 'lazykimi-plugin/hooks');
+  const scripts = path.join(f.sourceRoot, 'lazykimi-plugin/scripts');
+  fs.mkdirSync(hooks);
+  fs.mkdirSync(scripts);
+  fs.writeFileSync(path.join(hooks, 'owned.sh'), 'canonical hook\n');
+  fs.symlinkSync('../hooks', path.join(scripts, 'hooks'));
+  const staged = stage(f);
+  assert.equal(fs.readFileSync(path.join(staged.stagingPath, 'lazykimi-plugin/hooks/owned.sh'), 'utf8'), 'canonical hook\n');
+  assert.equal(fs.existsSync(path.join(staged.stagingPath, 'lazykimi-plugin/scripts/hooks')), false);
+  assert.equal(fs.lstatSync(path.join(scripts, 'hooks')).isSymbolicLink(), true);
+});
+
+test('stageRelease refuses a changed hooks bridge or linked canonical target', t => {
+  for (const mutation of ['changed-bridge', 'linked-target']) {
+    const f = fixture();
+    t.after(() => fs.rmSync(f.sandbox, { recursive: true, force: true }));
+    const hooks = path.join(f.sourceRoot, 'lazykimi-plugin/hooks');
+    const scripts = path.join(f.sourceRoot, 'lazykimi-plugin/scripts');
+    fs.mkdirSync(scripts);
+    if (mutation === 'linked-target') fs.symlinkSync(f.sourceRoot, hooks);
+    else fs.mkdirSync(hooks);
+    fs.symlinkSync(mutation === 'changed-bridge' ? '../tooling' : '../hooks', path.join(scripts, 'hooks'));
+    expectOwnershipRefusal(() => stage(f));
+  }
+});
+
 test('stageRelease refuses a symlink substituted for the dependency root', (t) => {
   // Given the dependency-root pathname itself was substituted with a symlink.
   const substituted = fixture();

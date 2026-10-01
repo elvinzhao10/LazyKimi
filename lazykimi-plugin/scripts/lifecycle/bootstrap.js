@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { promoteRelease } = require('./core');
 const { LifecycleError, workspacePreserved } = require('./errors');
-const { safeFile } = require('./files');
+const { safeFile, inventoryReleaseSource, includeReleaseSource } = require('./files');
 const {
   prepareBootstrapProductRoot,
   quarantineEmptyProductRoot,
@@ -250,6 +250,13 @@ function bootstrapRelease(paths, options) {
     if (fetched !== revision.sha) throw new LifecycleError('REVISION_CHANGED', 'mutable revision changed during staging');
     gitCommand(gitPath, ['-C', stagingPath, 'checkout', '--detach', revision.sha], { label: 'Git staged checkout', timeoutMs });
     fs.rmSync(path.join(stagingPath, '.git'), { recursive: true });
+    // Apply the same exact source exclusions as local staging. Preflight the
+    // whole checkout first; foreign links remain ownership refusals.
+    inventoryReleaseSource(stagingPath);
+    const hooksBridge = path.join(stagingPath, 'lazykimi-plugin', 'scripts', 'hooks');
+    if (fs.existsSync(hooksBridge) && !includeReleaseSource(stagingPath, hooksBridge)) {
+      fs.unlinkSync(hooksBridge);
+    }
     const verified = verifyStagedPackage(stagingPath, paths.product);
     const testOutput = run(runtimePath, [path.join(stagingPath, verified.selfTest)], {
       code: 'SELF_TEST_FAILED',

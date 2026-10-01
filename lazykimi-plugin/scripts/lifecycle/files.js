@@ -26,12 +26,29 @@ const SOURCE_EXCLUDED_SYMLINKS = new Set([
   'lazykimi-plugin/scripts/hooks',
 ]);
 
-function excludedFromRelease(relative, stat) {
+function validateHooksBridge(root, candidate, stat) {
+  if (!stat.isSymbolicLink() || fs.readlinkSync(candidate) !== '../hooks') {
+    throw new LifecycleError('OWNERSHIP_REFUSED', 'changed source hooks bridge');
+  }
+  for (const relative of ['lazykimi-plugin', 'lazykimi-plugin/scripts', 'lazykimi-plugin/hooks']) {
+    const directory = path.join(root, relative);
+    let target;
+    try { target = fs.lstatSync(directory); } catch (error) {
+      throw new LifecycleError('OWNERSHIP_REFUSED', `missing canonical hooks directory: ${relative}`, error);
+    }
+    if (!target.isDirectory() || target.isSymbolicLink()) {
+      throw new LifecycleError('OWNERSHIP_REFUSED', `unsafe canonical hooks directory: ${relative}`);
+    }
+  }
+}
+
+function excludedFromRelease(root, relative, stat) {
   if (GENERATED_SOURCE_DIRECTORIES.has(relative)) {
     return stat.isDirectory() && !stat.isSymbolicLink();
   }
   if (SOURCE_EXCLUDED_SYMLINKS.has(relative)) {
-    return stat.isSymbolicLink();
+    validateHooksBridge(root, path.join(root, relative), stat);
+    return true;
   }
   return false;
 }
@@ -100,7 +117,7 @@ function inventoryTree(root, current, omitExcluded) {
     const absolute = path.join(current, name);
     const relative = path.relative(root, absolute).split(path.sep).join('/');
     const stat = fs.lstatSync(absolute);
-    if (omitExcluded && excludedFromRelease(relative, stat)) continue;
+    if (omitExcluded && excludedFromRelease(root, relative, stat)) continue;
     if (stat.isSymbolicLink()) throw new LifecycleError('OWNERSHIP_REFUSED', `symlinked content: ${relative}`);
     if (stat.isDirectory()) {
       entries.push({ path: relative, type: 'directory', mode: modeOf(stat), sha256: null });
@@ -132,9 +149,7 @@ function includeReleaseSource(root, candidate) {
     return false;
   }
   if (SOURCE_EXCLUDED_SYMLINKS.has(relative)) {
-    if (!stat.isSymbolicLink()) {
-      throw new LifecycleError('OWNERSHIP_REFUSED', `expected the hooks bridge symlink at: ${relative}`);
-    }
+    validateHooksBridge(root, candidate, stat);
     return false;
   }
   return true;
