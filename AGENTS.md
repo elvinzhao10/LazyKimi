@@ -8,9 +8,8 @@ authorities.
 
 ## Current documentation release: v1.3.4
 
-The current local package candidate is v1.3.4, aligned at family contract
-parity with LazyZCode v1.3.4. The tag and release asset are pending
-publication; fresh Kimi host readiness requires direct observation. This
+The package version is v1.3.4, aligned at family contract
+parity with LazyZCode v1.3.4. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
 (the default full-plugin route), `project-init-route` (the manual project
@@ -30,9 +29,9 @@ For new installations use **Node.js 20 or later** plus **Git** and
 **Python 3.10+** for the MCP servers. The v1.3.4 family port adds the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
-LazyKimi/` on macOS, mirroring the LazyZCode pattern; until the public
-origin exists, lifecycle commands run from a local release root and say so
-honestly. For project-level use, `lazykimi init` (from `lazykimi-plugin/`)
+LazyKimi/` on macOS, mirroring the LazyZCode pattern. The public source is
+`https://github.com/elvinzhao10/LazyKimi.git`. For project-level use,
+`lazykimi init` (from `lazykimi-plugin/`)
 copies `.kimi-code/` and `.lazykimi/` into the project and rewrites the
 `__KIMI_PLUGIN_ROOT__` placeholder in `.kimi-code/mcp.json` to absolute
 paths (Kimi does not interpolate env vars in `mcp.json`). Never treat
@@ -105,7 +104,7 @@ When the user types `onboard`:
 
 ```bash
 # Run from the repository checkout; these are package checks only.
-cd lazykimi-plugin && npm install && npm run build
+cd lazykimi-plugin && npm ci --ignore-scripts --no-audit --fund=false && npm run build
 node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
@@ -121,8 +120,9 @@ When the user types `offboard`:
 1. Confirm which selected host is being removed: **Kimi Code CLI** or
    **Kimi Work**. Inspect the project receipt and requested uninstall
    scope first.
-2. Run only the safe local package action selected by the user:
-   `lazykimi uninstall --yes`. Do not combine with `tooling enable`, guess
+2. Inspect the selected project's receipt, then run `lazykimi uninstall`
+   with its confirmation prompt, or `lazykimi uninstall --yes` when the
+   selected scope is already approved. Do not combine with `tooling enable`, guess
    a tooling/host/global path, or scan host directories.
 3. Preserve modified, unknown, user-owned, linked, caller-owned, and
    host-managed assets. Report retained assets instead of deleting around
@@ -130,13 +130,15 @@ When the user types `offboard`:
    configuration belonging to another host.
 4. Give the remaining manual host step:
    - **Kimi Code CLI (project route):** remove the eight critical
-     `[[hooks]]` entries from `~/.kimi-code/config.toml` (those whose
-     `command` references `.kimi-code/hooks/`) and remove each
-     `lazykimi-*` MCP server via `/mcp-config`.
+     `[[hooks]]` entries from the selected Kimi config only after checking
+     their exact project paths and ownership; preserve modified entries and
+     hooks belonging to another project. Project uninstall removes only
+     receipt-owned, unchanged MCP entries and preserves other configuration.
    - **Kimi Code CLI (manifest route):** uninstall the `lazykimi` plugin
      through `/plugins`.
-   - **Kimi Work:** delete `~/.kimi-work/skills/lazy-*/` directories and
-     remove each `lazykimi-*` MCP server through the MCP configuration UI.
+   - **Kimi Work fallback:** use the receipt-aware removal described in
+     `docs/11-kimi-work-setup.md`; preserve unknown or modified skills. Remove
+     only connectors added for the selected route through the host UI.
 5. Report **package removal** separately from the **user-observed host
    result** in a new host session; never claim host removal without that
    observation.
