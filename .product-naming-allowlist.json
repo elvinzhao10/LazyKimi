@@ -1,6 +1,279 @@
 {
   "formerDisplayNames": [
     {
+      "path": "CONTRIBUTING.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "LICENSE",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "LICENSE",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "attribution",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "NOTICE",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "NOTICE",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "NOTICE",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/06-capabilities-and-approvals.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/09-test-and-release-verification.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/09-test-and-release-verification.md",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/09-test-and-release-verification.md",
+      "text": "lazyzcode",
+      "count": 6,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/09-test-and-release-verification.md",
+      "text": "zcode",
+      "count": 13,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/README.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/README.md",
+      "text": "lazytrae",
+      "count": 8,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/README.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/README.md",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/README.md",
+      "text": ".trae",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-bugfix-and-cli-hardening.md",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-bugfix-and-cli-hardening.md",
+      "text": ".trae",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "lazybuddy",
+      "count": 64,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "lazytrae",
+      "count": 58,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": ".trae",
+      "count": 10,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "atlas",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "prometheus",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "sisyphus",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "oracle",
+      "count": 4,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "hephaestus",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "metis",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-recreate.md",
+      "text": "momus",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-spec-compliance.md",
+      "text": "lazybuddy",
+      "count": 14,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-spec-compliance.md",
+      "text": "lazytrae",
+      "count": 13,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-spec-compliance.md",
+      "text": "codebuddy",
+      "count": 3,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-spec-compliance.md",
+      "text": ".trae",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-spec-compliance.md",
+      "text": "oracle",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": "lazytrae",
+      "count": 22,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/history/lazykimi-v0.3.0-capability-hardening.md",
+      "text": ".trae",
+      "count": 8,
+      "classification": "old-note",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/reference/hook-policy.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
+      "path": "docs/reference/model-routing.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
+    },
+    {
       "path": "lazykimi-plugin/tests/test_v134_run_integrity.py",
       "text": "lazybuddy",
       "count": 2,

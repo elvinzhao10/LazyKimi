@@ -18,24 +18,31 @@ function git(cwd, args) {
   return result.stdout.trim();
 }
 
-function fixture() {
+function fixture({ repositorySource = false } = {}) {
   const sandbox = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'lazykimi lifecycle bootstrap cli '));
   const source = path.join(sandbox, 'source');
   const remote = path.join(sandbox, 'official.git');
   const packageRoot = path.join(source, 'lazykimi-plugin');
   const scripts = path.join(packageRoot, 'scripts');
   const shimRoot = path.join(sandbox, 'node-only-bin');
-  fs.mkdirSync(scripts, { recursive: true });
   fs.mkdirSync(shimRoot);
-  fs.cpSync(path.join(PLUGIN_ROOT, 'scripts', 'lifecycle'), path.join(scripts, 'lifecycle'), { recursive: true });
-  for (const name of ['lazykimi-lifecycle.js', 'lifecycle-self-test.js']) {
-    fs.copyFileSync(path.join(PLUGIN_ROOT, 'scripts', name), path.join(scripts, name));
+  if (repositorySource) {
+    fs.mkdirSync(source);
+    // The Git index is the exact release tree; generated files cannot hide
+    // source aliases or missing tracked publication assets.
+    git(path.resolve(PLUGIN_ROOT, '..'), ['checkout-index', '--all', `--prefix=${source}${path.sep}`]);
+  } else {
+    fs.mkdirSync(scripts, { recursive: true });
+    fs.cpSync(path.join(PLUGIN_ROOT, 'scripts', 'lifecycle'), path.join(scripts, 'lifecycle'), { recursive: true });
+    for (const name of ['lazykimi-lifecycle.js', 'lifecycle-self-test.js']) {
+      fs.copyFileSync(path.join(PLUGIN_ROOT, 'scripts', name), path.join(scripts, name));
+    }
+    for (const name of ['kimi.plugin.json', 'package.json']) {
+      fs.copyFileSync(path.join(PLUGIN_ROOT, name), path.join(packageRoot, name));
+    }
+    fs.cpSync(path.join(PLUGIN_ROOT, 'contracts'), path.join(packageRoot, 'contracts'), { recursive: true });
+    fs.writeFileSync(path.join(source, 'README.md'), 'first\n');
   }
-  for (const name of ['kimi.plugin.json', 'package.json']) {
-    fs.copyFileSync(path.join(PLUGIN_ROOT, name), path.join(packageRoot, name));
-  }
-  fs.cpSync(path.join(PLUGIN_ROOT, 'contracts'), path.join(packageRoot, 'contracts'), { recursive: true });
-  fs.writeFileSync(path.join(source, 'README.md'), 'first\n');
   git(source, ['init']);
   git(source, ['config', 'user.email', 'fixture@example.invalid']);
   git(source, ['config', 'user.name', 'Lifecycle Fixture']);
@@ -87,6 +94,44 @@ async function waitForPath(target, timeoutMs = 5_000) {
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
 }
+
+test('the exact staged repository tree onboards through official transport without documentation aliases', t => {
+  const f = fixture({ repositorySource: true });
+  t.after(() => fs.rmSync(f.sandbox, { recursive: true, force: true }));
+  for (const name of ['CODE_OF_CONDUCT.md', 'CONTRIBUTING.md', 'LICENSE', 'NOTICE', 'SECURITY.md', 'docs']) {
+    assert.equal(fs.lstatSync(path.join(f.source, name)).isSymbolicLink(), false, name);
+  }
+  assert.equal(fs.lstatSync(path.join(f.source, 'lazykimi-plugin/scripts/hooks')).isSymbolicLink(), true);
+  const onboard = run(f, 'onboard');
+  assert.equal(onboard.status, 0, JSON.stringify(onboard.output));
+  assert.equal(onboard.output.package_readiness.status, 'ready');
+  assert.equal(onboard.output.host_readiness.status, 'pending');
+  const release = path.join(f.installRoot, 'LazyKimi', 'releases', onboard.output.release_id);
+  assert.equal(fs.readFileSync(path.join(release, 'CODE_OF_CONDUCT.md'), 'utf8'), fs.readFileSync(path.join(f.source, 'CODE_OF_CONDUCT.md'), 'utf8'));
+  assert.equal(fs.existsSync(path.join(release, 'lazykimi-plugin/scripts/hooks')), false);
+});
+
+test('official bootstrap refuses changed or foreign source links', t => {
+  for (const mutation of ['changed-bridge', 'foreign-link', 'linked-target']) {
+    const f = fixture({ repositorySource: true });
+    t.after(() => fs.rmSync(f.sandbox, { recursive: true, force: true }));
+    if (mutation === 'foreign-link') fs.symlinkSync(f.source, path.join(f.source, 'caller-link'));
+    else if (mutation === 'changed-bridge') {
+      fs.unlinkSync(path.join(f.source, 'lazykimi-plugin/scripts/hooks'));
+      fs.symlinkSync('../tooling', path.join(f.source, 'lazykimi-plugin/scripts/hooks'));
+    } else {
+      fs.rmSync(path.join(f.source, 'lazykimi-plugin/hooks'), { recursive: true });
+      fs.symlinkSync(f.source, path.join(f.source, 'lazykimi-plugin/hooks'));
+    }
+    git(f.source, ['add', '.']);
+    git(f.source, ['commit', '-m', 'unsafe source fixture']);
+    git(f.source, ['push', f.remote, 'main']);
+    const onboard = run(f, 'onboard');
+    assert.equal(onboard.status, 1, mutation);
+    assert.equal(onboard.output.error.code, 'OWNERSHIP_REFUSED', JSON.stringify(onboard.output));
+    assert.equal(fs.existsSync(path.join(f.installRoot, 'LazyKimi/active.json')), false);
+  }
+});
 
 function startOnboard({ environment, installRoot, projectRoot }) {
   const child = spawn(process.execPath, [
