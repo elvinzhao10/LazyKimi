@@ -18,7 +18,7 @@ function git(cwd, args) {
   return result.stdout.trim();
 }
 
-function fixture({ repositorySource = false } = {}) {
+function fixture({ repositorySource = false, concurrentGc = false } = {}) {
   const sandbox = fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()), 'lazykimi lifecycle bootstrap cli '));
   const source = path.join(sandbox, 'source');
   const remote = path.join(sandbox, 'official.git');
@@ -46,10 +46,27 @@ function fixture({ repositorySource = false } = {}) {
   git(source, ['init']);
   git(source, ['config', 'user.email', 'fixture@example.invalid']);
   git(source, ['config', 'user.name', 'Lifecycle Fixture']);
+  // The stress case owns one explicit GC child rather than an untracked daemon.
+  if (concurrentGc) git(source, ['config', 'gc.auto', '0']);
   git(source, ['add', '.']);
   git(source, ['commit', '-m', 'first']);
   git(source, ['branch', '-M', 'main']);
-  git(sandbox, ['clone', '--bare', source, remote]);
+  git(source, ['fsck', '--full']);
+  let sourceGc = Promise.resolve();
+  if (concurrentGc) {
+    const child = spawn('git', ['gc', '--aggressive', '--prune=now'], { cwd: source });
+    let stderr = '';
+    child.stdout.resume();
+    child.stderr.on('data', chunk => { stderr += chunk; });
+    sourceGc = new Promise((resolve, reject) => {
+      child.on('error', reject);
+      child.on('close', status => status === 0 ? resolve() : reject(new Error(stderr)));
+    });
+  }
+  // Local clone's object copy can race source maintenance. Use upload-pack,
+  // matching the transport boundary exercised by the official-source shim.
+  git(sandbox, ['clone', '--no-local', '--bare', source, remote]);
+  git(remote, ['fsck', '--full']);
   const realGit = spawnSync('which', ['git'], { encoding: 'utf8' }).stdout.trim();
   fs.writeFileSync(path.join(shimRoot, 'git'), `#!${process.execPath}
 'use strict';
@@ -68,6 +85,7 @@ process.exit(result.status === null ? 1 : result.status);
     sandbox,
     shimRoot,
     source,
+    sourceGc,
   };
 }
 
@@ -109,6 +127,17 @@ test('the exact staged repository tree onboards through official transport witho
   const release = path.join(f.installRoot, 'LazyKimi', 'releases', onboard.output.release_id);
   assert.equal(fs.readFileSync(path.join(release, 'CODE_OF_CONDUCT.md'), 'utf8'), fs.readFileSync(path.join(f.source, 'CODE_OF_CONDUCT.md'), 'utf8'));
   assert.equal(fs.existsSync(path.join(release, 'lazykimi-plugin/scripts/hooks')), false);
+});
+
+test('fixture transport remains complete while its source is aggressively repacked', async t => {
+  const f = fixture({ repositorySource: true, concurrentGc: true });
+  t.after(() => fs.rmSync(f.sandbox, { recursive: true, force: true }));
+  await f.sourceGc;
+  git(f.source, ['fsck', '--full']);
+  git(f.remote, ['fsck', '--full']);
+  assert.equal(git(f.remote, ['rev-parse', 'main']), git(f.source, ['rev-parse', 'main']));
+  const onboard = run(f, 'onboard');
+  assert.equal(onboard.status, 0, JSON.stringify(onboard.output));
 });
 
 test('official bootstrap refuses changed or foreign source links', t => {
