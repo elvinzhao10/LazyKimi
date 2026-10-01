@@ -6,3 +6,29 @@ __pycache__/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Personal host overrides and transient output (pinned evidence uses .txt).
+.kimi-code/*.local.json
+.kimi-code/*.local.toml
+*.log
+logs/
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Shared LazySeries development hygiene (keep example configuration public).
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.template
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.tsbuildinfo

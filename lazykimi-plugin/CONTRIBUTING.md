@@ -115,6 +115,11 @@ development record.
 
 ## Boundaries
 
+- Root community files and `docs/` are regular publication copies of the
+  payload documents. Update both copies together and rebase relative links
+  for their location. Never replace them with symlinks: durable onboarding
+  refuses unowned or linked publication content.
+
 - `sources/` is an optional, git-ignored area of local read-only reference
   checkouts used during the v0.x port. It is never committed, never a build
   dependency, and may be deleted freely: a fresh checkout builds and tests
