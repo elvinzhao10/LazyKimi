@@ -1,30 +1,65 @@
-# LazyKimi v1.3.4 — runtime integrity and native adapter repairs
+# LazyKimi v1.3.4 — safer runs, clearer host boundaries
+
+A small maintenance release for the LazySeries family. It repairs runtime and
+host-adapter boundaries while retaining the workflow foundation inherited from
+family versions v1.3.0–v1.3.3. Those inherited features are not new in this patch
+and do not imply prior public releases of the Kimi or DeepSeek ports.
 
 ## Eval-driven fixes
 
-Receipt validation preserves unknown or modified files, MCP setup merges owned entries, and KIMI_CODE_HOME is respected. Native agent headers and explicit project-bound MCP adapters replace invented settings and plugin-directory state. The release archive includes the compiled CLI. Finalization requires all intended tasks done; persisted status is assessed separately from completion evidence.
+- Project-bound MCP adapters use explicit project paths; unbound global launches fail closed. Native agent headers replace invented settings.
+- Receipt-aware setup merges owned MCP entries, respects KIMI_CODE_HOME, and preserves modified or unknown files.
+- Public-source bootstrap stages regular publication files and validates the internal hook bridge. The archive includes the compiled CLI.
+- Finalization requires all intended tasks done; persisted status is assessed
+  separately from completion evidence.
 
-Fresh public-source onboarding stages regular publication documents and excludes the validated internal source hook bridge before recording ownership. Changed or unrelated symlinks remain refused. Isolated public-origin setup, status and receipt-safe removal are verified.
+## Cumulative workflow experience
+
+Describe work in natural language or use explicit workflow entry points.
+Keep editable Markdown plans, durable decisions, evidence-bound completion
+and verification sized to the change. Planning-only requests remain separate
+from execution authority. The README presents these inherited features together
+with the 1.3.4 fixes; historical notes below retain the version-by-version record.
 
 ## Measured efficiency
 
-This maintenance release makes no new latency, token-saving or recall claim. Ledger append/compaction, learned routing and shared-core migration are deferred.
+No new latency, token-saving, cost or recall improvement is measured for this
+patch. Ledger append/compaction, learned routing and shared-core migration are deferred.
 
 ## Host capability matrix
 
 Kimi Code terminal package fixtures pass; fresh authenticated CLI/IDE acceptance remains pending. The unbound global manifest project-state MCP fails closed; use the documented explicitly bound project config. Kimi Work supports native plugins in the host, while this package route remains experimental.
 
+Package and distribution checks do not prove a current native host session.
+**HOST READINESS: PENDING** until loading, command/skill behavior and the expected
+MCP connections are observed. The README links the selected host's setup guide.
+
 ## Migration and upgrade
 
 Use the receipt-aware upgrade route with an explicit project binding. Preserve project evidence and unknown host configuration. No credentials or production host settings are changed by package verification.
 
+Read [AGENTS.md](AGENTS.md) and [the install guide](docs/03-install-and-host-verification.md).
+Until the repaired tag is approved, use the immutable repaired source linked in
+the README rather than the original public v1.3.4 tag. Choose one route, check the installed package version, and restart the host.
+Source checkouts and release archives have different build requirements; follow
+the documented route. Do not reset populated runs merely to upgrade.
+
 ## Known risks
 
-Native host acceptance is still separate from package readiness. Token/cost budgets are metadata, and pending approval results are persisted observations without a live approval queue. Shell loop policy beyond its configured global cap requires orchestrator enforcement.
+Native acceptance is separate from package readiness. Token/cost budgets are
+metadata; pending approvals are persisted observations without a live approval
+queue. Shell loop policy beyond the configured global cap needs orchestrator enforcement.
 
 ## Rollback
 
 Keep the prior local 1.3.3 checkout and ownership receipts; a prior public release is not established. Remove only receipt-owned, unmodified assets and use a fresh host session to verify removal.
+
+## Documentation and family presentation
+
+Aligned sibling README structure, current setup navigation and a shared six-repo
+family table. Personal environment files and caches are ignored while example
+configuration and pinned fixture logs remain publishable. Earlier release notes
+remain below as historical evidence.
 
 ## Prior release notes
 

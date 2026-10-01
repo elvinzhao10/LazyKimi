@@ -41,11 +41,13 @@ revision before promotion; preserve the existing installation if that source
 is unavailable or fails integrity checks.
 
 For the durable lifecycle, use Node 20+, Git and Python 3.10+. Once the
-selected source revision is published, run:
+selected source revision is published, run the command below. The original
+public v1.3.4 tag predates the bootstrap repair; until its replacement is
+approved, use the immutable repaired source shown here:
 
 ```bash
 node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
-  --source https://github.com/elvinzhao10/LazyKimi \
+  --source https://github.com/elvinzhao10/LazyKimi/tree/39d87bb2eb8ea06317c9f323c62d77bedf12e7af \
   --install-root <absolute-install-root> --project <absolute-project> --json
 ```
 

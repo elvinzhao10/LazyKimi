@@ -22,27 +22,6 @@
       "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
     },
     {
-      "path": "NOTICE",
-      "text": "lazybuddy",
-      "count": 3,
-      "classification": "attribution",
-      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
-    },
-    {
-      "path": "NOTICE",
-      "text": "lazytrae",
-      "count": 3,
-      "classification": "attribution",
-      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
-    },
-    {
-      "path": "NOTICE",
-      "text": "codebuddy",
-      "count": 1,
-      "classification": "attribution",
-      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
-    },
-    {
       "path": "docs/06-capabilities-and-approvals.md",
       "text": "lazybuddy",
       "count": 1,
@@ -323,27 +302,6 @@
       "reason": "Lineage text names the sibling packages this port derives from."
     },
     {
-      "path": "README.md",
-      "text": "lazybuddy",
-      "count": 7,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
-      "path": "README.md",
-      "text": "lazytrae",
-      "count": 7,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
-      "path": "README.md",
-      "text": "lazyzcode",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
       "path": "RELEASE_NOTES.md",
       "text": "lazytrae",
       "count": 1,
@@ -494,27 +452,6 @@
       "path": "lazykimi-plugin/LICENSE",
       "text": "lazytrae",
       "count": 2,
-      "classification": "attribution",
-      "reason": "Legal attribution keeps the upstream product lineage verbatim."
-    },
-    {
-      "path": "lazykimi-plugin/NOTICE",
-      "text": "codebuddy",
-      "count": 1,
-      "classification": "attribution",
-      "reason": "Legal attribution keeps the upstream product lineage verbatim."
-    },
-    {
-      "path": "lazykimi-plugin/NOTICE",
-      "text": "lazybuddy",
-      "count": 3,
-      "classification": "attribution",
-      "reason": "Legal attribution keeps the upstream product lineage verbatim."
-    },
-    {
-      "path": "lazykimi-plugin/NOTICE",
-      "text": "lazytrae",
-      "count": 3,
       "classification": "attribution",
       "reason": "Legal attribution keeps the upstream product lineage verbatim."
     },
@@ -2190,6 +2127,90 @@
       "count": 2,
       "classification": "stable-machine-id",
       "reason": "Adaptive tooling layer enumerates the family host ids (machine identifiers) in host tables."
+    },
+    {
+      "path": "README.md",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "README.md",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "README.md",
+      "text": "lazyqoder",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "README.md",
+      "text": "lazytrae",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "README.md",
+      "text": "lazyzcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "README.md",
+      "text": "zcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Exact sibling links and host names in the LazySeries family table; not current product identity."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "lazykimi-plugin/NOTICE",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "NOTICE",
+      "text": "codebuddy",
+      "count": 1,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "NOTICE",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "NOTICE",
+      "text": "lazytrae",
+      "count": 3,
+      "classification": "attribution",
+      "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
     }
   ],
   "stableIdentityFiles": [
