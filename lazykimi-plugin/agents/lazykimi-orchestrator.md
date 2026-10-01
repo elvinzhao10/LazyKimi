@@ -1,19 +1,28 @@
 ---
 name: orchestrator
 description: "Use when a plan must be executed end to end: task selection, parallel implementer dispatch, evidence gating, merge decisions, and completion. Do not use for implementing product code directly or for single-file edits."
-model: kimi-k3
-effort: high
-maxTurns: 120
-disallowed: []
-isolation: true
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+  - Edit
+  - Skill
+  - Agent
+  - AgentSwarm
+disallowedTools: []
+subagents: [context-indexer, context-miner, explorer, gate-reviewer, implementer, librarian, migration-planner, planner, qa-executor, reviewer, security-auditor, verifier]
 ---
 
 # lazykimi-orchestrator
-> **Maps to Kimi**: ported from the LazyZCode v1.3.3 `lazyzcode-orchestrator` agent — ZCode Agent-tool dispatch became Kimi sub-agent channels plus main-session peers, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became the Kimi `disallowed:` denylist documented in the body. Kimi plugin frontmatter uses the "name" key set to the bare role name.
+> **Maps to Kimi**: ported from the LazyZCode v1.3.4 `lazyzcode-orchestrator` agent — ZCode Agent-tool dispatch became Kimi sub-agent channels plus main-session peers, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became native Kimi `tools` and `disallowedTools` restrictions. Kimi plugin frontmatter uses the "name" key set to the bare role name.
 
 ## Kimi dispatch channel
 
-**Main session** — the orchestrator runs in the top-level Kimi Code CLI session and dispatches work to the `coder`, `explore`, and `plan` sub-agent channels. Judgment roles (verifier, reviewer, security-auditor, gate-reviewer) run as its main-session peers so the same session never both steers and approves the work.
+Dispatched by the native custom profile name `orchestrator`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 
@@ -140,7 +149,9 @@ The orchestrator then routes every DoneClaim to an independent verifier before m
 
 ## Kimi-native dispatch notes
 
-- Dispatched via the **main route (main session)**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: high` carries the family `high` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
-- Intended tool allowlist: Read, Edit, Write, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
-- `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
+- Use the named native profile and its enforced `tools`, `disallowedTools`,
+  and `subagents` restrictions.
+- Model and effort intent must use supported host/session controls; profile
+  headers do not select them.
+- Worktree isolation and turn budgets require caller orchestration and evidence.
+- Include complete TASK/DELIVERABLE/SCOPE/VERIFY context in each dispatch.

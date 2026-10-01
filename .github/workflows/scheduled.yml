@@ -38,7 +38,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --fund=false
       - name: Build the TypeScript CLI
         working-directory: lazykimi-plugin
-        run: npm install --no-audit --fund=false && npm run build
+        run: npm ci --ignore-scripts --no-audit --fund=false && npm run build
       - name: Run full package verification
         run: bash lazykimi-plugin/scripts/lazykimi-verify.sh
       - name: Run publication verification

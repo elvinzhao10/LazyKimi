@@ -1,17 +1,6 @@
 'use strict';
 
-// validate-agent-frontmatter.js — Kimi agent-definition policy validator.
-//
-// Validates plugins/lazykimi/agents/*.md against the Kimi Code CLI subagent
-// schema: name, description (dispatcher style), model (kimi-k3), effort
-// (low|high|max — Kimi effort scale observed on-host 2026-09-30: kimi-k3
-// support_efforts = ["low","high","max"], default_effort = "high"),
-// maxTurns, disallowed (denylist within Kimi's file-mutation tool universe),
-// and isolation. Legacy ZCode-family keys (color, thoughtLevel, tools,
-// disallowedTools, skills, memory) are rejected: Kimi uses a `disallowed`
-// denylist rather than a `tools` allowlist; the intended allowlist is stated
-// in each agent's body prose.
-
+// Native Kimi profile fields; restrictions are enforced by the host.
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -21,11 +10,10 @@ const EXPECTED_NAMES = new Set([
   'planner', 'qa-executor', 'reviewer', 'security-auditor',
   'verifier',
 ]);
-const REQUIRED_FIELDS = new Set(['name', 'description', 'model', 'effort', 'maxTurns', 'disallowed', 'isolation']);
+const REQUIRED_FIELDS = new Set(['name', 'description', 'tools', 'disallowedTools', 'subagents']);
 const ALLOWED_FIELDS = new Set(REQUIRED_FIELDS);
-const FORBIDDEN_FIELDS = new Set(['color', 'thoughtLevel', 'tools', 'disallowedTools', 'skills', 'memory', 'user-invocable']);
-const EFFORTS = new Set(['low', 'high', 'max']);
-const KIMI_TOOLS = new Set(['Read', 'Edit', 'Write', 'Bash']);
+const FORBIDDEN_FIELDS = new Set(['model', 'effort', 'maxTurns', 'disallowed', 'isolation', 'color', 'thoughtLevel', 'skills', 'memory', 'user-invocable']);
+const KIMI_TOOLS = new Set(['Read', 'Grep', 'Glob', 'Edit', 'Write', 'Bash', 'Skill', 'Agent', 'AgentSwarm']);
 const READONLY_NAMES = new Set([
   'context-indexer', 'context-miner', 'explorer', 'gate-reviewer', 'librarian',
   'planner', 'reviewer', 'security-auditor',
@@ -104,7 +92,7 @@ function validateAgent(filePath) {
   const filename = path.basename(filePath);
   const entry = fs.lstatSync(filePath);
   if (!entry.isFile() || entry.isSymbolicLink()) refuse(`${filename}: agent definition must be a regular file`);
-  const { body, data } = parseFrontmatter(fs.readFileSync(filePath, 'utf8'), filename);
+  const { data } = parseFrontmatter(fs.readFileSync(filePath, 'utf8'), filename);
   for (const key of Object.keys(data)) {
     if (FORBIDDEN_FIELDS.has(key)) refuse(`${filename}: legacy frontmatter field ${key} is not a Kimi agent key`);
     if (!ALLOWED_FIELDS.has(key)) refuse(`${filename}: unsupported frontmatter field ${key}`);
@@ -112,16 +100,14 @@ function validateAgent(filePath) {
   for (const field of REQUIRED_FIELDS) if (!Object.hasOwn(data, field)) refuse(`${filename}: required field ${field} is missing`);
   requireString(data.name, 'name', filename);
   requireString(data.description, 'description', filename);
-  requireString(data.model, 'model', filename, new Set(['kimi-k3']));
-  requireString(data.effort, 'effort', filename, EFFORTS);
-  if (!Number.isSafeInteger(data.maxTurns) || data.maxTurns < 1 || data.maxTurns > 200) {
-    refuse(`${filename}: maxTurns must be an integer between 1 and 200`);
+  requireList(data.tools, 'tools', filename);
+  requireList(data.disallowedTools, 'disallowedTools', filename, true);
+  requireList(data.subagents, 'subagents', filename, true);
+  for (const field of ['tools', 'disallowedTools']) for (const tool of data[field]) {
+    if (!KIMI_TOOLS.has(tool)) refuse(`${filename}: unsupported ${field} entry ${tool}`);
   }
-  requireList(data.disallowed, 'disallowed', filename, true);
-  for (const tool of data.disallowed) {
-    if (!KIMI_TOOLS.has(tool)) refuse(`${filename}: disallowed entry ${tool} is not a Kimi file-mutation tool`);
-  }
-  if (data.isolation !== true) refuse(`${filename}: isolation must be true (self-contained dispatches)`);
+  for (const name of data.subagents) if (!EXPECTED_NAMES.has(name)) refuse(`${filename}: unsupported subagent ${name}`);
+  if (data.name !== 'orchestrator' && data.subagents.length) refuse(`${filename}: worker must not delegate`);
   if (data.name !== filename.replace(/^lazykimi-/, '').slice(0, -3)) refuse(`${filename}: name must match filename`);
   if (!EXPECTED_NAMES.has(data.name)) refuse(`${filename}: unexpected agent name ${data.name}`);
   const [descriptionHead] = data.description.split(/do not use/i);
@@ -129,24 +115,18 @@ function validateAgent(filePath) {
     refuse(`${filename}: description must be dispatcher style ("Use when ...; do not use for ...")`);
   }
   if (READONLY_NAMES.has(data.name)) {
-    if (!data.disallowed.includes('Write') || !data.disallowed.includes('Edit')) {
-      refuse(`${filename}: read-only role must disallow Write and Edit`);
+    for (const tool of ['Write', 'Edit', 'Bash', 'Agent', 'AgentSwarm']) {
+      if (data.tools.includes(tool) || !data.disallowedTools.includes(tool)) refuse(`${filename}: read-only role exposes ${tool}`);
     }
   }
-  if (data.name === 'verifier') {
-    if (data.disallowed.includes('Write') || !data.disallowed.includes('Edit')) {
-      refuse(`${filename}: verifier must keep Write for its run-scoped report but disallow Edit`);
-    }
+  if (data.name === 'verifier' && (!data.tools.includes('Write') || data.tools.includes('Edit') || !data.disallowedTools.includes('Edit'))) {
+    refuse(`${filename}: verifier must keep Write and disallow Edit`);
   }
-  if (data.name === 'implementer') {
-    if (data.disallowed.length !== 0) refuse(`${filename}: implementer must retain Read, Edit, Write, and Bash`);
-    if (!body.includes('DoneClaim')) refuse(`${filename}: implementer body must document its DoneClaim return`);
+  if (data.name === 'implementer' && ['Read', 'Edit', 'Write', 'Bash'].some(tool => !data.tools.includes(tool) || data.disallowedTools.includes(tool))) {
+    refuse(`${filename}: implementer must retain its implementation tools`);
   }
-  if (data.name === 'orchestrator') {
-    if (data.disallowed.length !== 0) refuse(`${filename}: orchestrator must keep its .lazykimi/ state-write surface`);
-    if (!body.includes('Subagents return a DoneClaim') || !body.includes('isolated worktree') || !body.includes('merge')) {
-      refuse(`${filename}: orchestrator worktree role requires an explicit return and merge path`);
-    }
+  if (data.name === 'orchestrator' && (!data.tools.includes('Agent') || !data.tools.includes('AgentSwarm') || data.subagents.length !== EXPECTED_NAMES.size - 1)) {
+    refuse(`${filename}: orchestrator must expose native delegation and all worker profiles`);
   }
   return { ...data, file: filename };
 }

@@ -58,7 +58,7 @@ and task shape. The reviewer and verifier may be invoked as peers inside a
 
 ## Command and skill inventory
 
-The package contains 19 portable `lazy-` skills (v1.3.3: `lazy-lcx-report-bug`
+The package contains 19 portable `lazy-` skills (v1.3.4: `lazy-lcx-report-bug`
 renamed to `lazy-report-bug`; `lazy-review-work` and `lazy-ultrawork` added).
 The skill inventory is: `lazy-ast-grep`, `lazy-coding-agent-sessions`,
 `lazy-debugging`, `lazy-frontend`, `lazy-git-master`, `lazy-init-deep`,

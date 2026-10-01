@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # stop-failure.sh — Kimi StopFailure hook (advisory, stop-failure ledger).
-# v1.3.3 mapped semantics: records a stop_failure event on the active run so
+# v1.3.4 mapped semantics: records a stop_failure event on the active run so
 # Stop-gate failures remain visible in the run ledger.
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.

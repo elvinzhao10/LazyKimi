@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lazykimi-kimi-preparation-check.sh — ported from lazyzcode v1.3.3
+# lazykimi-kimi-preparation-check.sh — ported from lazyzcode v1.3.4
 # scripts/lazyzcode-zcode-preparation-check.sh, Kimi-adapted.
 #
 # Read-only preflight for the package inputs a Kimi host cache-preparation
@@ -88,7 +88,7 @@ if [ ! -f "$PLUGIN_ROOT/kimi.plugin.json" ] \
     || [ ! -f "$PLUGIN_ROOT/.kimi-code/mcp.json" ] \
     || [ ! -f "$PLUGIN_ROOT/marketplace.json" ]; then
     printf '%s\n' \
-        'ERROR: LazyKimi plugin root is unavailable; keep this script under the v1.3.3 lazykimi-plugin/scripts directory.' >&2
+        'ERROR: LazyKimi plugin root is unavailable; keep this script under the v1.3.4 lazykimi-plugin/scripts directory.' >&2
     exit 1
 fi
 
@@ -102,7 +102,7 @@ import sys
 plugin_root = Path(sys.argv[1]).resolve()
 release_root = Path(sys.argv[2]).resolve()
 project_root = Path(sys.argv[3]).resolve()
-version = "1.3.3"
+version = "1.3.4"
 server_names = (
     "lazykimi-run-ledger",
     "lazykimi-verification",
@@ -131,7 +131,7 @@ try:
         "Kimi manifest",
     )
     if work_manifest.get("name") != "lazykimi" or work_manifest.get("version") != version:
-        raise ValueError("Kimi manifest must identify lazykimi version 1.3.3")
+        raise ValueError("Kimi manifest must identify lazykimi version 1.3.4")
 
     marketplace = load_object(
         plugin_root / "marketplace.json",

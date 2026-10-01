@@ -2,7 +2,7 @@
 
 > Kimi-native evidence-led agent workflow harness for **Kimi Code CLI** (primary)
 > and **Kimi Work** (secondary, skills import only). Current release:
-> **v1.3.3**, at family parity with LazyZCode v1.3.3.
+> **v1.3.4**, at family parity with LazyZCode v1.3.4.
 
 > **Verified on macOS only.** Linux and Windows paths and host behaviour are
 > unverified. Package checks prove the copied package and its local contracts;
@@ -84,7 +84,7 @@ Start from the immutable release, open the cloned folder in the host you want
 to use, and type `onboard` in the agent chat:
 
 ```bash
-git clone --branch v1.3.3 https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.3.4 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
 ```
 

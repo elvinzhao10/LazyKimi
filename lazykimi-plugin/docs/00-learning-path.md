@@ -56,7 +56,7 @@ hooks block are host/user state, not package state.
 LazyKimi keeps runtime state under `.lazykimi/` and project configuration
 under `.kimi-code/`. The two never mix:
 
-- `.lazykimi/runs/<id>/` — the v1.3.3 run-state model: `state.json`,
+- `.lazykimi/runs/<id>/` — the v1.3.4 run-state model: `state.json`,
   `events.jsonl`, `checkpoints/`, `evidence/`, `verification/`
   (see [reference/state-model.md](reference/state-model.md) for the full tree
   and the v0.x old-to-new mapping).

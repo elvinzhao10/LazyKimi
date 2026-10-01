@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v103-tooling-lifecycle-regression.sh — receipt-owning tooling lifecycle
 # (install/status/detect/doctor/uninstall/verify). Ported from lazyzcode
-# v1.3.3 tests/v016-tooling-lifecycle-regression.sh; family versioning keeps
+# v1.3.4 tests/v016-tooling-lifecycle-regression.sh; family versioning keeps
 # the new port on the v103 prefix.
 set -euo pipefail
 

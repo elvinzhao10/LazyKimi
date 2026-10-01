@@ -2,7 +2,7 @@
 
 ## OVERVIEW
 
-LazyKimi is the Kimi-native member of the LazySeries evidence-gated agent workflow family (at parity with LazyZCode v1.3.3). It runs the thirteen family role agents on Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main session, preserving the Explore -> Plan -> Implement -> Verify -> Review loop, the DoneClaim -> independent verification -> completion contract, and the five-agent ALL-MUST-PASS review panel. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
+LazyKimi is the Kimi-native member of the LazySeries evidence-gated agent workflow family (at parity with LazyZCode v1.3.4). It runs the thirteen family role agents on Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main session, preserving the Explore -> Plan -> Implement -> Verify -> Review loop, the DoneClaim -> independent verification -> completion contract, and the five-agent ALL-MUST-PASS review panel. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
 
 ## AGENT ROLE CATALOG
 

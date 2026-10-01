@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# LazyKimi v1.3.3 SSRF boundary regression test.
+# LazyKimi v1.3.4 SSRF boundary regression test.
 # Verifies whitelist enforcement and redirect blocking in the docs MCP server
 # (family port: curl-based implementation with package_url builders).
 set -euo pipefail

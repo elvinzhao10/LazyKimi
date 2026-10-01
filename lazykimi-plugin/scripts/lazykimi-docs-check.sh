@@ -1,5 +1,5 @@
 #!/bin/bash
-# lazykimi-docs-check.sh — ported from lazyzcode v1.3.3 scripts/lazyzcode-docs-check.sh.
+# lazykimi-docs-check.sh — ported from lazyzcode v1.3.4 scripts/lazyzcode-docs-check.sh.
 # Checks Markdown link integrity and the active-documentation policy for the
 # lazykimi payload surfaces.
 set -euo pipefail
@@ -49,7 +49,7 @@ append_policy_violation() {
 check_active_documentation_policy() {
     # Active payload surfaces must not carry retired product vocabulary or
     # stale internal references; NOTICE attribution lines stay allowed. Since
-    # the v1.3.3 docs regeneration the plugin README is held to the same
+    # the v1.3.4 docs regeneration the plugin README is held to the same
     # policy (it previously carried the retired Greek-agent inventory).
     local active_paths=(
         "${PLUGIN_ROOT}/.kimi-code/skills"

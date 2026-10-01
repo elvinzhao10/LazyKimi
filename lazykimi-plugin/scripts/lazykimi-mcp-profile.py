@@ -217,28 +217,19 @@ def render_profile(
     rendered = {}
     for name in selected:
         declaration = declarations[name]
-        expected_fields = {"command", "args", "env", "cwd", "required"}
+        expected_fields = {"command", "args", "required"}
         if set(declaration) != expected_fields or declaration.get("required") is not False:
             raise ProfileError(f"MCP declaration {name} must be an optional stdio server")
-        expected_arg = f"{_PLUGIN_ROOT}/mcp/{name}/server.sh"
-        if declaration.get("command") != "bash" or declaration.get("args") != [expected_arg]:
+        expected_args = [f"{_PLUGIN_ROOT}/scripts/kimi-project-mcp.js", name,
+                         "--project", "__KIMI_PROJECT_ROOT__", "--mode", "__KIMI_MCP_MODE__"]
+        if declaration.get("command") != "node" or declaration.get("args") != expected_args:
             raise ProfileError(f"MCP declaration {name} has an invalid launcher")
-        launcher = plugin_root / "mcp" / name / "server.sh"
-        if launcher.is_symlink() or not launcher.is_file() or not os.access(launcher, os.X_OK):
+        launcher = plugin_root / "scripts" / "kimi-project-mcp.js"
+        if launcher.is_symlink() or not launcher.is_file():
             raise ProfileError(f"MCP declaration {name} launcher is unavailable")
-        expected_env = {
-            "LAZYKIMI_MCP_MODE": "__KIMI_MCP_MODE__",
-            "CWD": "__KIMI_PROJECT_ROOT__",
-        }
-        if declaration.get("env") != expected_env:
-            raise ProfileError(f"MCP declaration {name} has invalid process paths")
         rendered[name] = {
-            "command": "bash",
-            "args": [str(plugin_root / "mcp" / name / "server.sh")],
-            "env": {
-                "LAZYKIMI_MCP_MODE": mode,
-                "CWD": str(project_root),
-            },
+            "command": "node",
+            "args": [str(launcher), name, "--project", str(project_root), "--mode", mode],
             "required": False,
         }
     return {"mcpServers": rendered}

@@ -2,12 +2,12 @@
   "$schema": "lazy-harness-active.v2.schema.json",
   "schema_version": 2,
   "product": "LazyKimi",
-  "active_release": "1.3.3-a1b2c3d4e5f6",
+  "active_release": "1.3.4-a1b2c3d4e5f6",
   "previous_release": null,
   "entrypoint": "lazykimi-plugin/dist/index.js",
   "runtime_path": "/usr/local/bin/node",
   "release_metadata": {
-    "1.3.3-a1b2c3d4e5f6": {
+    "1.3.4-a1b2c3d4e5f6": {
       "entrypoint": "lazykimi-plugin/dist/index.js",
       "runtime_path": "/usr/local/bin/node"
     }

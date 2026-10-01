@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # user-prompt-submit.sh — Kimi UserPromptSubmit hook: adaptive intake.
-# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+# Ported from the LazyZCode v1.3.4 hook semantics (family parity).
 #
 # Keeps the adaptive dual-entry logic:
 #   1. runtime_freshness present in the event  -> scripts/runtime-freshness-entry.js resume

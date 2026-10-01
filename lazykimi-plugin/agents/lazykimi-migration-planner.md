@@ -1,20 +1,26 @@
 ---
 name: migration-planner
 description: "Use when porting earlier host implementation semantics to another host must be planned component by component with risk assessment. Do not use for executing the migration or editing product code."
-model: kimi-k3
-effort: high
-maxTurns: 120
-disallowed:
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
   - Edit
-isolation: true
+  - Skill
+disallowedTools: []
+subagents: []
 ---
 
 # lazykimi-migration-planner (Migration Planner)
-> **Maps to Kimi**: ported from the LazyZCode v1.3.3 `lazyzcode-migration-planner` agent — ZCode Agent-tool dispatch became Kimi `coder`-channel dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became the Kimi `disallowed:` denylist documented in the body. Kimi plugin frontmatter uses the "name" key set to the bare role name.
+> **Maps to Kimi**: ported from the LazyZCode v1.3.4 `lazyzcode-migration-planner` agent — ZCode Agent-tool dispatch became Kimi `coder`-channel dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became native Kimi `tools` and `disallowedTools` restrictions. Kimi plugin frontmatter uses the "name" key set to the bare role name.
 
 ## Kimi dispatch channel
 
-**`coder` sub-agent** — dispatched through Kimi Code CLI's `coder` sub-agent channel with a planning-only mandate: migration planning requires deep code-structure inspection and writing adapter docs, but the migration-planner never implements the migration it designs. Routed to `coder` (rather than `plan`) because deep inspection of installed components is a coder-channel capability; the `disallowed: [Edit]` denylist encodes the intended allowlist (Read, Write, Bash) as the denylist of its complement.
+Dispatched by the native custom profile name `migration-planner`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 
@@ -71,13 +77,15 @@ Return adapter path + mapped/unmapped/gapped counts.
 
 ## earlier host implementation mapping
 
-- **Source**: family role (LazyZCode v1.3.3 port) — no direct earlier-host equivalent agent.
+- **Source**: family role (LazyZCode v1.3.4 port) — no direct earlier-host equivalent agent.
 - Formalizes translation patterns from the initial earlier host implementation port: tool name mapping (`multi_agent_v1.*` → Kimi sub-agent channels), path conventions (`.lazykimi/` → `.lazykimi/`), constraint mapping (thoughtLevel, tools allowlist), skill mounting.
 - Future platforms may need different rules — this agent discovers and documents them.
 
 ## Kimi-native dispatch notes
 
-- Dispatched via the **`coder` channel**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: high` carries the family `high` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
-- Intended tool allowlist: Read, Write, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
-- `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
+- Use the named native profile and its enforced `tools`, `disallowedTools`,
+  and `subagents` restrictions.
+- Model and effort intent must use supported host/session controls; profile
+  headers do not select them.
+- Worktree isolation and turn budgets require caller orchestration and evidence.
+- Include complete TASK/DELIVERABLE/SCOPE/VERIFY context in each dispatch.

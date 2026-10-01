@@ -1,21 +1,27 @@
 ---
 name: explorer
 description: "Use when code must be located: files, patterns, conventions, and cross-layer structures, answered precisely from a read-only search. Do not use for writing, editing files, or external research."
-model: kimi-k3
-effort: low
-maxTurns: 40
-disallowed:
-  - Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+disallowedTools:
   - Write
-isolation: true
+  - Edit
+  - Bash
+  - Agent
+  - AgentSwarm
+subagents: []
 ---
 
 # lazykimi-explorer
-> **Maps to Kimi**: ported from the LazyZCode v1.3.3 `lazyzcode-explorer` agent — ZCode Agent-tool dispatch became Kimi explore dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became the Kimi `disallowed:` denylist documented in the body. Kimi plugin frontmatter uses the "name" key set to the bare role name.
+> **Maps to Kimi**: ported from the LazyZCode v1.3.4 `lazyzcode-explorer` agent — ZCode Agent-tool dispatch became Kimi explore dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became native Kimi `tools` and `disallowedTools` restrictions. Kimi plugin frontmatter uses the "name" key set to the bare role name.
 
 ## Kimi dispatch channel
 
-**`explore` sub-agent** — dispatched through Kimi Code CLI's `explore` sub-agent channel. Strictly read-only: the `disallowed: [Edit, Write]` frontmatter denylist encodes the intended read-only allowlist (Read, Bash) as the denylist of its complement within Kimi's file-mutation tools.
+Dispatched by the native custom profile name `explorer`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 
@@ -109,7 +115,9 @@ Before reporting, verify:
 
 ## Kimi-native dispatch notes
 
-- Dispatched via the **`explore` channel**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: low` carries the family `low` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
-- Intended tool allowlist: Read, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
-- `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
+- Use the named native profile and its enforced `tools`, `disallowedTools`,
+  and `subagents` restrictions.
+- Model and effort intent must use supported host/session controls; profile
+  headers do not select them.
+- Worktree isolation and turn budgets require caller orchestration and evidence.
+- Include complete TASK/DELIVERABLE/SCOPE/VERIFY context in each dispatch.

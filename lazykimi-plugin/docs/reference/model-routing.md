@@ -1,25 +1,18 @@
 # Model routing
 
-Status: v1.3.3, ported from the lazyzcode family reference and adapted to the
+Status: v1.3.4, ported from the lazyzcode family reference and adapted to the
 `kimi` host entry. LazyKimi describes task intent. Kimi chooses and bills the
 model. A package alias or recommendation is not proof of a concrete backing
 model, account availability, host loading, or a particular rate.
 
-LazyKimi's declared agents pin `model: kimi-k3` and an `effort` budget in
-their Kimi frontmatter, and the routing policy's `kimi` host entry maps every
-profile tier (economy/balanced/strong) to the `kimi-k3` alias with
-`agent-frontmatter` dispatch. The observed Kimi effort scale on `kimi-k3` is
-`low|high|max` with `default_effort = "high"` (T21 host receipt 2026-09-30:
-`[models."kimi-code/k3"] support_efforts` in `~/.kimi-code/config.toml`, real
-CLI v0.27.0), so agent effort values are restricted to that scale: family
-`low` maps to `low`, the family middle intent to `high` (Kimi has no middle
-tier), and family `max` to `max`. The policy entry itself still carries no
-per-tier `effort` mappings: frontmatter effort remains package metadata, and
-whether a live session honors it is a separate host observation. Before
-dispatch, propose delegation and any model switches in the plan, remind the
-user that switching can change quality, latency, and cost, and record the
-decision. If the plan is silent, keep the same model across all subagents and
-retries.
+Kimi custom profile frontmatter supports tool and delegation restrictions.
+It ignores `model`, `effort`, `maxTurns`, and `isolation`; LazyKimi does not
+use those fields to claim model selection or isolation enforcement. Model
+and effort intent remains advisory and must be implemented through supported
+host/session controls and observed in the current session. The current
+routing helper's `agent-frontmatter` dispatch label is legacy metadata and
+must not be treated as a supported host control. Preserve the accepted
+parent-session model unless the plan explicitly authorizes a supported switch.
 
 | Task class | Optional plan choice | Use |
 | --- | --- | --- |
@@ -29,7 +22,7 @@ retries.
 
 The strong tier is a provisional choice for those roles. It does not claim a
 specific model or a quality guarantee. Kimi exposes model and effort selection
-through its own agent frontmatter and UI; package metadata alone does not
+through supported session controls; package metadata alone does not
 prove the host applied a tier. The routing policy declares the `kimi` profiles
 as documented-host-alias bindings; they are advisory until the current session
 visibly honors them.
@@ -69,14 +62,13 @@ choice; do not invent a model argument for a dispatch.
 
 ## Discover the current selection
 
-Kimi surfaces the current model and per-agent `model`/`effort` choices in its
-own UI and agent definitions. Snapshots published by the host document client
+Inspect the current model and effort through Kimi session controls. Snapshots published by the host document client
 version, account availability, service updates, parameters, and displayed
 rates, and can differ from the current session. Check the host before acting
 on a recommendation.
 
-Per-agent overrides are user-owned: set `model` or `effort` in the agent
-definition or the host's agent settings. LazyKimi never writes host settings.
+Session overrides are user-owned. Ignored profile metadata cannot prove an
+override. LazyKimi never writes model settings.
 
 ## Custom models
 

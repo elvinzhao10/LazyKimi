@@ -105,6 +105,7 @@ export function runRegressionTests(target: string): TestResult {
   }
   let passed = 0;
   let failed = 0;
+  const failedScripts: string[] = [];
   let skipped = 0;
   for (const script of scripts) {
     const scriptPath = path.join(testsDir, script);
@@ -122,12 +123,15 @@ export function runRegressionTests(target: string): TestResult {
     }
     const result = spawnSync('bash', [scriptPath, ...args], { encoding: 'utf-8', cwd: target, stdio: 'pipe' });
     if (result.status === 0) passed++;
-    else failed++;
+    else {
+      failed++;
+      failedScripts.push(script);
+    }
   }
   return {
     ran: true,
     passed: failed === 0,
-    detail: `${passed} passed, ${failed} failed, ${skipped} skipped (${scripts.length} total)`,
+    detail: `${passed} passed, ${failed} failed, ${skipped} skipped (${scripts.length} total)${failedScripts.length ? `; failed: ${failedScripts.join(', ')}` : ''}`,
   };
 }
 

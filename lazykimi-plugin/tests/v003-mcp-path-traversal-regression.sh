@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# LazyKimi v1.3.3 MCP path traversal regression test.
-# Verifies resolve_repo_path() rejects escapes (family v1.3.3 API surface —
-# path_boundary.py is the LazyZCode v1.3.3 implementation; the v0.x
+# LazyKimi v1.3.4 MCP path traversal regression test.
+# Verifies resolve_repo_path() rejects escapes (family v1.3.4 API surface —
+# path_boundary.py is the LazyZCode v1.3.4 implementation; the v0.x
 # safeProjectPath alias was dropped upstream in favor of the raising API).
 set -euo pipefail
 

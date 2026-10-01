@@ -1,5 +1,12 @@
 # LazyKimi Plugin Changelog
 
+## [1.3.4] — 2026-09-30
+
+- Serialize task claims and iteration limits; preserve blocked and exhausted outcomes without completion authority.
+- Preserve run history, reject stale snapshot commits, and require every intended task done before finalization.
+- Isolate malformed verification requests and return MCP content blocks; record advisory hooks through the transaction authority.
+- Repair native adapter and package lifecycle boundaries; retain explicit pending host acceptance. See the root release notes.
+
 > **Historical/non-operational record.** This dated change history is retained
 > for context only. In a repository checkout, current guidance is in
 > `README.md`, `AGENTS.md`, and `lazykimi-plugin/README.md`; a copied package

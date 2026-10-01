@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # stop-gate.sh — Kimi Stop hook: completion-gate reminder.
-# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+# Ported from the LazyZCode v1.3.4 hook semantics (family parity).
 #
 # Reads completion status via the launcher (scripts/completion-assessment.js)
 # when resolvable, otherwise falls back to reading .lazykimi state directly

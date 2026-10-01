@@ -26,7 +26,7 @@ function serverNameForCapability(capability: string): string {
 
 export const OPTIONAL_MCP_SERVERS: readonly string[] = OPTIONAL_CAPABILITY_NAMES.map(serverNameForCapability);
 
-// v1.3.3 family tool surface: the exact tool-name sets of the LazyZCode v1.3.3
+// v1.3.4 family tool surface: the exact tool-name sets of the LazyZCode v1.3.4
 // servers, split 9/7/4/5/5/2 across the six declared servers (32 tools total).
 // run-ledger/verification/status-dashboard are bash server.sh JSON-RPC loops
 // delegating to scripts/state/*; context-graph/code-intel/docs are python

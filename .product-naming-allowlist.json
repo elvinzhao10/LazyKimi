@@ -821,13 +821,6 @@
     },
     {
       "path": "lazykimi-plugin/contracts/tests/execution-context-contract.test.js",
-      "text": "lazyzcode",
-      "count": 1,
-      "classification": "stable-machine-id",
-      "reason": "Family contract content pinning cross-repo machine identifiers."
-    },
-    {
-      "path": "lazykimi-plugin/contracts/tests/execution-context-contract.test.js",
       "text": "zcode",
       "count": 1,
       "classification": "stable-machine-id",
@@ -1361,7 +1354,7 @@
     {
       "path": "lazykimi-plugin/scripts/lazykimi-verify.sh",
       "text": "lazyzcode",
-      "count": 4,
+      "count": 2,
       "classification": "source-identity",
       "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
     },
@@ -1408,13 +1401,6 @@
       "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
     },
     {
-      "path": "lazykimi-plugin/scripts/loop/run-cycle.sh",
-      "text": "claude_plugin_root",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
-    },
-    {
       "path": "lazykimi-plugin/scripts/paired-live-test-lib.js",
       "text": "lazytrae",
       "count": 5,
@@ -1438,13 +1424,6 @@
     {
       "path": "lazykimi-plugin/scripts/release-version-classifier.js",
       "text": "lazyzcode",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
-    },
-    {
-      "path": "lazykimi-plugin/scripts/validate-agent-frontmatter.js",
-      "text": "zcode",
       "count": 1,
       "classification": "source-identity",
       "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
@@ -1476,20 +1455,6 @@
       "count": 1,
       "classification": "source-identity",
       "reason": "Port lineage comment or family identifier in the adapted surface."
-    },
-    {
-      "path": "lazykimi-plugin/tests/agent-frontmatter-policy.test.js",
-      "text": "lazyzcode",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
-    },
-    {
-      "path": "lazykimi-plugin/tests/agent-frontmatter-policy.test.js",
-      "text": "zcode",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
     },
     {
       "path": "lazykimi-plugin/tests/completion-assessment.test.js",

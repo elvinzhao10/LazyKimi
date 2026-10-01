@@ -1,15 +1,15 @@
 # AGENTS.md — LazyKimi setup and removal guide
 
 LazyKimi targets the **Kimi Code CLI** host (primary) and **Kimi Work**
-(secondary, skills import only). Automated package checks run locally;
+(secondary; full-plugin route experimental, skills fallback available). Automated package checks run locally;
 no current-session host activation is established. Package files, host
 settings, credentials, marketplace state, and live sessions remain separate
 authorities.
 
-## Current documentation release: v1.3.3
+## Current documentation release: v1.3.4
 
-The current local package candidate is v1.3.3, aligned at family contract
-parity with LazyZCode v1.3.3. The tag and release asset are pending
+The current local package candidate is v1.3.4, aligned at family contract
+parity with LazyZCode v1.3.4. The tag and release asset are pending
 publication; fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
@@ -27,7 +27,7 @@ dispatch, and **HOST READINESS: PENDING** remains authoritative.
 ## Durable onboarding (start here)
 
 For new installations use **Node.js 20 or later** plus **Git** and
-**Python 3.10+** for the MCP servers. The v1.3.3 family port adds the
+**Python 3.10+** for the MCP servers. The v1.3.4 family port adds the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
 LazyKimi/` on macOS, mirroring the LazyZCode pattern; until the public
@@ -64,8 +64,9 @@ When the user types `onboard`:
 4. **Kimi Code CLI** has two routes — pick exactly one:
    - **Plugin manifest route (`kimi-plugin-manifest`, default full
      route):** add the repository through `/plugins marketplace` using
-     `lazykimi-plugin/marketplace.json` (v2). Delivers skills, commands,
-     agents, the 16 inline hooks, and the 6 inline `mcpServers`.
+     `lazykimi-plugin/marketplace.json` (v2). Declares skills, commands, agents and 16 inline hooks. Manifest MCP
+     launchers fail closed without explicit project binding; use the project
+     init route for project-bound MCP until manifest request context is supported.
    - **Project init route (`project-init-route`, manual project route):**
      run `lazykimi init`, then `bash lazykimi-plugin/scripts/install-hooks.sh`
      to append the eight critical `[[hooks]]` entries to
@@ -73,7 +74,9 @@ When the user types `onboard`:
      the six servers.
    Do not run both routes together; coexistence is unsupported and may
    double-fire hook events.
-5. **Kimi Work** (`kimi-work-skills-fallback`): run
+5. **Kimi Work** supports full plugins per its official overview; LazyKimi
+   full-plugin loading remains experimental until live proof. For the
+   recovery route (`kimi-work-skills-fallback`), run
    `bash lazykimi-plugin/scripts/install-kimi-work.sh` to copy the `lazy-*`
    skills into `~/.kimi-work/skills/`, restart Kimi Work, and add each
    `lazykimi-*` MCP server manually through Kimi Work's MCP configuration

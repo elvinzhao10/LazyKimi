@@ -116,14 +116,14 @@ follow the smallest source function named in the failure. Do not "fix" a
 release check by weakening its assertion: each assertion encodes a published
 ownership or evidence contract.
 
-## Family test-stack port: inventory and skip list (v1.3.3)
+## Family test-stack port: inventory and skip list (v1.3.4)
 
-The v1.3.3 test stack mirrors the lazyzcode layout: `tests/*.test.js`
+The v1.3.4 test stack mirrors the lazyzcode layout: `tests/*.test.js`
 (node:test), `tests/test_lazykimi_*.py` plus `tooling/test_lazykimi_*.py`
 (pytest, python3.10+ resolved by `scripts/lazykimi-python-resolver.sh`),
 `tests/v*.sh` and `tests/publication-regression.sh` (bash), `tests/fixtures/`,
 and `scripts/assets/` fixture libraries. Existing `v001`–`v003` regressions
-keep their numbers; ports new in v1.3.3 use the `v103*` family prefix.
+keep their numbers; ports new in v1.3.4 use the `v103*` family prefix.
 
 Current committed inventory: 32 node:test files, 26 pytest files (15 in
 `tests/`, 11 in `tooling/`), and 41 bash regressions (24 historical `v001`–

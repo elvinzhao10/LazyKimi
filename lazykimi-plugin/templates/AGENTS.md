@@ -1,6 +1,6 @@
 # AGENTS.md — LazyKimi local onboarding
 
-This is the reusable `v1.3.3` consumer template, not a claim that a host loaded
+This is the reusable `v1.3.4` consumer template, not a claim that a host loaded
 the plugin. Explicit user instructions and nearer project instructions take
 precedence.
 
@@ -65,7 +65,8 @@ and may double-fire hook events:
 
 ## Kimi Work fallback boundary
 
-Kimi Work has no plugin manifest support: no commands, no agents, no hooks,
+Kimi Work supports full plugins; this package's full-plugin route remains
+experimental pending live proof. The skills-only fallback installs no commands, agents, hooks,
 no `sessionStart.skill`. A package file, manifest, or load-check never proves
 those capabilities or that MCP loaded. Prepare manual connector values without
 mutating the host from `.kimi-code/mcp.json` after `lazykimi init` rewrites

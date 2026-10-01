@@ -3,7 +3,7 @@
 > Self-contained evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.
 
 This package belongs to the LazyKimi project, the Kimi-native family port of
-the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.3.
+the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.4.
 Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
@@ -40,7 +40,7 @@ package evidence, not proof of live host loading or MCP connection.
 ## What this plugin provides
 
 LazyKimi provides a workflow harness for Kimi Code CLI (primary) and Kimi
-Work (secondary, skills import only). Host plugin/marketplace behavior must
+Work (secondary, full-plugin route experimental; skills fallback available). Host plugin/marketplace behavior must
 be verified in a live session:
 
 - **Hierarchical project memory** (`lazy-init-deep`) — generates `AGENTS.md`
@@ -73,7 +73,7 @@ be verified in a live session:
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 32 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
-| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.3 |
+| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.4 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |
 | `scripts/` | State scripts, loop orchestration, lifecycle, verification utilities | Used by package readiness and workflow checks |
 
@@ -143,11 +143,9 @@ registration interactively, use `/mcp` (list servers) and `/mcp-config`
 (configure servers) inside a Kimi Code CLI session. The shipped template uses
 the `__KIMI_PLUGIN_ROOT__` placeholder — Kimi does not interpolate
 environment variables in `mcp.json` — and `lazykimi init` rewrites it to the
-absolute `lazykimi-plugin/` directory path (plus the `LAZYKIMI_MCP_MODE`/
-`CWD` env stanza). The default profile is `orchestrated` (all six servers);
+absolute plugin path and explicit `--project`/`--mode` adapter arguments. The default profile is `orchestrated` (all six servers);
 `lazykimi init --mcp-mode direct|assisted|planned|orchestrated|long-horizon`
-re-rewrites the declarations idempotently and records the mode in
-`.lazykimi/config.json`.
+merges receipt-owned declarations idempotently. Existing config and runtime state are preserved.
 
 ## Uninstall
 
@@ -251,13 +249,14 @@ inside a `/swarm` or as the closing checkpoint of a `/goal`.
 | `lazykimi-context-miner` | `explore` | Context mining; review-panel context lane |
 | `lazykimi-migration-planner` | `coder` | Foreign-host adaptation |
 
-The thirteen roles map to Kimi Code CLI's three built-in sub-agent channels
-(`coder`, `explore`, `plan`) plus the main session (orchestrator, verifier,
-reviewer, security-auditor, gate-reviewer as main-session peers), preserving
-the planner/implementer/verifier separation the five evidence gates depend
-on. Frontmatter uses Kimi's `disallowed` denylist (the intended allowlist is
-stated in each agent body) with `model: kimi-k3` and an `effort` budget; see
-[docs/reference/model-routing.md](docs/reference/model-routing.md).
+The thirteen custom profiles are discoverable by their native role names. Their
+`tools`, `disallowedTools`, and `subagents` fields are enforced by Kimi both
+when tools are exposed and before execution. Read-only profiles allow only
+Read/Grep/Glob and deny mutation, shell, and delegation tools. The verifier
+retains Bash and Write for test execution and evidence; its shell commands
+still require the independent hook permission layer. Model, effort, turn
+budgets, and worktree isolation are plan/session decisions, not agent header
+enforcement. See [native adapter boundaries](docs/reference/native-adapter.md).
 
 ## Hook list (16)
 
@@ -265,7 +264,7 @@ stated in each agent body) with `model: kimi-k3` and an `effort` budget; see
 | --- | --- | --- |
 | `SessionStart` | `session-start.sh` | Bootstrap `.lazykimi/` state; report `SESSIONSTART_READINESS`; strict-JSON `additionalContext` |
 | `UserPromptSubmit` | `user-prompt-submit.sh` | Adaptive intake: run state and pressure signals |
-| `PreToolUse` (Bash) | `pre-tool-use.sh` | v1.3.3 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
+| `PreToolUse` (Bash) | `pre-tool-use.sh` | v1.3.4 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
 | `PostToolUse` | `post-tool-use.sh` | Append redacted tool-use event to the run ledger |
 | `PostToolUseFailure` | `post-tool-use-failure.sh` | Append failure event to the run ledger |
 | `Stop` | `stop-gate.sh` | Unchecked-plan-task detection; advisory completion reminder |
@@ -304,13 +303,11 @@ protocol evidence, not a host connection claim.
 
 ## Kimi Work (Secondary Host)
 
-Kimi Work is the secondary host. **Kimi Work has no plugin manifest support**;
-LazyKimi supports it via skill import only. The `lazykimi-*` MCP connectors
-must be added manually through Kimi Work's MCP configuration, and a loaded
-session must be observed before claiming host readiness. Package evidence
-proves only that the source skills are present and importable; it does not
-prove that Kimi Work loaded them. See
-[docs/11-kimi-work-setup.md](docs/11-kimi-work-setup.md) for the import walk-through.
+Kimi Work supports the full plugin definition, including skills, MCP, agents,
+hooks, and commands ([official overview](https://www.kimi.com/en/help/plugins-and-skills/overview)).
+LazyKimi's full-plugin route there remains experimental until a fresh live
+session proves loading and project binding. The skills import script remains
+a recovery route. See [Kimi Work setup](docs/11-kimi-work-setup.md).
 
 ## Workflow phases and evidence gates
 

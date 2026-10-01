@@ -537,7 +537,8 @@ test('update emits revision confirmation while releasing its lifecycle lock', (t
   // Given: an installed release and a different commit at the same version.
   const f = fixture();
   t.after(() => fs.rmSync(f.sandbox, { recursive: true }));
-  assert.equal(run(f, 'onboard').status, 0);
+  const onboard = run(f, 'onboard');
+  assert.equal(onboard.status, 0, JSON.stringify({ output: onboard.output, stderr: onboard.stderr }));
   fs.appendFileSync(path.join(f.source, 'README.md'), 'second\n');
   git(f.source, ['add', 'README.md']);
   git(f.source, ['commit', '-m', 'second']);

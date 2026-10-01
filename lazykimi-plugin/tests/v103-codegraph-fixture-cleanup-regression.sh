@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v103-codegraph-fixture-cleanup-regression.sh — ported from lazyzcode v1.3.3 tests/v017-codegraph-fixture-cleanup-regression.sh; family
+# v103-codegraph-fixture-cleanup-regression.sh — ported from lazyzcode v1.3.4 tests/v017-codegraph-fixture-cleanup-regression.sh; family
 # versioning keeps the new port on the v103 prefix.
 set -euo pipefail
 

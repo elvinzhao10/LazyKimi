@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # post-tool-use-failure.sh — Kimi PostToolUseFailure hook: append a failure
 # event with a retry/fallback/blocker suggestion to the active run's events.jsonl.
-# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+# Ported from the LazyZCode v1.3.4 hook semantics (family parity).
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics go to stderr.
 # Advisory only — ALWAYS exits 0.

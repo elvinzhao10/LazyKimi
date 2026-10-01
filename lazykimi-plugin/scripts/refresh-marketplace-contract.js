@@ -3,7 +3,7 @@
 
 // Family-named refresh entry point. LazyKimi keeps ONE canonical contract
 // generator — scripts/lazykimi-regenerate-marketplace-contract.js (ported in
-// the per-host contracts task) — which already implements the v1.3.3
+// the per-host contracts task) — which already implements the v1.3.4
 // metadata-drift rule (counts and mirrors derived from canonical files, no
 // hand-maintained duplicates) plus the deterministic payload inventory and
 // the Kimi route table. This wrapper delegates to it so family tooling that

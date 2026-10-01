@@ -1,21 +1,27 @@
 ---
 name: planner
 description: "Use when a vague or large request must become ONE decision-complete work plan under .lazykimi/plans/ before any implementation. Do not use for executing, implementing, or editing code."
-model: kimi-k3
-effort: max
-maxTurns: 120
-disallowed:
-  - Edit
+tools:
+  - Read
+  - Grep
+  - Glob
+disallowedTools:
   - Write
-isolation: true
+  - Edit
+  - Bash
+  - Agent
+  - AgentSwarm
+subagents: []
 ---
 
 # lazykimi-planner
-> **Maps to Kimi**: ported from the LazyZCode v1.3.3 `lazyzcode-planner` agent — ZCode Agent-tool dispatch became Kimi plan dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became the Kimi `disallowed:` denylist documented in the body. Kimi plugin frontmatter uses the "name" key set to the bare role name.
+> **Maps to Kimi**: ported from the LazyZCode v1.3.4 `lazyzcode-planner` agent — ZCode Agent-tool dispatch became Kimi plan dispatch, `.lazyzcode/` state paths became `.lazykimi/`, and the ZCode `tools:` frontmatter allowlist became native Kimi `tools` and `disallowedTools` restrictions. Kimi plugin frontmatter uses the "name" key set to the bare role name.
 
 ## Kimi dispatch channel
 
-**`plan` sub-agent** — dispatched through Kimi Code CLI's `plan` sub-agent channel for planning and indexing work. Read-only over the repository (the intended allowlist is Read, Bash, encoded as `disallowed: [Edit, Write]`); plan artifacts under `.lazykimi/` are written by the orchestrator or via the plan channel's host-sanctioned output path.
+Dispatched by the native custom profile name `planner`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 
@@ -201,7 +207,9 @@ After approval and plan file written:
 
 ## Kimi-native dispatch notes
 
-- Dispatched via the **`plan` channel**; see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: max` carries the family `max` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
-- Intended tool allowlist: Read, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
-- `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
+- Use the named native profile and its enforced `tools`, `disallowedTools`,
+  and `subagents` restrictions.
+- Model and effort intent must use supported host/session controls; profile
+  headers do not select them.
+- Worktree isolation and turn budgets require caller orchestration and evidence.
+- Include complete TASK/DELIVERABLE/SCOPE/VERIFY context in each dispatch.

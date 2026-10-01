@@ -6,12 +6,12 @@
   "origin": "https://github.com/elvinzhao10/LazyKimi.git",
   "commit_sha": "a1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e",
   "manifest": {
-    "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
-    "version": "1.3.3",
+    "path": "releases/1.3.4-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
+    "version": "1.3.4",
     "sha256": "df8800e4abda15e20b2e7c4adedcf8e03a1a15051af37681668a2198e1998060",
     "digests": [
       {
-        "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
+        "path": "releases/1.3.4-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
         "sha256": "df8800e4abda15e20b2e7c4adedcf8e03a1a15051af37681668a2198e1998060"
       }
     ]
@@ -28,8 +28,8 @@
     "rollback": "rollback/"
   },
   "release": {
-    "id": "1.3.3-a1b2c3d4e5f6",
-    "path": "releases/1.3.3-a1b2c3d4e5f6"
+    "id": "1.3.4-a1b2c3d4e5f6",
+    "path": "releases/1.3.4-a1b2c3d4e5f6"
   },
   "runtime": {
     "path": "/usr/local/bin/node",
@@ -50,13 +50,13 @@
   "created_files_scope": "release-only",
   "created_files": [
     {
-      "path": "releases/1.3.3-a1b2c3d4e5f6",
+      "path": "releases/1.3.4-a1b2c3d4e5f6",
       "type": "directory",
       "mode": "0755",
       "sha256": null
     },
     {
-      "path": "releases/1.3.3-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
+      "path": "releases/1.3.4-a1b2c3d4e5f6/lazykimi-plugin/packages/cli/package.json",
       "type": "file",
       "mode": "0644",
       "sha256": "df8800e4abda15e20b2e7c4adedcf8e03a1a15051af37681668a2198e1998060"
@@ -64,7 +64,7 @@
   ],
   "registered_project_declarations": [],
   "receipt_path": "receipts/lazykimi-1-3-3-a1b2c3d4e5f6.json",
-  "active_release": "1.3.3-a1b2c3d4e5f6",
+  "active_release": "1.3.4-a1b2c3d4e5f6",
   "previous_release": null,
   "host_evidence": {
     "status": "pending",

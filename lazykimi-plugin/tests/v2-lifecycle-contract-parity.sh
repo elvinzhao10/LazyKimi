@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v2-lifecycle-contract-parity.sh — lifecycle-v2 writer/reader/contract parity
-# between LazyKimi and LazyZCode. Ported from lazyzcode v1.3.3
+# between LazyKimi and LazyZCode. Ported from lazyzcode v1.3.4
 # tests/v2-lifecycle-contract-parity.sh (which compared LazyTrae vs LazyZCode)
 # and adapted to the lazykimi facts:
 #   - lazy-harness-active.v2.schema.json is enum-extended (LazyKimi added to

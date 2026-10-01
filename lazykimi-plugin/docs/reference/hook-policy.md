@@ -1,7 +1,7 @@
 # Hook policy reference
 
-Status: v1.3.3. Kimi Code CLI exposes a 16-event hook surface. LazyKimi ships
-one consumer script per event under `hooks/` and ports the lazyzcode v1.3.3
+Status: v1.3.4. Kimi Code CLI exposes a 16-event hook surface. LazyKimi ships
+one consumer script per event under `hooks/` and ports the lazyzcode v1.3.4
 hardened hook semantics onto both Kimi registration routes. This page is the
 Kimi-native policy reference; there is no lazyzcode counterpart because the
 event sets differ.
@@ -12,7 +12,7 @@ event sets differ.
 | --- | --- | --- | --- |
 | `SessionStart` | `session-start.sh` | critical (TOML) + manifest | Bootstrap `.lazykimi/` state tree, run load-check, report `SESSIONSTART_READINESS=full\|degraded`; strict-JSON `additionalContext` on stdout, diagnostics on stderr, always exit 0. |
 | `UserPromptSubmit` | `user-prompt-submit.sh` | critical (TOML) + manifest | Adaptive intake: surface run state and context-pressure signals on every prompt. |
-| `PreToolUse` (matcher `Bash`) | `pre-tool-use.sh` | critical (TOML) + manifest | The v1.3.3 hardening gate (see below). Deny = exit 2 with a stderr reason. |
+| `PreToolUse` (matcher `Bash`) | `pre-tool-use.sh` | critical (TOML) + manifest | The v1.3.4 hardening gate (see below). Deny = exit 2 with a stderr reason. |
 | `PostToolUse` | `post-tool-use.sh` | critical (TOML) + manifest | Append a redacted tool-use summary event to `runs/<id>/events.jsonl`. |
 | `PostToolUseFailure` | `post-tool-use-failure.sh` | critical (TOML) + manifest | Append a failure event to the run ledger. |
 | `Stop` | `stop-gate.sh` | critical (TOML) + manifest | Unchecked-plan-task detection against `.lazykimi/plans/` and run state; advisory `additionalContext` reminder. |
@@ -43,16 +43,16 @@ Kimi Code CLI has two registration routes and they are intentionally unequal:
    `PreToolUse` (matcher `Bash`), `PostToolUse`, `PostToolUseFailure`, `Stop`,
    `PermissionRequest`, `PermissionResult`.
 
-The critical 8 are the events that carry v1.3.3 gating semantics (state
+The critical 8 are the events that carry v1.3.4 gating semantics (state
 bootstrap, prompt intake, the pre-tool hardening gate, ledger appends, the
 stop gate, and the permission ledger). The remaining 8 advisory events are
 only declared through the plugin manifest; the TOML route deliberately does
 not install them. The installer is idempotent, never overwrites existing
 entries, and never touches provider/model/permission configuration.
 
-## The PreToolUse hardening gate (v1.3.3 semantics)
+## The PreToolUse hardening gate (v1.3.4 semantics)
 
-`pre-tool-use.sh` ports the lazyzcode v1.3.3 policy set:
+`pre-tool-use.sh` ports the lazyzcode v1.3.4 policy set:
 
 - **1 MiB input cap** — payloads above the cap are rejected as oversized
   input rather than truncated or parsed partially.

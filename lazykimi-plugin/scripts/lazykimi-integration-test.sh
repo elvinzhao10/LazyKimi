@@ -67,7 +67,7 @@ else
   fail "doctor did not pass or did not report 16 hooks"
 fi
 
-# Step 5: load-check must report the v1.3.3 inventory: 19/19 skills, 20/20
+# Step 5: load-check must report the v1.3.4 inventory: 19/19 skills, 20/20
 # commands, 13/13 agents, 16/16 inline hook events, 6/6 MCP servers.
 if node "$CLI" load-check >"$TMP/load.out" 2>&1 \
   && grep -q '19/19' "$TMP/load.out" \

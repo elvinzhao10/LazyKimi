@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v103-loop-scripts-regression.sh — failure->classify->repair loop machinery.
 #
-# Covers the v1.3.3 loop scripts against a temp project: next-task dependency
+# Covers the v1.3.4 loop scripts against a temp project: next-task dependency
 # selection, classify-failure family classes, create-repair-task (retry +
 # ask-user), the finalize-run gates (including the plan.md checkbox
 # cross-check), and the state round-trip they ride on.
@@ -137,10 +137,34 @@ seed_run
 CWD="$TMP" bash "$STATE/update-task.sh" looptest T1 running >/dev/null 2>&1 || true
 OUT=$(printf '%s' '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"run_check","arguments":{"run_id":"looptest","task_id":"T1","error_message":"connection refused during fetch"}}}' \
   | CWD="$TMP" LAZYKIMI_MCP_MODE=orchestrated bash "$PLUGIN_ROOT/mcp/verification/server.sh" 2>/dev/null || true)
-echo "$OUT" | grep -q '"classification": *"retry"' || fail "verification run_check wiring: $OUT"
+python3 - "$OUT" <<'PYMCP' || fail "verification run_check wiring: $OUT"
+import json
+import sys
+reply = json.loads(sys.argv[1])
+assert reply["jsonrpc"] == "2.0" and reply["id"] == 1, reply
+assert "error" not in reply, reply
+result = reply["result"]
+assert result.get("isError", False) is False, reply
+assert isinstance(result.get("content"), list) and len(result["content"]) == 1, reply
+block = result["content"][0]
+assert block.get("type") == "text", reply
+assert json.loads(block["text"])["classification"] == "retry", reply
+PYMCP
 OUT=$(printf '%s' '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"create_repair_task","arguments":{"run_id":"looptest","failed_task_id":"T1","classification":"retry"}}}' \
   | CWD="$TMP" LAZYKIMI_MCP_MODE=orchestrated bash "$PLUGIN_ROOT/mcp/verification/server.sh" 2>/dev/null || true)
-echo "$OUT" | grep -q '"repair_task_id": *"R' || fail "verification create_repair_task wiring: $OUT"
+python3 - "$OUT" <<'PYMCP' || fail "verification create_repair_task wiring: $OUT"
+import json
+import sys
+reply = json.loads(sys.argv[1])
+assert reply["jsonrpc"] == "2.0" and reply["id"] == 2, reply
+assert "error" not in reply, reply
+result = reply["result"]
+assert result.get("isError", False) is False, reply
+assert isinstance(result.get("content"), list) and len(result["content"]) == 1, reply
+block = result["content"][0]
+assert block.get("type") == "text", reply
+assert json.loads(block["text"])["repair_task_id"].startswith("R"), reply
+PYMCP
 python3 - "$TMP" <<'PYEOF'
 import json, sys
 events = [json.loads(l) for l in open(f"{sys.argv[1]}/.lazykimi/runs/looptest/events.jsonl") if l.strip()]

@@ -61,7 +61,7 @@ This is an SSRF boundary, not a general web fetch.
 ## Hook policy
 
 The sixteen hook scripts under `hooks/` apply narrow local policy to host
-events with the v1.3.3 hardened semantics (1 MiB input cap with
+events with the v1.3.4 hardened semantics (1 MiB input cap with
 oversized-input rejection, malformed-payload rejection, identity
 normalization + wrapper resolution, role-scoped writes, secret-like path
 denial, destructive-operation denial, deny = exit 2, fail-open on internal
@@ -71,7 +71,7 @@ errors):
 | --- | --- |
 | `SessionStart` | Bootstrap `.lazykimi/` state; report `SESSIONSTART_READINESS`; strict-JSON `additionalContext`. |
 | `UserPromptSubmit` | Adaptive intake: surface run state and pressure signals. |
-| `PreToolUse` (Bash) | The v1.3.3 hardening gate (see [reference/hook-policy.md](reference/hook-policy.md)). |
+| `PreToolUse` (Bash) | The v1.3.4 hardening gate (see [reference/hook-policy.md](reference/hook-policy.md)). |
 | `PostToolUse` | Append redacted tool-use event to the run ledger. |
 | `Stop` | Unchecked-plan-task detection; advisory completion reminder. |
 | `SubagentStop` | Executor-evidence gate reminder (authoritative gate stays in review skills). |

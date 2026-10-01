@@ -1,25 +1,25 @@
 # State model reference
 
-Status: v1.3.3. This page is the state-artifact reference for the `.lazykimi/`
+Status: v1.3.4. This page is the state-artifact reference for the `.lazykimi/`
 run-state model: what each artifact is, who writes it, and how the v0.x state
 maps onto the family model.
 
 
 ## Two schema sets
 
-LazyKimi v1.3.3 carries two schema sets during the port:
+LazyKimi v1.3.4 carries two schema sets during the port:
 
 1. **Project-route payload schemas** — shipped at
    `.lazykimi/schemas/{boulder,evidence,sessions,active-loop}.schema.json`
    (v0.x state model, Draft 2020-12). `lazykimi init` copies these into the
    target project.
-2. **Family run-state schemas** — the v1.3.3 family model
+2. **Family run-state schemas** — the v1.3.4 family model
    (`schemas/active-run.schema.json` at the plugin root, plus the
    run-state/events schemas added by the state wave).
 
 ## Old-to-new mapping
 
-| v0.x artifact | v1.3.3 family artifact | Notes |
+| v0.x artifact | v1.3.4 family artifact | Notes |
 | --- | --- | --- |
 | `.lazykimi/state/boulder.json` (boulder.schema.json) | `.lazykimi/runs/<run_id>/state.json` + `schemas/active-run.schema.json` | The boulder's "active work + task index" becomes per-run state; the plan checkbox is the source of truth for task completion. |
 | `.lazykimi/state/sessions.json` (sessions.schema.json) | `.lazykimi/runs/<run_id>/events.jsonl` | The append-only event ledger replaces the session log; `lazykimi sync` remains the bridge during migration. |
@@ -30,7 +30,7 @@ The v0.x schemas are not auto-migrated; the manual mapping above applies and
 the deprecation is noted in CHANGELOG. `lazykimi sync` bridges user-managed
 blocks forward.
 
-## The v1.3.3 run-state tree
+## The v1.3.4 run-state tree
 
 The session-start hook and `scripts/state/create-run.sh` bootstrap the same
 tree; MCP servers, hooks, and the CLI share the scripts under
@@ -78,4 +78,3 @@ run state aligned — the checkbox is authoritative for completion.
 Cross-reference: [hook-policy.md](hook-policy.md) for which hook consumers
 append to `events.jsonl`, and [host-routes.md](host-routes.md) for which
 routes install the hook consumers that write here.
-

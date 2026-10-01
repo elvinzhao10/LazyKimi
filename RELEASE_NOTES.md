@@ -1,3 +1,31 @@
+# LazyKimi v1.3.4 — runtime integrity and native adapter repairs
+
+## Eval-driven fixes
+
+Receipt validation preserves unknown or modified files, MCP setup merges owned entries, and KIMI_CODE_HOME is respected. Native agent headers and explicit project-bound MCP adapters replace invented settings and plugin-directory state. The release archive includes the compiled CLI. Finalization requires all intended tasks done; persisted status is assessed separately from completion evidence.
+
+## Measured efficiency
+
+This maintenance release makes no new latency, token-saving or recall claim. Ledger append/compaction, learned routing and shared-core migration are deferred.
+
+## Host capability matrix
+
+Kimi Code terminal package fixtures pass; fresh authenticated CLI/IDE acceptance remains pending. The unbound global manifest project-state MCP fails closed; use the documented explicitly bound project config. Kimi Work supports native plugins in the host, while this package route remains experimental.
+
+## Migration and upgrade
+
+Use the receipt-aware upgrade route with an explicit project binding. Preserve project evidence and unknown host configuration. No credentials or production host settings are changed by package verification.
+
+## Known risks
+
+Native host acceptance is still separate from package readiness. Token/cost budgets are metadata, and pending approval results are persisted observations without a live approval queue. Shell loop policy beyond its configured global cap requires orchestrator enforcement.
+
+## Rollback
+
+Keep the prior local 1.3.3 checkout and ownership receipts; a prior public release is not established. Remove only receipt-owned, unmodified assets and use a fresh host session to verify removal.
+
+## Prior release notes
+
 # LazyKimi v1.3.3 — full family parity port
 
 **Status:** v1.3.3 release. This release aligns LazyKimi with LazyZCode

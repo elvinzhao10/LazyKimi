@@ -5,7 +5,7 @@ import { readJson, isObject } from '../lib/json';
 import { isPluginSourceRoot } from '../lib/paths';
 import { validateMcpServers, REQUIRED_MCP_SERVERS, EXPECTED_MCP_TOOLS } from '../lib/mcp-validation';
 
-const PLUGIN_VERSION = '1.3.3';
+const PLUGIN_VERSION = '1.3.4';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;
@@ -51,7 +51,7 @@ function countHooks(hooksDir: string): number {
 
 function checkBoulderState(boulderPath: string): CheckResult {
   if (!existsSync(boulderPath)) {
-    // v1.3.3: runtime state is per-project (created by `lazykimi init`), not a
+    // v1.3.4: runtime state is per-project (created by `lazykimi init`), not a
     // repo-root artifact; absence in a source checkout is not a failure.
     return { label: '.lazykimi/state/boulder.json', status: 'PASS', detail: 'not initialized (per-project runtime state)' };
   }
@@ -91,7 +91,7 @@ function checkKimiBinary(): CheckResult {
   };
 }
 
-// v1.3.3: report the active MCP profile mode. Kimi provides no env
+// v1.3.4: report the active MCP profile mode. Kimi provides no env
 // interpolation, so the mode rides the init-time mcp.json env stanza; this
 // reads the persisted .lazykimi/config.json record of that rewrite.
 function checkMcpMode(target: string, isPluginRoot: boolean): CheckResult {
@@ -221,7 +221,7 @@ Options:
     console.log(`  [${c.status}] ${label} ${c.detail ?? ''}`);
   }
   console.log(`\n=== Results: ${result.pass} PASS, ${result.warn} WARN, ${result.fail} FAIL ===`);
-  // v1.3.3 honest host-readiness contract: without a lifecycle observation
+  // v1.3.4 honest host-readiness contract: without a lifecycle observation
   // receipt (bound to an active source/version/build/session with one loaded
   // skill, command, agent, hook, and all six MCP connections), the host is
   // PENDING — package checks never prove a live host session.

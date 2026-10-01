@@ -1,6 +1,6 @@
 #!/bin/bash
 # v103-lifecycle-entrypoint-regression.sh — bounded node:test entrypoint over
-# the durable lifecycle surface. Ported from lazyzcode v1.3.3
+# the durable lifecycle surface. Ported from lazyzcode v1.3.4
 # tests/v103-lifecycle-entrypoint-regression.sh (same five-file selection).
 set -euo pipefail
 

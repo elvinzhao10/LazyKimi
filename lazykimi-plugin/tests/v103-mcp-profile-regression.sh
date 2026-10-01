@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# v103-mcp-profile-regression.sh — MCP profile gate (v1.3.3 port).
+# v103-mcp-profile-regression.sh — MCP profile gate (v1.3.4 port).
 # Modes direct/assisted/planned/orchestrated/long-horizon; unset mode defaults
 # to orchestrated (all six servers active); deferred servers exit 0 quietly
 # via deferred-server.py; invalid mode fails closed with stderr + exit 2;
-# init --mcp-mode persists the mode and injects the LAZYKIMI_MCP_MODE env
-# stanza into every project mcp.json server entry (idempotent re-rewrite).
+# init --mcp-mode persists the mode and binds explicit --project/--mode arguments into every project mcp.json server entry (idempotent re-rewrite).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -68,22 +67,22 @@ grep -q 'MCP_PROFILE_INVALID' "$TMP/invalid.err" || fail "invalid mode must prin
 [ -z "$OUT" ] || fail "invalid mode must not answer on stdout"
 echo "  [PASS] invalid mode fails closed (exit 2 + stderr)"
 
-# 5. init --mcp-mode persists the mode and injects the env stanza (6 entries).
+# 5. init --mcp-mode persists the mode and injects the adapter arguments (6 entries).
 HOME="$TMP" node "$DIST_INDEX" init --target "$TMP/project" --mcp-mode direct >/dev/null 2>&1 \
   || fail "init --mcp-mode direct failed"
 MODE_COUNT=$(python3 -c "
 import json
 d = json.load(open('$TMP/project/.kimi-code/mcp.json'))
-count = sum(1 for s in d['mcpServers'].values() if s.get('env', {}).get('LAZYKIMI_MCP_MODE') == 'direct')
+count = sum(1 for s in d['mcpServers'].values() if s['args'][-2:] == ['--mode', 'direct'])
 print(len(d['mcpServers']), count)
 ")
-[ "$MODE_COUNT" = "6 6" ] || fail "expected 6 servers each carrying LAZYKIMI_MCP_MODE=direct, got: $MODE_COUNT"
+[ "$MODE_COUNT" = "6 6" ] || fail "expected 6 servers each carrying --mode direct, got: $MODE_COUNT"
 python3 -c "
 import json
 d = json.load(open('$TMP/project/.lazykimi/config.json'))
 assert d.get('mcpMode') == 'direct', d
 " || fail ".lazykimi/config.json must record mcpMode=direct"
-echo "  [PASS] init --mcp-mode direct: env stanza in 6/6 entries + config.json record"
+echo "  [PASS] init --mcp-mode direct: adapter arguments in 6/6 entries + config.json record"
 
 # 6. Re-init with a new mode rewrites exactly (no duplicate keys, all updated).
 HOME="$TMP" node "$DIST_INDEX" init --target "$TMP/project" --mcp-mode orchestrated >/dev/null 2>&1 \
@@ -92,31 +91,32 @@ python3 - "$TMP/project/.kimi-code/mcp.json" <<'PYEOF'
 import json, sys
 raw = open(sys.argv[1]).read()
 d = json.loads(raw)  # JSON object keys are per-object; duplicates would collapse silently,
-                     # so also assert the raw text carries no repeated env blocks per server.
-assert raw.count('"LAZYKIMI_MCP_MODE": "orchestrated"') == 6, raw.count('"LAZYKIMI_MCP_MODE": "orchestrated"')
+                     # so also assert the raw text carries no repeated adapter argument sets per server.
+assert sum(server['args'][-2:] == ['--mode', 'orchestrated'] for server in d['mcpServers'].values()) == 6
 assert '"__KIMI_MCP_MODE__"' not in raw and '"__KIMI_PLUGIN_ROOT__"' not in raw and '"__KIMI_PROJECT_ROOT__"' not in raw
 for server in d["mcpServers"].values():
-    assert server["env"]["LAZYKIMI_MCP_MODE"] == "orchestrated", server
-    assert server["env"]["CWD"].startswith("/"), server
+    assert server["args"][-2:] == ["--mode", "orchestrated"], server
+    assert server["args"][2] == "--project" and server["args"][3].startswith("/"), server
+    assert "env" not in server, server
 PYEOF
 echo "  [PASS] re-init with orchestrated rewrites all 6 stanzas (no placeholders, no duplicates)"
 
-# 7. The direct-mode project env stanza actually defers the python servers.
+# 7. The direct-mode project adapter arguments actually defers the python servers.
 HOME="$TMP" node "$DIST_INDEX" init --target "$TMP/project" --mcp-mode direct >/dev/null 2>&1 \
   || fail "re-init --mcp-mode direct failed"
 python3 - "$TMP/project" "$PLUGIN_ROOT" <<'PYEOF'
 import json, os, subprocess, sys
 project, plugin = sys.argv[1:]
 mcp = json.load(open(f"{project}/.kimi-code/mcp.json"))
-env = mcp["mcpServers"]["lazykimi-context-graph"]["env"]
+server = mcp["mcpServers"]["lazykimi-context-graph"]
 request = json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}) + "\n"
 completed = subprocess.run(
-    ["bash", f"{plugin}/mcp/context-graph/server.sh"],
-    input=request, text=True, capture_output=True, env={**os.environ, **env}, timeout=10, check=False,
+    [server["command"], *server["args"]],
+    input=request, text=True, capture_output=True, env={**os.environ, "CWD": plugin}, timeout=10, check=False,
 )
 assert completed.returncode == 0, (completed.returncode, completed.stderr)
 assert '"tools":[]' in completed.stdout.replace(" ", ""), completed.stdout
-print("  [PASS] project env stanza (direct) defers context-graph through server.sh")
+print("  [PASS] project adapter arguments (direct) defers context-graph through server.sh")
 PYEOF
 
 # 8. Declaration validation: profile.py --validate-commands passes on the template.

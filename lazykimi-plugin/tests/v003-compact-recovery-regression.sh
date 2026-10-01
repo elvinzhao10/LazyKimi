@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # v003-compact-recovery-regression.sh
-# v1.3.3 port: PreCompact/PostCompact carry context-recovery semantics —
+# v1.3.4 port: PreCompact/PostCompact carry context-recovery semantics —
 # pre-compact.sh records a pre_compact ledger event on the active run;
 # post-compact.sh writes a context-recovery checkpoint under
 # .lazykimi/runs/<id>/checkpoints/, records a post_compact event, and
@@ -17,7 +17,7 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/lazykimi-compact-test.XXXXXX")"
 cleanup() { rm -rf "$TMP"; }
 trap cleanup EXIT
 
-# 1. Seed a temp project with an active run (v1.3.3 state model).
+# 1. Seed a temp project with an active run (v1.3.4 state model).
 mkdir -p "$TMP"
 CWD="$TMP" bash "$PLUGIN_ROOT/scripts/state/create-run.sh" compact-test "compact recovery regression" >/dev/null \
   || fail "create-run failed"
@@ -48,4 +48,4 @@ printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" || f
 printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/post-compact.sh" >/dev/null 2>&1 || fail "post-compact must fail open"
 printf 'not-json{{{' | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" >/dev/null 2>&1 || fail "pre-compact must fail open on malformed input"
 
-echo "PASS: v003 compact recovery regression (v1.3.3 semantics)"
+echo "PASS: v003 compact recovery regression (v1.3.4 semantics)"

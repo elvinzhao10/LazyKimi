@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # post-tool-use.sh — Kimi PostToolUse hook: append tool-use summary to the
 # active run's events.jsonl and grep changed files for AI-slop comment markers.
-# Ported from the LazyZCode v1.3.3 hook semantics (family parity).
+# Ported from the LazyZCode v1.3.4 hook semantics (family parity).
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics go to stderr.
 # Advisory only — ALWAYS exits 0.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # v001-mcp-config-regression.sh
 # Verify .kimi-code/mcp.json is valid JSON with 6 servers, all required:false,
-# and that the six declared servers expose the exact v1.3.3 family tool
-# surface: 9/7/4/5/5/2 tools = 32 total (v1.3.3 port expectation).
+# and that the six declared servers expose the exact v1.3.4 family tool
+# surface: 9/7/4/5/5/2 tools = 32 total (v1.3.4 port expectation).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

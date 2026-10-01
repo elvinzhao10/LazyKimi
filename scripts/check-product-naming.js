@@ -9,7 +9,7 @@
 // .product-naming-allowlist.json. Family-shared byte-identical contracts are
 // exempt by content hash: a contract is exempt only while its bytes still
 // match its tracked .sha256 sidecar (the sidecars were copied from the
-// LazyZCode v1.3.3 release, so the exemption is hash-pinned, not
+// LazyZCode v1.3.4 release, so the exemption is hash-pinned, not
 // path-globbed). The scripts/hooks bridge symlink is skipped for the same
 // reason the family's v122 harness-semantic-parity work introduced it: it is
 // a bridge to the canonical hooks directory, not a second surface.
@@ -112,7 +112,7 @@ function sha256(buffer) {
 }
 
 // A contract is hash-exempt while its bytes match its tracked .sha256 sidecar.
-// The sidecar set was copied verbatim from the LazyZCode v1.3.3 release, so a
+// The sidecar set was copied verbatim from the LazyZCode v1.3.4 release, so a
 // byte-identical family file stays exempt and any local edit immediately
 // resurfaces naming review instead of silently riding the exemption.
 function isHashExemptContract(relativePath) {

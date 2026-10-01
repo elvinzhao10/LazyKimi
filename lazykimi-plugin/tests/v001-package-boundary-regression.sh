@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # v001-package-boundary-regression.sh
 # Verify the lazykimi-plugin package is self-contained within lazykimi-plugin/
-# with no escaped symlinks or parent-dir refs (root runtime copies removed in v1.3.3).
+# with no escaped symlinks or parent-dir refs (root runtime copies removed in v1.3.4).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -20,7 +20,7 @@ for d in .kimi-code agents commands hooks mcp src contracts tooling scripts; do
   [ -d "$PLUGIN_ROOT/$d" ] || fail "missing package dir: $d"
 done
 
-# 2. Root-level runtime copies are intentionally absent (v1.3.3 repo hygiene):
+# 2. Root-level runtime copies are intentionally absent (v1.3.4 repo hygiene):
 #    the shipped payload is lazykimi-plugin/.kimi-code/ + .lazykimi/schemas/.
 [ ! -e "$REPO_ROOT/.lazykimi" ] || fail "root .lazykimi/ runtime copy must not exist"
 [ ! -e "$REPO_ROOT/.kimi-code" ] || fail "root .kimi-code/ runtime copy must not exist"

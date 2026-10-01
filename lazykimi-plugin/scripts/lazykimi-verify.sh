@@ -1,7 +1,7 @@
 #!/bin/bash
-# lazykimi-verify.sh — Master verification runner (v1.3.3)
+# lazykimi-verify.sh — Master verification runner (v1.3.4)
 #
-# Ported from lazyzcode v1.3.3 scripts/lazyzcode-verify.sh, Kimi-adapted.
+# Ported from lazyzcode v1.3.4 scripts/lazyzcode-verify.sh, Kimi-adapted.
 # Runs all health-check scripts in sequence and emits a compact JSON summary.
 # Exit code 0 when all_pass is true; exit code 1 otherwise.
 #
@@ -341,7 +341,7 @@ run_regression_inventory() {
         # the tooling lifecycle runs several bounded fixture installs; both need
         # a floor above the generic per-check budget. v003-doctor-plugin-root
         # drives a full nested `lazykimi verify --must-pass`, whose phase
-        # budget grew with the v1.3.3 family test stack, so it needs the same
+        # budget grew with the v1.3.4 family test stack, so it needs the same
         # floor (measured ~2 min nested, ~3.5 min unnested on the dev host).
         case "$test_name" in
             v103-codegraph-regression.sh|v103-codegraph-install-timeout-regression.sh|v103-tooling-lifecycle-regression.sh|v003-doctor-plugin-root-regression.sh)
@@ -364,61 +364,20 @@ run_regression_inventory() {
     fi
 }
 
-# The family-shared byte-identical execution-context contract test hardcodes
-# the lazyzcode monorepo layout (plugins/lazyzcode/...) in its fixture paths,
-# so exactly these three assertions cannot resolve in this repository. They
-# are a recorded family deviation: any OTHER contract-test failure fails the
-# gate, and the recorded set is re-checked by name on every run.
 run_contract_tests() {
     local result_file
-    if [ "$REGRESSION_DEPTH" -gt 0 ]; then
-        CONTRACT_TESTS_RESULT="skipped-nested"
-        return
-    fi
-    if [ "$VERIFY_SUITE" != "all" ]; then
-        CONTRACT_TESTS_RESULT="skipped-suite"
-        return
-    fi
+    if [ "$REGRESSION_DEPTH" -gt 0 ]; then CONTRACT_TESTS_RESULT="skipped-nested"; return; fi
+    if [ "$VERIFY_SUITE" != "all" ]; then CONTRACT_TESTS_RESULT="skipped-suite"; return; fi
     result_file="$(mktemp "${TMPDIR:-/tmp}/lazykimi-contract-tests.XXXXXX")"
-    tap_file="${result_file}.tap"
-    # The child redirects its own TAP stream to a file (the bounded runner's
-    # captured tail is truncated); the runner still bounds the process.
     if "$PYTHON_BIN" "$RUNNER" --label "contract_tests" --timeout "$VERIFY_TIMEOUT" --result-file "$result_file" -- \
-        bash -c 'node --test --test-reporter=tap "$1"/contracts/tests/*.test.js >"$2" 2>&1' _ "$PLUGIN_ROOT" "$tap_file"; then
+        bash -c 'node --test "$1"/contracts/tests/*.test.js' _ "$PLUGIN_ROOT"; then
         CONTRACT_TESTS_RESULT="pass"
     else
-        if "$PYTHON_BIN" - "$tap_file" <<'PY'
-import json
-import re
-import sys
-
-recorded = {
-    "accepts a compact fixed dispatch with read-only provenance and once-validated argv",
-    "accepts benign argv and binds it to the trusted stored plan command list",
-    "reruns only failed missing stale or input-affected lanes and retains all-five PASS",
-}
-with open(sys.argv[1], encoding="utf-8") as handle:
-    tap = handle.read()
-failed = {name for name in re.findall(r"^not ok \d+ - (.+)$", tap, re.MULTILINE)}
-extra = failed - recorded
-if extra:
-    print(f"unrecorded contract-test failures: {sorted(extra)}", file=sys.stderr)
-    raise SystemExit(1)
-missing = recorded - failed
-if missing:
-    print(f"recorded structural failures no longer reproduce (update the record): {sorted(missing)}", file=sys.stderr)
-    raise SystemExit(1)
-raise SystemExit(0)
-PY
-        then
-            CONTRACT_TESTS_RESULT="pass-3-recorded-structural"
-        else
-            CONTRACT_TESTS_RESULT="fail"
-            ALL_PASS=false
-            printf 'FAIL: contract tests failed beyond the recorded structural set\n' >&2
-        fi
+        CONTRACT_TESTS_RESULT="fail"
+        ALL_PASS=false
+        printf 'FAIL: contract tests failed\n' >&2
     fi
-    rm -f "$result_file" "$tap_file"
+    rm -f "$result_file"
 }
 
 run_language_tests() {
@@ -539,10 +498,11 @@ if [ -n "$LATEST_RUN" ]; then
         if [ "$ALL_PASS" = true ]; then
             ALL_PASS_PY=True
         fi
-        "$PYTHON_BIN" - "$CWD" "$EVENTS_FILE" "$LATEST_RUN" "$NOW" "$ALL_PASS_PY" <<'PY' 2>/dev/null || true
+        "$PYTHON_BIN" - "$CWD" "$EVENTS_FILE" "$LATEST_RUN" "$NOW" "$ALL_PASS_PY" "${SCRIPTS_DIR}/state/state-transaction.py" <<'PY' 2>/dev/null || true
 import json
 import os
 import sys
+import subprocess
 
 cwd, events_file, run_id, now, all_pass_raw = sys.argv[1:6]
 root = os.path.realpath(os.path.join(cwd, ".lazykimi", "runs"))
@@ -555,8 +515,9 @@ if not inside_runs or not events_path.endswith(os.path.join(run_id, "events.json
     raise SystemExit(0)
 all_pass = all_pass_raw == "True"
 event = {"ts": now, "run_id": run_id, "event": "verification_passed" if all_pass else "verification_failed", "all_pass": all_pass}
-with open(events_path, "a") as f:
-    f.write(json.dumps(event) + "\n")
+subprocess.run([sys.executable, sys.argv[6], "append-event", os.path.dirname(events_path),
+                run_id, event["event"], json.dumps({"all_pass": all_pass}), now],
+               check=True, capture_output=True, timeout=7)
 PY
     fi
 fi

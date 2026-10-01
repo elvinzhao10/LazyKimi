@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # lazykimi-hook-pipeline-test.sh — Simulates Kimi's 16-event hook lifecycle by
 # piping realistic payloads (from tests/fixtures/hook-events/) through each
-# hook in sequence. Ported from the LazyZCode v1.3.3 hook-pipeline-test.sh and
+# hook in sequence. Ported from the LazyZCode v1.3.4 hook-pipeline-test.sh and
 # extended to the Kimi 16-event surface, including oversized-input and
 # wrapper-resolution adversarial cases. Proves the entire hook chain works
 # end-to-end without requiring a live Kimi session.
@@ -116,7 +116,7 @@ expect_stdout "SessionStart" "session-start.sh" "SessionStart.json" \
 expect_stdout "UserPromptSubmit (plain)" "user-prompt-submit.sh" "UserPromptSubmit.json" "-" 0
 
 # 2b. UserPromptSubmit — action verb produces the adaptive intake directive
-#     (selection-only until the kimi host is observed, per v1.3.3).
+#     (selection-only until the kimi host is observed, per v1.3.4).
 ACTION_PAYLOAD='{"session_id":"'"$SESSION_ID"'","cwd":"'"$CWD"'","hook_event_name":"UserPromptSubmit","prompt":"please review the current change set"}'
 out=$(printf '%s' "$ACTION_PAYLOAD" | run_hook bash "$HOOKS_DIR/user-prompt-submit.sh" 2>/dev/null); status=$?
 if [ "$status" -eq 0 ] && printf '%s' "$out" | grep -Eq 'additionalContext.*Adaptive intake directive' \

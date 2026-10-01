@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # publication-regression.sh — publication-boundary regression for LazyKimi.
-# Ported from lazyzcode v1.3.3 tests/publication-regression.sh and adapted to
+# Ported from lazyzcode v1.3.4 tests/publication-regression.sh and adapted to
 # the lazykimi layout: docs live inside lazykimi-plugin/docs (the repo-root
 # docs/ is a tracked symlink onto it), there is ONE marketplace.json v2 inside
 # the plugin tree, and the publication set additionally pins the marketplace
@@ -140,7 +140,7 @@ assert len(marketplace.get("plugins", [])) == 1, "marketplace must expose exactl
 entry = marketplace["plugins"][0]
 assert entry["id"] == manifest["name"] == "lazykimi", "marketplace entry id must match the manifest name"
 assert entry["source"] == "./", "marketplace entry must point at the plugin root"
-assert manifest["version"] == contract["version"] == "1.3.3", "manifest and contract versions must agree"
+assert manifest["version"] == contract["version"] == "1.3.4", "manifest and contract versions must agree"
 
 for relative, expected in contract["artifacts"].items():
     artifact = repository_root / relative

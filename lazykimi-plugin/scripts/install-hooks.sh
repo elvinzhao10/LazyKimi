@@ -34,7 +34,7 @@ Idempotent: skips entries whose command string is already present in
 config.toml. A backup config.toml.bak is written before the first new entry
 is appended. Restart Kimi Code CLI after running this script.
 
-Events wired (the critical 8 — exactly the events carrying v1.3.3
+Events wired (the critical 8 — exactly the events carrying v1.3.4
   gating semantics per contracts/kimi-hook-consumers.v1.json; the 8 advisory
   events activate only through the plugin manifest route):
   SessionStart, UserPromptSubmit, PreToolUse (Bash), PostToolUse,

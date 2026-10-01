@@ -1,19 +1,26 @@
 ---
 name: verifier
 description: "Use when an implementer's DoneClaim must be independently confirmed from artifacts: reproduce tests, Manual-QA, adversarial probes, and return a verdict with confidence. Do not use for implementing or repairing code."
-model: kimi-k3
-effort: max
-maxTurns: 120
-disallowed:
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - Write
+disallowedTools:
   - Edit
-isolation: true
+  - Agent
+  - AgentSwarm
+subagents: []
 ---
 
 # lazykimi-verifier
 
 ## Kimi dispatch channel
 
-**Main session** — runs as a peer of the orchestrator in the top-level Kimi Code CLI session, not as a `coder`/`explore`/`plan` sub-agent. This preserves the separation between orchestration and judgment on Kimi: the same session must not both steer and approve the work.
+Dispatched by the native custom profile name `verifier`. The frontmatter
+controls tools and delegation. Return a complete, self-contained final result
+to the caller; the caller remains responsible for independent acceptance.
 
 ## Mission
 
@@ -148,7 +155,9 @@ The verifier is the **final authority** on whether a task is truly complete:
 
 ## Kimi-native dispatch notes
 
-- Dispatched via the **main** route (main session); see *Kimi dispatch channel* above.
-- `model: kimi-k3` with `effort: max` carries the family `max` thought-level intent on Kimi's observed effort scale (`low|high|max` on `kimi-k3`; T21 host receipt 2026-09-30).
-- Intended tool allowlist: Read, Write, Bash — encoded in frontmatter as the `disallowed` denylist of its complement within Kimi's file-mutation tools (Kimi has no allowlist key).
-- `isolation: true` keeps each dispatch self-contained; every dispatch message carries its full TASK/DELIVERABLE/SCOPE/VERIFY context.
+- Use the named native profile and its enforced `tools`, `disallowedTools`,
+  and `subagents` restrictions.
+- Model and effort intent must use supported host/session controls; profile
+  headers do not select them.
+- Worktree isolation and turn budgets require caller orchestration and evidence.
+- Include complete TASK/DELIVERABLE/SCOPE/VERIFY context in each dispatch.
