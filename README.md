@@ -1,5 +1,7 @@
 # LazyKimi
 
+![LazyKimi](lazykimi-banner.png)
+
 > Kimi-native evidence-led agent workflow harness for **Kimi Code CLI** (primary)
 > and **Kimi Work** (experimental full-plugin route, skills fallback). Current release:
 > **v1.3.4**, at family parity with LazyZCode v1.3.4.
