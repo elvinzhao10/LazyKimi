@@ -4,6 +4,8 @@
 
 Receipt validation preserves unknown or modified files, MCP setup merges owned entries, and KIMI_CODE_HOME is respected. Native agent headers and explicit project-bound MCP adapters replace invented settings and plugin-directory state. The release archive includes the compiled CLI. Finalization requires all intended tasks done; persisted status is assessed separately from completion evidence.
 
+Fresh public-source onboarding stages regular publication documents and excludes the validated internal source hook bridge before recording ownership. Changed or unrelated symlinks remain refused. Isolated public-origin setup, status and receipt-safe removal are verified.
+
 ## Measured efficiency
 
 This maintenance release makes no new latency, token-saving or recall claim. Ledger append/compaction, learned routing and shared-core migration are deferred.
