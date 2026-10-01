@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # LazyKimi — hooks installer (config.toml route)
 #
-# Appends LazyKimi [[hooks]] entries to ~/.kimi-code/config.toml with ABSOLUTE
+# Appends LazyKimi [[hooks]] entries to KIMI_CODE_HOME/config.toml (default
+# ~/.kimi-code/config.toml) with ABSOLUTE
 # paths to the project's hook scripts. Use this when you cloned the repo and
 # ran `lazykimi init` but did NOT install as a plugin via /plugins install
 # (plugin manifest hooks auto-activate from kimi.plugin.json).
@@ -11,14 +12,15 @@
 set -euo pipefail
 
 PROJECT_ROOT="${PWD:-}"
-CONFIG_DIR="${HOME}/.kimi-code"
+CONFIG_DIR="${KIMI_CODE_HOME:-${HOME}/.kimi-code}"
 CONFIG_FILE="$CONFIG_DIR/config.toml"
 
 usage() {
   cat <<'EOF'
 Usage: bash install-hooks.sh [--project-root <path>] [--help]
 
-Appends LazyKimi [[hooks]] entries to ~/.kimi-code/config.toml with ABSOLUTE
+Appends LazyKimi [[hooks]] entries to KIMI_CODE_HOME/config.toml (default
+~/.kimi-code/config.toml) with ABSOLUTE
 paths to <project>/.kimi-code/hooks/<name>.sh so hooks resolve regardless of
 CWD when Kimi Code CLI invokes them.
 

@@ -8,7 +8,7 @@ a passing local check from being mistaken for a live host capability.
 flowchart TB
     Policy["skills + SKILL.md\nwhat the workflow asks for"]
     Roles["agents (13 roles)\nwho investigates, implements, verifies"]
-    Channels["Kimi sub-agents (coder/explore/plan)\nhost dispatch surface"]
+    Channels["named native agent profiles\nhost dispatch surface"]
     Adapter["hooks + MCP\nhost/protocol adapters"]
     Runtime["scripts + CLI\nstate changes and checks"]
     State[".lazykimi/ run files, plans, evidence, receipts"]
@@ -19,8 +19,8 @@ flowchart TB
 ## Policy is not execution
 
 Skills describe how an agent should approach planning, debugging, review, or
-completion. Agent files narrow that guidance to a role and declare which Kimi
-sub-agent channel it maps to. They do not gain authority merely by existing: a
+completion. Agent files narrow that guidance to a role and declare native
+tool and delegation restrictions. They do not gain authority merely by existing: a
 host must select and load them, and an agent must still perform the described
 work.
 
@@ -35,28 +35,20 @@ session for an integration.
 
 ## The planner/implementer/verifier separation
 
-LazyKimi's thirteen roles map to three Kimi sub-agent channels plus the main
-agent. This mapping is not cosmetic — it enforces the separation the five
-evidence gates depend on:
+LazyKimi declares thirteen named native profiles. The orchestrator delegates
+through Agent/AgentSwarm; each worker declares supported `tools`,
+`disallowedTools`, and `subagents` restrictions.
 
-- **`plan` channel**: lazykimi-planner (planning) and lazykimi-context-indexer
-  (indexing). Read-only over the repository; plan artifacts are written under
-  `.lazykimi/`. The planner cannot implement.
-- **`coder` channel**: lazykimi-implementer (deep implementation),
-  lazykimi-qa-executor (QA execution), and lazykimi-migration-planner
-  (host-adapter planning). These are the only roles with write access to
-  product code.
-- **`explore` channel**: lazykimi-explorer, lazykimi-librarian, and
-  lazykimi-context-miner. All read-only for product code.
-- **Main session**: lazykimi-orchestrator, lazykimi-verifier, lazykimi-reviewer,
-  lazykimi-security-auditor, and lazykimi-gate-reviewer run as main-session
-  peers. The orchestrator steers but does not implement; the verifier judges
-  but does not implement — preserving orchestration/judgment separation.
+Planning and review profiles are read-only and return their results to the
+caller; the authorized caller persists plan or review artifacts. Implementation
+and QA profiles have execution tools. The verifier can run checks and write
+evidence but cannot use Edit or delegate. Shell and path permissions remain
+separate host policy: a tool allowlist is not a filesystem sandbox.
 
-Collapsing planner and implementer into one agent would let a plan be
-rationalized by its own author mid-implementation. Collapsing implementer and
-verifier would let the author approve its own work. The sub-agent channel
-mapping makes both collapses structurally impossible.
+Independent planning, implementation and acceptance remain workflow
+requirements. Their enforcement depends on the loaded native profiles,
+permission policy and evidence gates, and must be observed in the host.
+See [native-adapter.md](reference/native-adapter.md) for the exact boundaries.
 
 ## Host ownership stays external
 

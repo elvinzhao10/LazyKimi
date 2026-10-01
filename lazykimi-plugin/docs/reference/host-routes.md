@@ -27,7 +27,8 @@ explains each route and the manual connector spec for Kimi Work.
   `orchestrated`) copies `.kimi-code/`, `.lazykimi/`, and `mcp.json` into the
   project, then `bash lazykimi-plugin/scripts/install-hooks.sh --project-root
   <path>` appends the **critical 8** `[[hooks]]` entries to
-  `~/.kimi-code/config.toml` (see [hook-policy.md](hook-policy.md) for the
+  `KIMI_CODE_HOME/config.toml` when set, otherwise `~/.kimi-code/config.toml`
+  (see [hook-policy.md](hook-policy.md) for the
   split).
 - **Placeholder rewrite**: the shipped `.kimi-code/mcp.json` template uses the
   `__KIMI_PLUGIN_ROOT__` placeholder because Kimi does NOT interpolate

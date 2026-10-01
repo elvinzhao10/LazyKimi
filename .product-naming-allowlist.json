@@ -1,6 +1,27 @@
 {
   "formerDisplayNames": [
     {
+      "path": "lazykimi-plugin/tests/test_v134_run_integrity.py",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Shared regression scopes legacy hooks to the two products that declare them; Kimi skips those cases."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_v134_run_integrity.py",
+      "text": "lazyqoder",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Shared regression scopes legacy hooks to the two products that declare them; Kimi skips those cases."
+    },
+    {
+      "path": "lazykimi-plugin/tests/test_v134_run_integrity.py",
+      "text": "claude_plugin_root",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Fixture explicitly clears inherited host plugin-root variables to keep package execution isolated."
+    },
+    {
       "path": ".github/workflows/paired-contract-parity.yml",
       "text": ".lazyzcode",
       "count": 3,

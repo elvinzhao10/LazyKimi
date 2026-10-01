@@ -196,6 +196,9 @@ copy_publication_fixture() {
     cp "$REPOSITORY_ROOT/LICENSE" "$REPOSITORY_ROOT/NOTICE" "$fixture_root/"
     cp "$PLUGIN_ROOT/README.md" "$fixture_root/lazykimi-plugin/README.md"
     cp "$PLUGIN_ROOT/LICENSE" "$PLUGIN_ROOT/NOTICE" "$fixture_root/lazykimi-plugin/"
+    if [ -f "$REPOSITORY_ROOT/lazykimi-banner.png" ]; then
+        cp "$REPOSITORY_ROOT/lazykimi-banner.png" "$fixture_root/"
+    fi
 }
 
 assert_bad_link() {

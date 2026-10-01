@@ -34,8 +34,30 @@ data.
 
 ## Delivery surfaces
 
+The public source is [LazyKimi on GitHub](https://github.com/elvinzhao10/LazyKimi).
+Public source availability does not prove that a particular tag or release
+asset is published. Durable onboarding verifies the selected official source
+revision before promotion; preserve the existing installation if that source
+is unavailable or fails integrity checks.
+
+For the durable lifecycle, use Node 20+, Git and Python 3.10+. Once the
+selected source revision is published, run:
+
+```bash
+node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
+  --source https://github.com/elvinzhao10/LazyKimi \
+  --install-root <absolute-install-root> --project <absolute-project> --json
+```
+
+The bare official URL selects the current release tag (`v1.3.4`); an explicit
+official `/tree/<ref>` URL selects that branch or tag. The lifecycle validates
+source and receipts before promotion, preserves prior releases on update,
+and requires explicit SHA confirmation when an update changes revision without
+changing version. It reports package readiness separately from host readiness.
+
 Kimi Code CLI auto-discovers `.kimi-code/` when the project is opened. Kimi
-Work may use its documented Skills UI or a narrower local-skills import path.
+Work supports full plugins; LazyKimi activation on that route remains
+experimental until observed. Work may also use its documented Skills UI or a narrower local-skills import path.
 The latter imports skills only; it is intentionally not represented as
 automatic agent, hook, command, or MCP loading.
 
@@ -48,6 +70,7 @@ bash lazykimi-plugin/scripts/install-hooks.sh
 ```
 
 The installer appends eight critical `[[hooks]]` entries to
+the selected `KIMI_CODE_HOME/config.toml`, defaulting to
 `~/.kimi-code/config.toml`. It is idempotent and does not overwrite existing
 entries, provider/model/permission configuration, or any other host file. After
 installation, restart the Kimi Code CLI session so the new hooks take effect.
@@ -60,12 +83,14 @@ registration interactively, use `/mcp` (list servers) and `/mcp-config`
 (configure servers) inside a Kimi Code CLI session. The shipped template uses
 the `__KIMI_PLUGIN_ROOT__` placeholder — Kimi does not interpolate environment
 variables in `mcp.json` — and `lazykimi init` rewrites it to the absolute
-`lazykimi-plugin/` directory path (injecting the `LAZYKIMI_MCP_MODE` and
-`CWD` env stanza) when the project route is initialized. The full route and
+`lazykimi-plugin/` directory and project paths with explicit `--project` and
+`--mode` adapter arguments when the project route is initialized. Host plugin
+cwd and environment do not supply project binding; unbound manifest launchers
+fail closed. The full route and
 connector specification is in
 [reference/host-routes.md](reference/host-routes.md).
 
-For Kimi Work, add each `lazykimi-*` MCP connector manually through Kimi
+For the Kimi Work fallback, first confirm local stdio support, then add each `lazykimi-*` MCP connector manually through Kimi
 Work's MCP configuration UI. The copied repository does not auto-register MCP
 servers in Kimi Work.
 

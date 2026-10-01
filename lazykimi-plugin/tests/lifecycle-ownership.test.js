@@ -100,6 +100,28 @@ test('Given KIMI_CODE_HOME When host config path resolves Then the override is a
   assert.equal(result.stdout.trim(), '/isolated-kimi-home/config.toml');
 });
 
+test('Given an isolated KIMI_CODE_HOME When hooks install and uninstall Then the default home is preserved', t => {
+  const root = fixture(t);
+  assert.equal(run(root, ['init']).status, 0);
+  const defaultConfig = path.join(root, '.kimi-code/config.toml');
+  fs.writeFileSync(defaultConfig, '# caller-owned default home\n');
+  const config = path.join(root, 'isolated-host/config.toml');
+  const installer = path.resolve(__dirname, '../scripts/install-hooks.sh');
+  const environment = { ...process.env, HOME: root, KIMI_CODE_HOME: path.dirname(config) };
+  const install = () => spawnSync('bash', [installer, '--project-root', root], {
+    encoding: 'utf8', timeout: 30000, env: environment,
+  });
+  const installed = install();
+  assert.equal(installed.status, 0, installed.stderr);
+  const bytes = fs.readFileSync(config, 'utf8');
+  assert.equal((bytes.match(/^\[\[hooks\]\]/gm) || []).length, 8);
+  assert.equal(install().status, 0);
+  assert.equal(fs.readFileSync(config, 'utf8'), bytes);
+  assert.equal(run(root, ['uninstall', '--soft', '--yes']).status, 0);
+  assert.equal(fs.readFileSync(config, 'utf8').includes('[[hooks]]'), false);
+  assert.equal(fs.readFileSync(defaultConfig, 'utf8'), '# caller-owned default home\n');
+});
+
 test('Given modified owned assets When sync refreshes its receipt Then uninstall still preserves the modifications and selected mode', t => {
   const root = fixture(t);
   assert.equal(run(root, ['init', '--mcp-mode', 'direct']).status, 0);

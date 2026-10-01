@@ -48,7 +48,7 @@ quietly becoming unreviewed implementation.
 | --- | --- | --- | --- |
 | `/swarm <task>` | Explore phase (parallel explorer + librarian + context-miner); parallel independent task implementation; parallel review lanes | Orchestrator dispatches | Heartbeat markers and deliverables under `.lazykimi/team/members/<id>/` |
 | `/goal <objective>` | Implement phase when the work is a single large objective rather than a checklist | Orchestrator oversees | Full Explore -> Plan -> Implement -> Verify -> QA loop; context-indexer reconstructs on resumption |
-| `/plan on` / `/plan off` | Plan phase; turn off before Implement | Orchestrator toggles | Read-only + plan-file writes while the planner and context-indexer work |
+| `/plan on` / `/plan off` | Plan phase; turn off before Implement | Orchestrator selects host mode | Read-only profiles return plans; the authorized caller persists their artifacts |
 | `/yolo` | (optional) User explicitly accepts risk of skipping approval prompts | User-initiated | Faster execution with reduced gate friction |
 | `/auto` | (optional) Automatic tool execution following host permission policy | User-initiated | Host-governed tool automation |
 
