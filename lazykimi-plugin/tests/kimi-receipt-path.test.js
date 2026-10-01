@@ -22,8 +22,11 @@ function fixture() {
   const installRoot = path.join(sandbox, 'install');
   fs.cpSync(PLUGIN_ROOT, path.join(sourceRoot, 'lazykimi-plugin'), {
     recursive: true,
+    // Match Git checkout semantics rather than cpSync's absolute link rewrite.
+    verbatimSymlinks: true,
     filter: source => !/(?:^|[\\/])(?:node_modules|__pycache__|\.git)(?:$|[\\/])/.test(path.relative(PLUGIN_ROOT, source)),
   });
+  assert.equal(fs.readlinkSync(path.join(sourceRoot, 'lazykimi-plugin/scripts/hooks')), '../hooks');
   fs.mkdirSync(projectRoot);
   const paths = prepareProductRoot({ installRoot, product: 'LazyKimi' });
   const commitSha = 'c'.repeat(40);

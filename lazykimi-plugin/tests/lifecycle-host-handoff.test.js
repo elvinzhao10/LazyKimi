@@ -41,6 +41,9 @@ function fixture() {
   // clone, exactly like the release inventory exclusion in files.js.
   fs.cpSync(PLUGIN_ROOT, packageRoot, {
     recursive: true,
+    // Preserve the repository's literal ../hooks bridge. The default cpSync
+    // rewrites relative links to absolute source paths, unlike a Git checkout.
+    verbatimSymlinks: true,
     filter: (source) => {
       const relative = path.relative(PLUGIN_ROOT, source).split(path.sep).join('/');
       if (relative === '') return true;
@@ -52,6 +55,7 @@ function fixture() {
       return !generated;
     },
   });
+  assert.equal(fs.readlinkSync(path.join(packageRoot, 'scripts', 'hooks')), '../hooks');
   fs.mkdirSync(projectRoot);
   const paths = prepareProductRoot({ installRoot, product: 'LazyKimi' });
   const commitSha = 'a'.repeat(40);
