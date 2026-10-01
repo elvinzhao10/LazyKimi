@@ -10,7 +10,9 @@
 
 LazyKimi brings structured, evidence-based workflows to **Kimi Code CLI**.
 Kimi Work is a secondary, experimental full-plugin route with a skills fallback.
-Kimi Code IDE and desktop acceptance remain unverified for this package.
+Kimi Code for VS Code, IDE integration through ACP, and **Kimi Code Desktop**
+are separate acceptance targets. Kimi Code Desktop and Kimi Work are distinct
+products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
 [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
 [1.3.4 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
@@ -143,6 +145,23 @@ checks do not prove IDE, desktop, Linux or Windows acceptance. Do not turn
 native `/swarm`, `/goal` or `/plan` availability into a LazyKimi acceptance claim.
 
 ## Choose one route
+
+### Identify the Kimi client first
+
+| Name | What it means | LazyKimi acceptance |
+| --- | --- | --- |
+| Kimi Code CLI | Coding agent launched with `kimi` in a terminal. | Primary package target; current native host session still pending. |
+| Kimi Code for VS Code | Official editor extension with a Kimi panel and code review UI. | Separate extension/CLI build acceptance pending. |
+| Kimi Code in an ACP IDE | An editor such as Zed or JetBrains launches `kimi acp`. | CLI-backed integration; editor session acceptance pending. |
+| Kimi Code Desktop | Standalone graphical coding client for local projects. | Shares documented CLI extension settings; package acceptance pending. |
+| Kimi Work | Work mode of the general Kimi desktop app, for local knowledge work. | Experimental full-plugin route; skills-only fallback remains narrower. |
+
+“Kimi Code IDE” is a broad description, not a sufficient installation target.
+Record the editor/extension or ACP path and exact host build. The current
+[CLI migration guide](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/migration.html)
+also distinguishes the Node.js client from legacy Python `kimi-cli`; old
+client evidence does not establish new-client compatibility. Product facts and
+sources are in the [surface guide](docs/reference/kimi-product-surfaces.md).
 
 | Route | Package behavior | Remaining acceptance |
 | --- | --- | --- |
