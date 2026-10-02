@@ -3,7 +3,7 @@
 > Self-contained evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.
 
 This package belongs to the LazyKimi project, the Kimi-native family port of
-the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.4.
+the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.5.
 Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
@@ -73,7 +73,7 @@ be verified in a live session:
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 32 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
-| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.4 |
+| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.5 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |
 | `scripts/` | State scripts, loop orchestration, lifecycle, verification utilities | Used by package readiness and workflow checks |
 
@@ -263,7 +263,7 @@ enforcement. See [native adapter boundaries](docs/reference/native-adapter.md).
 | --- | --- | --- |
 | `SessionStart` | `session-start.sh` | Bootstrap `.lazykimi/` state; report `SESSIONSTART_READINESS`; strict-JSON `additionalContext` |
 | `UserPromptSubmit` | `user-prompt-submit.sh` | Adaptive intake: run state and pressure signals |
-| `PreToolUse` (Write/Edit/Bash) | `pre-tool-use.sh` | v1.3.4 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
+| `PreToolUse` (Write/Edit/Bash) | `pre-tool-use.sh` | v1.3.5 hardening: 1 MiB cap, wrapper resolution, role-scoped writes, secrets/destructive denial (deny = exit 2) |
 | `PostToolUse` | `post-tool-use.sh` | Append redacted tool-use event to the run ledger |
 | `PostToolUseFailure` | `post-tool-use-failure.sh` | Append failure event to the run ledger |
 | `Stop` | `stop-gate.sh` | Unchecked-plan-task detection; advisory completion reminder |

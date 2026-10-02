@@ -1,6 +1,6 @@
 # Host routes reference
 
-Status: v1.3.4. LazyKimi reaches its hosts through three routes. The
+Status: v1.3.5. LazyKimi reaches its hosts through three routes. The
 authoritative machine-readable definition is
 `contracts/marketplace-route-contract.v1.json` (inventory: 19 skills, 20
 commands, 13 agents, 16 hook events, 6 MCP servers, 32 MCP tools); this page
@@ -8,7 +8,7 @@ explains each route and the manual connector spec for Kimi Work.
 
 ## Route 1 — `kimi-plugin-manifest` (default full route)
 
-- **Registration**: `/plugins marketplace add` via `lazykimi-plugin/marketplace.json`
+- **Registration**: `/plugins marketplace <absolute-path-to-marketplace.json>` using `lazykimi-plugin/marketplace.json`
   (v2 shape), then install the `lazykimi` plugin.
 - **Delivers**: skills, commands, agents, 16 inline hook events
   (`./hooks/<script>.sh`), 6 inline `mcpServers`
@@ -90,3 +90,7 @@ Rules that travel with the spec:
 - Route capabilities described here are `documented-untested` until that
   receipt lands; see the evaluation document for the current evidence scopes
   (`package`, `probe`, `current-session`).
+
+## Current client and removal boundary
+
+See [the dated platform audit](platform-status-2026-10-02.md) for current CLI, VS Code, ACP, Code Desktop and Work distinctions. Direct installation uses `/plugins install <path-or-url>`; pin a release/commit URL when required. `/plugins remove <id>` removes the installation record, retaining the managed copy and original source; package removal must not guess or delete host-managed caches. Plugins are user-scoped. Reload or start a new session before observing the result.

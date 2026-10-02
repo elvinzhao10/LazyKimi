@@ -76,7 +76,7 @@ EXPECTED_AGENTS = 13
 EXPECTED_HOOK_EVENTS = 16
 EXPECTED_MCP_SERVERS = 6
 EXPECTED_MCP_TOOLS = 32
-EXPECTED_VERSION = "1.3.4"
+EXPECTED_VERSION = "1.3.5"
 KIMI_HOOK_EVENTS = {
     "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse",
     "PostToolUseFailure", "Stop", "SubagentStop", "SubagentStart",

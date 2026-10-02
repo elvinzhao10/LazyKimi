@@ -1,6 +1,6 @@
 {
   "name": "lazykimi",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "LazyKimi evidence-gated planning, execution, and review workflows for Kimi hosts.",
   "author": "LazyKimi contributors",
   "homepage": "https://github.com/elvinzhao10/LazyKimi",
@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "LazyKimi",
     "shortDescription": "Evidence-gated planning, execution, and review workflows for Kimi hosts",
-    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.4. Primary host: Kimi Code CLI (plugin manifest and project init routes). Kimi Work supports full plugins; this package route remains experimental pending live proof. Manifest MCP servers require explicit project binding through the project init route.",
+    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.5. Primary host: Kimi Code CLI (plugin manifest and project init routes). Kimi Work supports full plugins; this package route remains experimental pending live proof. Manifest MCP servers require explicit project binding through the project init route.",
     "developerName": "LazyKimi contributors",
     "websiteURL": "https://github.com/elvinzhao10/LazyKimi"
   },

@@ -1,6 +1,6 @@
 # Hook policy reference
 
-Status: v1.3.4. Kimi Code CLI exposes a 16-event hook surface. LazyKimi ships
+Status: v1.3.5. Kimi Code CLI exposes a 16-event hook surface. LazyKimi ships
 one consumer script per event under `hooks/` and ports the lazyzcode v1.3.4
 hardened hook semantics onto both Kimi registration routes. This page is the
 Kimi-native policy reference; there is no lazyzcode counterpart because the

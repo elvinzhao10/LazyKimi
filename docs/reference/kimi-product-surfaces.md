@@ -1,6 +1,6 @@
 # Kimi products and LazyKimi acceptance
 
-Researched against official documentation on 2026-10-01. Kimi Code is the
+Researched against official documentation on 2026-10-02. Kimi Code is the
 coding service/product family; a model subscription or API key alone does not
 identify the client executing a workflow. [Official overview](https://www.kimi.com/code/docs/en/).
 
@@ -56,9 +56,10 @@ The upstream command is `kimi`; the package's `lazykimi` command is the
 LazyKimi harness CLI. LazyKimi's Python MCP prerequisites do not imply the
 current upstream Kimi Code CLI is Python-based.
 
-## LazyKimi v1.3.4 support statement
+## LazyKimi v1.3.5 support statement
 
-Package fixtures, extracted archives and isolated lifecycle checks pass.
+Package fixtures, extracted archives and isolated lifecycle checks are separate
+from native client acceptance; consult their run artifacts for results.
 No fresh authenticated acceptance was established for the current Node CLI,
 VS Code extension, ACP editors, Code Desktop or Work during this research.
 Shared configuration makes CLI/IDE/Desktop reuse a reasonable **candidate for
@@ -70,3 +71,5 @@ MCP, delegation restrictions and receipt-safe removal in that same surface.
 For IDEs record the editor and extension or ACP transport; for desktop apps
 record the exact app name. Use [the install guide](../03-install-and-host-verification.md)
 for package checks and [the Work guide](../11-kimi-work-setup.md) for fallback limits.
+
+See [the current platform audit](platform-status-2026-10-02.md) for the current plugin commands, managed-copy retention and shared-core boundary.

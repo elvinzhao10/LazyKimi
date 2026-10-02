@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # session-end.sh — Kimi SessionEnd hook (advisory, ledger-close).
-# v1.3.4 mapped semantics: appends a session_end event to the active run's
+# v1.3.5 mapped semantics: appends a session_end event to the active run's
 # events.jsonl via the scripts/state append machinery (transactional).
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.
 # Advisory only — ALWAYS exits 0 (never blocks session end).
 set -uo pipefail
 
-INPUT=$(head -c 1048576 || true)
-CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
+CWD=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
 [ -n "$CWD" ] || CWD="$PWD"
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

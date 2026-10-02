@@ -12,10 +12,13 @@ distinct products. See the [surface guide](docs/reference/kimi-product-surfaces.
 Current-client acceptance is pending for each surface; record its build before
 using legacy-client evidence.
 
-## Current documentation release: v1.3.4
+See [the current platform audit](docs/reference/platform-status-2026-10-02.md)
+for version-specific native features and legacy route limits.
 
-The package version is v1.3.4, aligned at family contract
-parity with LazyZCode v1.3.4. Fresh Kimi host readiness requires direct observation. This
+## Current documentation release: v1.3.5
+
+The package version is v1.3.5, aligned at family contract
+parity with LazyZCode v1.3.5. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
 (the default full-plugin route), `project-init-route` (the manual project
@@ -31,8 +34,11 @@ dispatch, and **HOST READINESS: PENDING** remains authoritative.
 
 ## Durable onboarding (start here)
 
+Optional TypeScript LSP requires Node.js **22.22.2+**; core lifecycle compatibility
+with Node.js 20 does not imply compatibility with that optional provider.
+
 For new installations use **Node.js 20 or later** plus **Git** and
-**Python 3.10+** for the MCP servers. The v1.3.4 family port adds the
+**Python 3.10+** for the MCP servers. The v1.3.5 family port adds the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
 LazyKimi/` on macOS, mirroring the LazyZCode pattern. The public source is
@@ -71,8 +77,9 @@ When the user types `onboard`:
    PATH entry, file existence, or a load-check.
 4. **Kimi Code CLI** has two routes — pick exactly one:
    - **Plugin manifest route (`kimi-plugin-manifest`, default full
-     route):** add the repository through `/plugins marketplace` using
-     `lazykimi-plugin/marketplace.json` (v2). Declares skills, commands, agents and 16 inline hooks. Manifest MCP
+     route):** use `/plugins marketplace <absolute-release-root>/lazykimi-plugin/marketplace.json`
+     (v2), or `/plugins install <pinned-repository-url>` on clients matching the
+     current official plugin guide. Declares skills, commands, agents and 16 inline hooks. Manifest MCP
      launchers fail closed without explicit project binding; use the project
      init route for project-bound MCP until manifest request context is supported.
    - **Project init route (`project-init-route`, manual project route):**
@@ -126,8 +133,9 @@ onboarding, and do not run `npm`/`npx` merely to inspect workflow files.
 
 When the user types `offboard`:
 
-1. Confirm which selected host is being removed: **Kimi Code CLI** or
-   **Kimi Work**. Inspect the project receipt and requested uninstall
+1. Confirm which selected host is being removed: **Kimi Code CLI**, **Kimi Code for VS Code**, **CLI via an ACP editor**,
+   **Kimi Code Desktop**, or **Kimi Work**. Code clients share some configuration;
+   remove only the selected receipt-owned integration. Inspect the project receipt and requested uninstall
    scope first.
 2. Inspect the selected project's receipt, then run `lazykimi uninstall`
    with its confirmation prompt, or `lazykimi uninstall --yes` when the
@@ -143,8 +151,9 @@ When the user types `offboard`:
      their exact project paths and ownership; preserve modified entries and
      hooks belonging to another project. Project uninstall removes only
      receipt-owned, unchanged MCP entries and preserves other configuration.
-   - **Kimi Code CLI (manifest route):** uninstall the `lazykimi` plugin
-     through `/plugins`.
+   - **Kimi Code CLI (manifest route):** remove the `lazykimi` plugin through `/plugins remove lazykimi`.
+     Current CLI removal deletes the installation record but retains the managed
+     copy. Do not erase retained copies, sessions or credentials as implicit cleanup.
    - **Kimi Work fallback:** use the receipt-aware removal described in
      `docs/11-kimi-work-setup.md`; preserve unknown or modified skills. Remove
      only connectors added for the selected route through the host UI.

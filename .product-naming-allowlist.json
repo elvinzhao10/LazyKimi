@@ -239,13 +239,6 @@
       "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
     },
     {
-      "path": "docs/reference/hook-policy.md",
-      "text": "lazyzcode",
-      "count": 3,
-      "classification": "source-identity",
-      "reason": "Regular root publication copy preserves the canonical package documentation and source attribution."
-    },
-    {
       "path": "docs/reference/model-routing.md",
       "text": "lazyzcode",
       "count": 1,
@@ -304,16 +297,9 @@
     {
       "path": "RELEASE_NOTES.md",
       "text": "lazytrae",
-      "count": 1,
+      "count": 2,
       "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
-      "path": "RELEASE_NOTES.md",
-      "text": "lazyzcode",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
+      "reason": "Current release notes describe the separate LazyTrae adapter and its runtime floor."
     },
     {
       "path": "lazykimi-evaluation.md",
@@ -1352,13 +1338,6 @@
       "reason": "Salvaged v0.x planning artifacts are immutable historical records."
     },
     {
-      "path": "lazykimi-plugin/docs/reference/hook-policy.md",
-      "text": "lazyzcode",
-      "count": 3,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
       "path": "lazykimi-plugin/docs/reference/model-routing.md",
       "text": "lazyzcode",
       "count": 1,
@@ -1663,13 +1642,6 @@
       "path": "lazykimi-plugin/scripts/verification-risk-policy.js",
       "text": "zcode",
       "count": 2,
-      "classification": "source-identity",
-      "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
-    },
-    {
-      "path": "lazykimi-plugin/scripts/verify-supported-floor.mjs",
-      "text": "lazyzcode",
-      "count": 1,
       "classification": "source-identity",
       "reason": "Family parity/test surface names the sibling checkouts or legacy env/state identifiers it explicitly compares against or normalizes."
     },
@@ -2211,6 +2183,118 @@
       "count": 3,
       "classification": "attribution",
       "reason": "Preserved upstream and sibling attribution; current product description corrected separately."
+    },
+    {
+      "path": "docs/reference/hook-policy.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": ".trae",
+      "count": 9,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "codebuddy",
+      "count": 6,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "lazyqoder",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "lazytrae",
+      "count": 4,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "docs/reference/platform-status-2026-10-02.md",
+      "text": "zcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/hook-policy.md",
+      "text": "lazyzcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": ".trae",
+      "count": 9,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "codebuddy",
+      "count": 6,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "lazybuddy",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "lazyqoder",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "lazytrae",
+      "count": 4,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/docs/reference/platform-status-2026-10-02.md",
+      "text": "zcode",
+      "count": 3,
+      "classification": "source-identity",
+      "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
     }
   ],
   "stableIdentityFiles": [

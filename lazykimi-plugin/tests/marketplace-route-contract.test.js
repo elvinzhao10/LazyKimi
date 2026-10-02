@@ -32,7 +32,7 @@ test('single marketplace.json v2 exposes the plugin in lockstep with the manifes
   assert.equal(marketplace.plugins[0].id, manifest.name);
   assert.equal(marketplace.plugins[0].id, 'lazykimi');
   assert.equal(marketplace.plugins[0].source, './');
-  assert.equal(manifest.version, '1.3.4');
+  assert.equal(manifest.version, '1.3.5');
   // Kimi auto-wires the full plugin surface through the manifest itself.
   assert.equal(Array.isArray(manifest.hooks), true, 'Kimi declares 16 hook events inline');
   assert.equal(manifest.hooks.length, 16);
@@ -77,7 +77,7 @@ test('validates exact marketplace identities and byte-equivalent canonical paylo
   const result = validateMarketplaceRoutes(root);
 
   // Then: the Kimi plugin-manifest route resolves over the canonical payload.
-  assert.equal(result.version, '1.3.4');
+  assert.equal(result.version, '1.3.5');
   assert.equal(result.install_id, 'lazykimi@lazykimi');
   assert.equal(result.plugin, 'lazykimi');
   assert.ok(result.payload_inventory.includes('.kimi-code/skills/lazy-programming/SKILL.md'));
@@ -93,7 +93,7 @@ test('validates the canonical payload from an installed plugin without release m
   const result = validateInstalledMarketplacePackage(root);
 
   // Then: its manifest identity and canonical payload remain verifiable.
-  assert.equal(result.version, '1.3.4');
+  assert.equal(result.version, '1.3.5');
   assert.ok(result.payload_inventory.includes('.kimi-code/skills/lazy-programming/SKILL.md'));
 });
 
@@ -125,7 +125,7 @@ test('publishes an exact Kimi full-plugin receipt schema', () => {
   assert.deepEqual(capabilities.required, ['skill', 'command', 'agent', 'hook', 'mcp']);
   assert.deepEqual(mcp.required, ['run-ledger', 'verification', 'status-dashboard', 'context-graph', 'code-intel', 'docs']);
   assert.equal(schema.properties.source.properties.route.const, 'kimi-plugin-manifest');
-  assert.equal(schema.properties.source.properties.version.const, '1.3.4');
+  assert.equal(schema.properties.source.properties.version.const, '1.3.5');
   assert.equal(schema.properties.type.const, 'kimi-plugin-manifest-full-plugin');
 });
 
@@ -156,7 +156,7 @@ test('refuses a changed marketplace entry source', (t) => {
 
 test('treats fallback as generated recovery and conflicts with the plugin-manifest route', () => {
   // Given: the full-plugin marketplace route and the manual recovery route.
-  const releaseRoot = '/durable/LazyKimi/releases/v1.3.4-aaaaaaaaaaaa';
+  const releaseRoot = '/durable/LazyKimi/releases/v1.3.5-aaaaaaaaaaaa';
   const projectRoot = '/project';
 
   // When: fallback metadata and the coexistence selection are evaluated.

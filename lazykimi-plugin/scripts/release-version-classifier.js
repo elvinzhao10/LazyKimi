@@ -8,8 +8,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const RELEASE_VERSION = '1.3.4';
-const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0'];
+const RELEASE_VERSION = '1.3.5';
+const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0', '1.3.4'];
 const VERSION_JSON_PATHS = [
   ['lazykimi-plugin/kimi.plugin.json', ['version']],
   ['lazykimi-plugin/package.json', ['version']],

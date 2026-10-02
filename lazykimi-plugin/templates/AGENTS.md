@@ -1,6 +1,6 @@
 # AGENTS.md — LazyKimi local onboarding
 
-This is the reusable `v1.3.4` consumer template, not a claim that a host loaded
+This is the reusable `v1.3.5` consumer template, not a claim that a host loaded
 the plugin. Explicit user instructions and nearer project instructions take
 precedence.
 

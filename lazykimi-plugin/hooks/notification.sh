@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # notification.sh — Kimi Notification hook (advisory, no-op logger).
-# v1.3.4 mapped semantics: Kimi-only event with no family gating analogue —
+# v1.3.5 mapped semantics: Kimi-only event with no family gating analogue —
 # log a bounded, redaction-safe trace to stderr only. Never writes state.
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.
 # Advisory only — ALWAYS exits 0.
 set -uo pipefail
 
-INPUT=$(head -c 1048576 || true)
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
 ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 # Bounded trace; never echo the raw payload (it may carry prompt content).
-printf '[%s] Notification received (payload %s bytes)\n' "$ts" "$(printf '%s' "$INPUT" | wc -c | tr -d ' ')" >&2
+printf '[%s] Notification received (payload %s bytes)\n' "$ts" "$(cat "$HOOK_INPUT_FILE" | wc -c | tr -d ' ')" >&2
 
 exit 0

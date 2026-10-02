@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "version": "1.3.4",
+  "version": "1.3.5",
   "identity": {
     "marketplace": "lazykimi",
     "owner": "LazyKimi",
@@ -9,7 +9,7 @@
   },
   "artifacts": {
     "lazykimi-plugin/marketplace.json": "8c808d29c676f2682e358f143445f41b95c12208e35e4618da95148f575ecc75",
-    "lazykimi-plugin/kimi.plugin.json": "cd5847ae23861ee724a394f4befa96b6fdf9c16d17bc770b89daf0dac60501db"
+    "lazykimi-plugin/kimi.plugin.json": "d9fff1186785bda0515fe8b2f3cde221f7a98c5eb9c982870d4342d5aa11c653"
   },
   "routes": {
     "kimi-plugin-manifest": {
@@ -91,8 +91,8 @@
       "hook_events": 16,
       "mcp_servers": 6
     },
-    "file_count": 109,
-    "inventory_sha256": "957b23faac86af509eb86727482631a77d921e2bdb2b648b96e311d9c316a636"
+    "file_count": 110,
+    "inventory_sha256": "29578fc8f9844c976d148b9f68432e60badb220dba65e3edfb4155ea85502c2a"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

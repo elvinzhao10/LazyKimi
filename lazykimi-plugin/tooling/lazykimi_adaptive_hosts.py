@@ -9,7 +9,7 @@ Kimi ships a single host whose plugin manifest (kimi.plugin.json)
 DOES declare a "skills" field, so workflow surfaces map to skills, commands,
 and agents alike. Internal names are NOT required to match any other host.
 
-v1.3.4 rule: the kimi host profile is selection-only until the host is
+v1.3.5 rule: the kimi host profile is selection-only until the host is
 observed. Until an observation receipt exists, the adaptive runtime never
 selects the full-plugin route; only ``lazykimi_adaptive_runtime`` may promote
 a mapping to full-plugin after the host boundary is confirmed.

@@ -1,146 +1,66 @@
-# LazyKimi v1.3.4 — safer runs, clearer host boundaries
+# LazyKimi v1.3.5 - runtime verification and platform clarity
 
-A small maintenance release for the LazySeries family. It repairs runtime and
-host-adapter boundaries while retaining the workflow foundation inherited from
-family versions v1.3.0–v1.3.3. Those inherited features are not new in this patch
-and do not imply prior public releases of the Kimi or DeepSeek ports.
+A maintenance release across the six LazySeries siblings. It carries forward
+the workflow and run-integrity foundation from 1.3.0 through 1.3.4.
 
 ## Eval-driven fixes
 
-- Project-bound MCP adapters use explicit project paths; unbound global launches fail closed. Native agent headers replace invented settings.
-- Receipt-aware setup merges owned MCP entries, respects KIMI_CODE_HOME, and preserves modified or unknown files.
-- Public-source bootstrap stages regular publication files and validates the internal hook bridge. The archive includes the compiled CLI.
-- Finalization requires all intended tasks done; persisted status is assessed
-  separately from completion evidence.
-
-## Cumulative workflow experience
-
-Describe work in natural language or use explicit workflow entry points.
-Keep editable Markdown plans, durable decisions, evidence-bound completion
-and verification sized to the change. Planning-only requests remain separate
-from execution authority. The README presents these inherited features together
-with the 1.3.4 fixes; historical notes below retain the version-by-version record.
+- Runtime-floor checks execute named package, installation and lifecycle tests.
+  Missing or unknown exercises and failed subprocesses cannot report PASS.
+- Optional TypeScript LSP installation is tested separately with engine-strict
+  dependency installation and the installed server executable.
+- Hook payloads are bounded before parsing and kept out of process arguments.
+  Invalid or oversized events preserve each adapter's exit and state contract.
+- Current product names, configuration scopes and native extension capabilities
+  are distinguished from legacy routes and unverified live integration.
 
 ## Measured efficiency
 
-No new latency, token-saving, cost or recall improvement is measured for this
-patch. Ledger append/compaction, learned routing and shared-core migration are deferred.
+Hook boundary repairs avoid payload-sized process arguments and bound input
+memory. The first host-independent verification unit is vendored identically
+in sibling packages, with product-specific exercises in small adapters.
+No latency, token, cost or native-host performance improvement is claimed.
+Persistent LSP sessions and event-ledger compaction remain future measured work.
 
 ## Host capability matrix
 
-Kimi Code terminal package fixtures pass; fresh authenticated CLI/IDE acceptance remains pending. The unbound global manifest project-state MCP fails closed; use the documented explicitly bound project config. Kimi Work supports native plugins in the host, while this package route remains experimental.
+Kimi Code CLI, Kimi Code for VS Code, CLI through ACP editors, Kimi Code Desktop and Kimi Work are distinct acceptance targets. Current Code CLI is a Node.js rewrite of legacy `kimi-cli`. Work documents full plugins, but LazyKimi's full Work integration remains experimental; Kimi web documents skills and MCP.
 
-Package and distribution checks do not prove a current native host session.
-**HOST READINESS: PENDING** until loading, command/skill behavior and the expected
-MCP connections are observed. The README links the selected host's setup guide.
+See [the dated platform audit](docs/reference/platform-status-2026-10-02.md).
+**HOST READINESS: PENDING** until the selected current client demonstrates
+discovery, skill/command execution, relevant hooks and MCP connections.
+Official feature documentation and package tests are separate evidence.
 
-## Migration and upgrade
+## Dependencies and runtime requirements
 
-Use the receipt-aware upgrade route with an explicit project binding. Preserve project evidence and unknown host configuration. No credentials or production host settings are changed by package verification.
-
-Read [AGENTS.md](AGENTS.md) and [the install guide](docs/03-install-and-host-verification.md).
-The corrected `v1.3.4` tag selects verified source `6b5984e`, including the
-public bootstrap repair. Choose one route, check the installed package version,
-and restart the host.
-Source checkouts and release archives have different build requirements; follow
-the documented route. Do not reset populated runs merely to upgrade.
-
-## Known risks
-
-Native acceptance is separate from package readiness. Token/cost budgets are
-metadata; pending approvals are persisted observations without a live approval
-queue. Shell loop policy beyond the configured global cap needs orchestrator enforcement.
-
-## Rollback
-
-Keep the prior local 1.3.3 checkout and ownership receipts; a prior public release is not established. Remove only receipt-owned, unmodified assets and use a fresh host session to verify removal.
-
-## Documentation and family presentation
-
-Aligned sibling README structure, current setup navigation and a shared six-repo
-family table. Personal environment files and caches are ignored while example
-configuration and pinned fixture logs remain publishable. Earlier release notes
-remain below as historical evidence.
-
-## Prior release notes
-
-# LazyKimi v1.3.3 — full family parity port
-
-**Status:** v1.3.3 release. This release aligns LazyKimi with LazyZCode
-v1.3.3 at family contract parity. Local package checks gate the release;
-fresh Kimi host activation remains pending (see Host capability matrix).
-
-## Eval-driven fixes
-
-- Version drift repaired: the shipped manifests said 0.2.0 while git
-  history contained a verified-but-unreleased 0.3.0 hardening round. The
-  v0.3.0 work is now reconciled honestly in CHANGELOG (history preserved,
-  never rewritten) instead of being silently folded into a new version.
-- The 0.x planning leftovers (LazyTrae-managed blocks, untracked planning
-  infra, stale runtime copies) are retired; the repository now contains
-  only LazyKimi product plus an explicitly optional, git-ignored `sources/`
-  reference area.
-
-## Measured efficiency
-
-No token, latency, or cost improvement has been measured for this release.
-All claims in this release are package-level; no host-session measurements
-exist yet.
-
-## Host capability matrix
-
-| Host | Package route | Current session |
-| --- | --- | --- |
-| Kimi Code CLI | Plugin manifest route (16 inline hooks, inline mcpServers) and project init route (`lazykimi init` + `install-hooks.sh`) | Pending live observation |
-| Kimi Work | Skills import only (`install-kimi-work.sh`) | Pending live observation |
-
-HOST READINESS: PENDING. Package checks prove files and declarations, not
-plugin loading, hook firing, or MCP connections. A 2026-09-30 host
-verification pass (T21) probed the real Kimi Code CLI v0.27.0 on the
-development machine: the `[[hooks]]` TOML schema, the `Write`/`Edit`
-PreToolUse tool names, and the `kimi-k3` effort scale (`low|high|max`) were
-observed at the config/transcript layer and the agent effort values were
-adapted to that scale; live-session activation remains pending (expired
-OAuth credential; see `lazykimi-evaluation.md`, "T21 host verification
-pass").
+Node.js 24 is recommended. Core lifecycle compatibility remains Node.js 20;
+LazyTrae's standalone CLI also retains its separate Node.js 18 compatibility
+tier. Optional TypeScript language-server 6.x requires Node.js 22.22.2 or later;
+5.x providers retain their own Node.js 20 requirement.
+Python language-server providers are aligned at basedpyright 1.40.1.
+LazyTrae uses fast-uri 4.2.1 directly and the patched 3.1.8 Ajv edge, with
+security and normalization regressions preserved.
 
 ## Migration and upgrade
 
-- **0.2.0 → 1.3.3:** this is a family-alignment jump, not twenty-one minor
-  releases of local development. Review the CHANGELOG v1.3.3 entry for the
-  component-by-component port summary. The 11 Greek-myth agents are gone;
-  update any dispatch references to the 13 role agents. The
-  `lazy-remove-ai-slops` slash command is retired (the skill remains). The
-  run-ledger MCP surface changes to the family 9-tool set (see CHANGELOG
-  for the dropped tools and their command equivalents).
-- **0.3.0 drift:** an unreleased v0.3.0 hardening round existed only in git
-  history (commits `64a0501`, `5ab1987`, `69450fd`); shipped manifests
-  never left 0.2.0. If you ran that unrevised tree, treat its behavior as
-  superseded by v1.3.3.
-- Re-run `lazykimi init` after upgrading so project assets
-  (`.kimi-code/`, `.lazykimi/`) and the rewritten `__KIMI_PLUGIN_ROOT__`
-  MCP paths refresh from the new package.
+Use the receipt-aware lifecycle update with an explicit project binding.
+Preserve populated run state, modified assets, unknown files and host settings.
+Select the exact client and version before following a native installation route.
+Kimi Code clients can share configuration; Kimi Work is a separate target.
+
+Read [AGENTS.md](AGENTS.md), [README.md](README.md) and the selected host guide.
+Use a newly versioned archive; existing 1.3.4 tags and assets remain intact.
 
 ## Known risks
 
-- Kimi host behaviors the package relies on (env stanza in `mcp.json`,
-  PreToolUse matcher tool names, plugin-manifest deny semantics, effort
-  scale) are documented-untested until the host verification pass records
-  observation receipts; every unobserved item stays HOST READINESS:
-  PENDING.
-- The project route's "critical 8" TOML hooks and the manifest route's 16
-  inline hooks overlap; installing both routes simultaneously is not
-  supported and may double-fire events.
+Authenticated current-client acceptance remains pending. A copied configuration,
+manifest validation, or isolated lifecycle fixture cannot establish host loading.
+Optional providers must satisfy their own runtime floor.
+Native features added upstream are not automatically wired into the adapter.
 
 ## Rollback
 
-Use the previous verified checkout (v0.2.0 tag state) and re-run
-`lazykimi init` in each project that adopted v1.3.3 assets. Project-local
-`.lazykimi/` run state is preserved by uninstall; remove the eight
-`[[hooks]]` TOML entries referencing `.kimi-code/hooks/` from
-`~/.kimi-code/config.toml` if the project route was installed.
-
-## Prior release notes
-
-See `lazykimi-plugin/CHANGELOG.md` for the full dated history, including
-the reconciled v0.3.0 (unreleased) entry.
+Retain the previous release and receipts. Follow the scoped lifecycle removal
+or rollback plan, preserving user-modified and foreign assets. Host-managed
+registrations require their selected client's removal flow; never remove
+credentials, sessions or entire shared configuration directories.

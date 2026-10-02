@@ -1,7 +1,7 @@
 import { runCompletionChecks } from '../lib/completion';
 import { detectTargetRoot } from '../lib/paths';
 
-const PLUGIN_VERSION = '1.3.4';
+const PLUGIN_VERSION = '1.3.5';
 
 export function run(args: string[]): number {
   const mustPass = args.includes('--must-pass');

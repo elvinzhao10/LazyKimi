@@ -140,7 +140,7 @@ assert len(marketplace.get("plugins", [])) == 1, "marketplace must expose exactl
 entry = marketplace["plugins"][0]
 assert entry["id"] == manifest["name"] == "lazykimi", "marketplace entry id must match the manifest name"
 assert entry["source"] == "./", "marketplace entry must point at the plugin root"
-assert manifest["version"] == contract["version"] == "1.3.4", "manifest and contract versions must agree"
+assert manifest["version"] == contract["version"] == "1.3.5", "manifest and contract versions must agree"
 
 for relative, expected in contract["artifacts"].items():
     artifact = repository_root / relative

@@ -22,7 +22,7 @@ file: `## <section>` headings plus `| Verification Step | Command | Expected | A
 | Verification Step | Command | Expected | Artifact |
 | --- | --- | --- | --- |
 | Kimi Code CLI MCP connections | `/mcp` in a project with `lazykimi init` applied | Six `lazykimi-*` servers connect with rewritten absolute paths | host observation receipt |
-| Kimi plugin-manifest route | `/plugins marketplace` install of `lazykimi-plugin/marketplace.json` | Observe skills, agents and hooks; unbound MCP launchers refuse until a supported project binding exists | host observation receipt |
+| Kimi plugin-manifest route | `/plugins marketplace <absolute-path-to-marketplace.json>` then selected plugin install | Observe skills, agents and hooks; unbound MCP launchers refuse until a supported project binding exists | host observation receipt |
 | Kimi TOML hook route | `scripts/install-hooks.sh --project-root <absolute-project>` then restart | The 8 critical `[[hooks]]` entries fire; removal targets only that project's established hook ownership | host observation receipt |
 
 Host observation rows stay **documented-untested** until recorded through the

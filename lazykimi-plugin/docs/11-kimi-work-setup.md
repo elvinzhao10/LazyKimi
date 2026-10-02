@@ -27,3 +27,7 @@ Never set invented host environment variables to work around that boundary.
 Remove only assets whose ownership is established by a valid receipt or the
 host's plugin manager. Preserve modified and unknown skill directories and
 remove manually configured connectors through the host UI.
+
+## Product identity and current acceptance
+
+Kimi Work is Work mode in the general Kimi desktop client. Kimi Code Desktop is a separate coding application. Full plugin support in Work is an upstream capability; this package's full Work integration remains experimental. The fallback helper imports skills only, with explicit project-bound manual MCP connectors. See [the reviewed product surfaces](reference/kimi-product-surfaces.md) and [2026-10-02 audit](reference/platform-status-2026-10-02.md).

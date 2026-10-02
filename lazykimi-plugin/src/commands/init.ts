@@ -5,7 +5,7 @@ import { writeJson, readJson, isObject } from '../lib/json';
 import { writeReceipt, readReceipt, isFileModified, safeProjectPath, serverDigest, getReceiptPath } from '../lib/receipt';
 import type { Receipt } from '../lib/receipt';
 
-const PLUGIN_VERSION = '1.3.4';
+const PLUGIN_VERSION = '1.3.5';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 16;

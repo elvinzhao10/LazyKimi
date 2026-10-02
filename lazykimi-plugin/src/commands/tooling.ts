@@ -247,7 +247,7 @@ function runCapabilityStatus(args: string[]): number {
     '  "route": mapping["route"],',
     '  "hostReadiness": mapping["hostReadiness"],',
     '  "entryRoute": "explicit-start-work",',
-    '  "reason": "v1.3.4 rule: the kimi host profile stays selection-only until a host observation receipt exists",',
+    '  "reason": "v1.3.5 rule: the kimi host profile stays selection-only until a host observation receipt exists",',
     '}, sort_keys=True))',
   ].join('\n');
   const adaptive = spawnSync('python3', ['-c', adaptiveScript], { encoding: 'utf-8', stdio: 'pipe' });
@@ -300,7 +300,7 @@ capability surface.
 
 Subcommands:
   capability-status [--json] [--tooling-root DIR]
-                       Capability readiness records plus the v1.3.4 adaptive
+                       Capability readiness records plus the v1.3.5 adaptive
                        selection report (selection-only until the kimi host
                        is observed)
   detect [--tooling-root DIR]
