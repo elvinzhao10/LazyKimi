@@ -87,7 +87,7 @@ test('machine status publishes authoritative v1.3.5 Kimi route boundaries', () =
   assert.equal(report.routes[1].coexists_with_default, false);
 });
 
-test('authoritative version fields advance in lockstep with the shipped lifecycle example', () => {
+test('authoritative versions advance while the initial public lifecycle example stays frozen', () => {
   // Given: current package manifests plus immutable historical lifecycle examples.
   // LazyKimi ships one marketplace.json v2 inside the plugin tree (entry
   // identified by id, not version) — the opposite of ZCode's root+plugins pair.
@@ -109,10 +109,8 @@ test('authoritative version fields advance in lockstep with the shipped lifecycl
     path.join(PLUGIN_ROOT, 'marketplace.json'), 'utf8',
   ));
 
-  // Then: every current authority is v1.3.4, the marketplace entry is the
-  // single lazykimi plugin, and the shipped lifecycle example stays in
-  // lockstep (LazyKimi has no pre-1.0 receipt history — its 0.x past is
-  // preserved as labeled-historical docs, not lifecycle receipts).
+  // Then: current authorities advance independently of the immutable initial
+  // public lifecycle example. The marketplace retains its v2 catalog identity.
   assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.5'));
   assert.equal(marketplace.version, '2');
   assert.equal(marketplace.plugins.length, 1);
