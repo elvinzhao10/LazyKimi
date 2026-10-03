@@ -84,8 +84,8 @@ LazyKimi ships **three routes** (see
 [docs/reference/host-routes.md](docs/reference/host-routes.md) for the full
 specification):
 
-- **Plugin manifest route (recommended):** `/plugins marketplace add` via
-  `lazykimi-plugin/marketplace.json` (v2), then install the `lazykimi`
+- **Plugin manifest route (recommended):** `/plugins marketplace <absolute-path-to-marketplace.json>`
+  with `lazykimi-plugin/marketplace.json` (v2), then select and install the `lazykimi`
   plugin. Kimi Code CLI reads `kimi.plugin.json`, activates skills and
   commands and declares 16 inline hooks and 6 MCP launchers. Unbound manifest
   MCP launchers fail closed: managed plugin cwd is not the user's project.

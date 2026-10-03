@@ -17,7 +17,7 @@
       "hosts": [
         "kimi"
       ],
-      "registration": "/plugins marketplace add via lazykimi-plugin/marketplace.json (v2), then install the lazykimi plugin",
+      "registration": "/plugins marketplace <absolute-path-to-marketplace.json> using lazykimi-plugin/marketplace.json (v2), then select the lazykimi plugin; or /plugins install <pinned-repository-url>; reload or start a new session",
       "delivers": [
         "skills",
         "commands",
