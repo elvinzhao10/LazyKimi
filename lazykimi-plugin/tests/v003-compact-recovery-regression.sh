@@ -48,4 +48,4 @@ printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" || f
 printf '' | CWD="$TMP/nonexistent" bash "$PLUGIN_ROOT/hooks/post-compact.sh" >/dev/null 2>&1 || fail "post-compact must fail open"
 printf 'not-json{{{' | CWD="$TMP" bash "$PLUGIN_ROOT/hooks/pre-compact.sh" >/dev/null 2>&1 || fail "pre-compact must fail open on malformed input"
 
-echo "PASS: v003 compact recovery regression (v1.3.4 semantics)"
+echo "PASS: v003 compact recovery regression (v1.3.5 semantics)"

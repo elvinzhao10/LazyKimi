@@ -3,7 +3,7 @@
 
 The Kimi plugin manifest invokes every inline MCP server as
 `python3 ./mcp/<server>/server.py`, while the project `.kimi-code/mcp.json`
-route invokes `bash .../mcp/<server>/server.sh`. The v1.3.4 run-ledger
+route invokes `bash .../mcp/<server>/server.sh`. The v1.3.5 run-ledger
 implementation is the bash JSON-RPC loop in server.sh (delegating to
 scripts/state/*); this entry execs that launcher with the same
 stdin/stdout/stderr so both routes run identical code. No env plumbing exists

@@ -18,10 +18,13 @@ SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 PLUGIN_ROOT="$(cd -P -- "$SCRIPT_DIR/.." && pwd -P)"
 
 # --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
-INPUT=$(head -c 1048576 || true)
-INPUT_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-ups.XXXXXX")
-trap 'rm -f "$INPUT_FILE"' EXIT
-printf '%s' "$INPUT" >"$INPUT_FILE"
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+if ! hook_read_input; then
+    [ -n "${HOOK_INPUT_FILE:-}" ] || exit 0
+    # Preserve the host-specific malformed adaptive directive without retaining input.
+    printf '%s' '{' >"$HOOK_INPUT_FILE"
+fi
+INPUT_FILE="$HOOK_INPUT_FILE"
 
 NOTES="$(ADAPTIVE_RUNTIME="$PLUGIN_ROOT/tooling/lazykimi_adaptive_runtime.py" \
 FRESHNESS_ENTRY="$PLUGIN_ROOT/scripts/runtime-freshness-entry.js" \
@@ -58,7 +61,7 @@ try:
     payload = json.loads(raw)
     if not isinstance(payload, dict):
         payload = {}
-except json.JSONDecodeError:
+except (json.JSONDecodeError, UnicodeDecodeError, RecursionError):
     payload = {}
 
 prompt = payload.get('prompt') or payload.get('user_prompt') or payload.get('message') or ''

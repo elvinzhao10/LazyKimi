@@ -2,7 +2,7 @@
 # pre-tool-use.sh — Kimi PreToolUse hook: block dangerous operations.
 # Ported from the LazyZCode v1.3.4 hardened deny policy (family parity).
 #
-# v1.3.4 hardening applied here:
+# v1.3.5 hardening applied here:
 #   - 1 MiB input cap with oversized-input rejection
 #   - malformed-payload rejection (missing mutating tool payload)
 #   - identity normalization (agent role fields) + wrapper resolution

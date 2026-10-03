@@ -1,5 +1,5 @@
 #!/bin/bash
-# lazykimi-verify.sh — Master verification runner (v1.3.4)
+# lazykimi-verify.sh — Master verification runner (v1.3.5)
 #
 # Ported from lazyzcode v1.3.4 scripts/lazyzcode-verify.sh, Kimi-adapted.
 # Runs all health-check scripts in sequence and emits a compact JSON summary.

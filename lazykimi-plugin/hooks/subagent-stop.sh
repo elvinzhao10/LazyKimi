@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # subagent-stop.sh — Kimi SubagentStop hook (advisory executor-evidence gate).
-# v1.3.4 mapped semantics: Kimi having this event is an ADDITIVE reminder —
+# v1.3.5 mapped semantics: Kimi having this event is an ADDITIVE reminder —
 # the authoritative executor-evidence gate stays in the review skills, so
-# behavior matches LazyZCode v1.3.4 (the family gate is skill-side).
+# behavior matches LazyZCode v1.3.5 (the family gate is skill-side).
 #
 # Verifies the implementer/coder sub-agent reported an EVIDENCE_RECORDED
 # marker pointing at a non-empty evidence file and appends an advisory
@@ -13,14 +13,15 @@
 # OR nothing on stdout; diagnostics to stderr. Advisory only — ALWAYS exits 0.
 set -uo pipefail
 
-INPUT=$(head -c 1048576 || true)
-[ -z "$INPUT" ] && exit 0
-CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
+[ -s "$HOOK_INPUT_FILE" ] || exit 0
+CWD=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
 [ -n "$CWD" ] || CWD="$PWD"
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-AGENT_TYPE=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('agent_type','') or d.get('agent_type_name','') or '')" 2>/dev/null || true)
-LAST_MSG=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('last_assistant_message',''))" 2>/dev/null || true)
+AGENT_TYPE=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('agent_type','') or d.get('agent_type_name','') or '')" 2>/dev/null || true)
+LAST_MSG=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('last_assistant_message',''))" 2>/dev/null || true)
 
 # Ledger record (best-effort, transactional via the state scripts).
 RID=$(CWD="$CWD" bash "$PLUGIN_ROOT/scripts/state/latest-run.sh" 2>/dev/null || true)

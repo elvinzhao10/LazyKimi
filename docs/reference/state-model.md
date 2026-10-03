@@ -1,13 +1,13 @@
 # State model reference
 
-Status: v1.3.4. This page is the state-artifact reference for the `.lazykimi/`
+Status: v1.3.5. This page is the state-artifact reference for the `.lazykimi/`
 run-state model: what each artifact is, who writes it, and how the v0.x state
 maps onto the family model.
 
 
 ## Two schema sets
 
-LazyKimi v1.3.4 carries two schema sets during the port:
+LazyKimi v1.3.5 carries two schema sets during the port:
 
 1. **Project-route payload schemas** — shipped at
    `.lazykimi/schemas/{boulder,evidence,sessions,active-loop}.schema.json`

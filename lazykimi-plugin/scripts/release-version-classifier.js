@@ -3,13 +3,13 @@
 // Release-version classifier for the LazyKimi v1.3.4 family-parity port.
 // Ported from lazyzcode v1.3.4 scripts/release-version-classifier.js and
 // adapted to the lazykimi layout (single lazykimi-plugin/ tree, kimi.plugin.json
-// manifest, 0.x previous-version history instead of 1.3.x).
+// manifest, and both 0.x and 1.3.x previous-version history).
 
 const fs = require('node:fs');
 const path = require('node:path');
 
-const RELEASE_VERSION = '1.3.4';
-const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0'];
+const RELEASE_VERSION = '1.3.5';
+const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0', '1.3.4'];
 const VERSION_JSON_PATHS = [
   ['lazykimi-plugin/kimi.plugin.json', ['version']],
   ['lazykimi-plugin/package.json', ['version']],

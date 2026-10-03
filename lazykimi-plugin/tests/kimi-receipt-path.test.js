@@ -30,7 +30,7 @@ function fixture() {
   fs.mkdirSync(projectRoot);
   const paths = prepareProductRoot({ installRoot, product: 'LazyKimi' });
   const commitSha = 'c'.repeat(40);
-  const staged = stageRelease(paths, { sourceRoot, version: '1.3.4', commitSha });
+  const staged = stageRelease(paths, { sourceRoot, version: '1.3.5', commitSha });
   const promoted = promoteRelease(paths, {
     ...staged,
     commitSha,
@@ -38,7 +38,7 @@ function fixture() {
     manifestRelativePath: 'lazykimi-plugin/kimi.plugin.json',
     origin: 'https://github.com/elvinzhao10/LazyKimi.git',
     runtimePath: process.execPath,
-    version: '1.3.4',
+    version: '1.3.5',
   });
   const releaseRoot = path.join(paths.releases, promoted.releaseId);
   const manifest = path.join(releaseRoot, 'lazykimi-plugin', 'kimi.plugin.json');
@@ -55,7 +55,7 @@ function receipt(f) {
       manifest: 'lazykimi-plugin/kimi.plugin.json',
       manifest_sha256: crypto.createHash('sha256').update(fs.readFileSync(f.manifest)).digest('hex'),
       plugin: 'lazykimi',
-      version: '1.3.4',
+      version: '1.3.5',
     },
     host: 'kimi',
     build: 'build:current',

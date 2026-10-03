@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # post-compact.sh — Kimi PostCompact hook (advisory, context-recovery).
-# v1.3.4 mapped semantics: writes a context-recovery checkpoint for the
+# v1.3.5 mapped semantics: writes a context-recovery checkpoint for the
 # active run (state snapshot under .lazykimi/runs/<id>/checkpoints/), records
 # a post_compact ledger event, and re-anchors context with an
 # additionalContext reminder pointing at durable state instead of stale
@@ -10,8 +10,9 @@
 # OR nothing on stdout; diagnostics to stderr. Advisory only — ALWAYS exits 0.
 set -uo pipefail
 
-INPUT=$(head -c 1048576 || true)
-CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
+CWD=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
 [ -n "$CWD" ] || CWD="$PWD"
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

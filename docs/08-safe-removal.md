@@ -111,3 +111,7 @@ paths.
 Read [03 — Install and host verification](03-install-and-host-verification.md)
 for the exact boundaries and [06 — Capabilities and approvals](06-capabilities-and-approvals.md)
 for the MCP inventory.
+
+## Current CLI plugin registry removal
+
+In the current Kimi Code CLI, `/plugins remove <id>` removes the installation record but retains both the managed copy and original source. Reload or start a new session before checking absence. Package offboarding must preserve these host-managed copies, other plugins, credentials and shared Code Desktop configuration. See [current platform ownership](reference/platform-status-2026-10-02.md).

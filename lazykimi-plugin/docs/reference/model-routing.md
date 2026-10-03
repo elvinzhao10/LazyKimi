@@ -1,6 +1,6 @@
 # Model routing
 
-Status: v1.3.4, ported from the lazyzcode family reference and adapted to the
+Status: v1.3.5, ported from the lazyzcode family reference and adapted to the
 `kimi` host entry. LazyKimi describes task intent. Kimi chooses and bills the
 model. A package alias or recommendation is not proof of a concrete backing
 model, account availability, host loading, or a particular rate.

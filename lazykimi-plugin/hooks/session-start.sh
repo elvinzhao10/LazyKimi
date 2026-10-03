@@ -9,16 +9,17 @@
 set -uo pipefail
 
 # --- Read event JSON from stdin defensively (cap input at 1 MiB) ---
-INPUT=$(head -c 1048576 || true)
-CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd','.'))" 2>/dev/null || true)
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
+CWD=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd','.'))" 2>/dev/null || true)
 [ -n "$CWD" ] || CWD="$PWD"
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-session-start.XXXXXX")
-trap 'rm -f "$NOTES_FILE"' EXIT
+trap 'rm -f "$NOTES_FILE" "$HOOK_INPUT_FILE"' EXIT
 note() { printf '%s\n' "$1" >>"$NOTES_FILE"; }
 
-note "(LazyKimi v1.3.4): Session starting — checking project state..."
+note "(LazyKimi v1.3.5): Session starting — checking project state..."
 
 # --- Bootstrap the .lazykimi/ directory tree so skills/agents that read
 # plans/, context/, drafts/, rules/, ulw-loop/, or runs/ don't crash on a
@@ -114,7 +115,7 @@ PY
     [ -n "$ACTIVE_LOOP" ] && note "$ACTIVE_LOOP"
 fi
 
-# --- Active run summary (v1.3.4 run state under .lazykimi/runs/) ---
+# --- Active run summary (v1.3.5 run state under .lazykimi/runs/) ---
 RUNS_DIR="$CWD/.lazykimi/runs"
 if [ -d "$RUNS_DIR" ]; then
     for run_dir in "$RUNS_DIR"/*/; do

@@ -26,12 +26,32 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: "20.0.0"
-      - run: node lazykimi-plugin/scripts/verify-supported-floor.mjs --expected-runtime 20.0.0 --exercise package,install,onboarding,lsp-provider
+      - run: npm ci --prefix lazykimi-plugin/tooling --ignore-scripts --no-audit --no-fund
+      - run: node --test lazykimi-plugin/tests/supported-floor.test.js
+      - run: node lazykimi-plugin/scripts/verify-supported-floor.mjs --expected-runtime 20.0.0 --exercise package,install,onboarding
+      - run: node lazykimi-plugin/scripts/verify-supported-floor.mjs --expected-runtime 20.0.0 --exercise lsp-provider --expect-unsupported
+
+  lsp-supported-floor:
+    name: Optional TypeScript LSP floor (Node 22.22.2)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: "22.22.2"
+      - run: node lazykimi-plugin/scripts/verify-supported-floor.mjs --expected-runtime 22.22.2 --exercise lsp-provider
 
   core:
-    name: Core verification (Node 22)
+    name: Core verification (Node ${{ matrix.node }})
     runs-on: macos-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
     env:
       LAZYKIMI_VERIFY_SUITE: all
       LAZYKIMI_VERIFY_TIMEOUT_SECONDS: 180
@@ -47,7 +67,7 @@ jobs:
         run: python -m pip install pytest==8.4.2
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
-          node-version: "22"
+          node-version: ${{ matrix.node }}
       - name: Install locked tooling dependencies
         working-directory: lazykimi-plugin/tooling
         run: npm ci --ignore-scripts --no-audit --fund=false
@@ -64,14 +84,16 @@ jobs:
   validate:
     name: Deterministic validation
     if: ${{ always() }}
-    needs: [supported-floor, core]
+    needs: [supported-floor, lsp-supported-floor, core]
     runs-on: macos-latest
     timeout-minutes: 5
     steps:
       - name: Require all blocking jobs to succeed
         env:
+          LSP_SUPPORTED_FLOOR_RESULT: ${{ needs.lsp-supported-floor.result }}
           SUPPORTED_FLOOR_RESULT: ${{ needs.supported-floor.result }}
           CORE_RESULT: ${{ needs.core.result }}
         run: |
           test "$SUPPORTED_FLOOR_RESULT" = success
+          test "$LSP_SUPPORTED_FLOOR_RESULT" = success
           test "$CORE_RESULT" = success

@@ -129,7 +129,7 @@ test('Given modified owned assets When sync refreshes its receipt Then uninstall
   fs.appendFileSync(file, '\nuser addition\n');
   const modified = fs.readFileSync(file, 'utf8');
   assert.equal(run(root, ['sync']).status, 0);
-  assert.equal(JSON.parse(fs.readFileSync(path.join(root, '.kimi-code/.lazykimi-receipt.json'))).pluginVersion, '1.3.4');
+  assert.equal(JSON.parse(fs.readFileSync(path.join(root, '.kimi-code/.lazykimi-receipt.json'))).pluginVersion, '1.3.5');
   const config = JSON.parse(fs.readFileSync(path.join(root, '.kimi-code/mcp.json')));
   assert.equal(config.mcpServers['lazykimi-run-ledger'].args.at(-1), 'direct');
   assert.equal(run(root, ['uninstall', '--yes']).status, 0);

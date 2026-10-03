@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pre-compact.sh — Kimi PreCompact hook (advisory, context-recovery).
-# v1.3.4 mapped semantics: records a pre_compact ledger event on the active
+# v1.3.5 mapped semantics: records a pre_compact ledger event on the active
 # run so context-recovery checkpoints (written by post-compact.sh into
 # .lazykimi/runs/<id>/checkpoints/) can be tied to the compaction boundary.
 #
@@ -8,8 +8,9 @@
 # Advisory only — ALWAYS exits 0 (never blocks compaction).
 set -uo pipefail
 
-INPUT=$(head -c 1048576 || true)
-CWD=$(printf '%s' "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/bounded-input.bash"
+hook_read_input || exit 0
+CWD=$(cat "$HOOK_INPUT_FILE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('cwd',''))" 2>/dev/null || echo "")
 [ -n "$CWD" ] || CWD="$PWD"
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 

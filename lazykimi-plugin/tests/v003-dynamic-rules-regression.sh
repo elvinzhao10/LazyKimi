@@ -63,4 +63,4 @@ printf '{"hook_event_name":"PostToolUse","cwd":"%s","tool_name":"Write","tool_in
 [ -s "$OUT2" ] && fail "hook printed output with no run state: $(cat "$OUT2")"
 echo "  [PASS] fail-open with no run state"
 
-echo "PASS: v003-dynamic-rules-regression (v1.3.4 semantics)"
+echo "PASS: v003-dynamic-rules-regression (v1.3.5 semantics)"

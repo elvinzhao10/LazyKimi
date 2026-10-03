@@ -46,18 +46,18 @@ asset is published. Durable onboarding verifies the selected official source
 revision before promotion; preserve the existing installation if that source
 is unavailable or fails integrity checks.
 
-For the durable lifecycle, use Node 20+, Git and Python 3.10+. The corrected
-`v1.3.4` tag points to bootstrap-repaired source `6b5984e`. Select that
-version explicitly:
+For the durable lifecycle, use Node 24 (recommended), 22, or 20 for core
+compatibility, plus Git and Python 3.10+. Verify the official v1.3.5 release
+and select its source explicitly:
 
 ```bash
 node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
-  --source https://github.com/elvinzhao10/LazyKimi/tree/v1.3.4 \
+  --source https://github.com/elvinzhao10/LazyKimi/tree/v1.3.5 \
   --install-root <absolute-install-root> --project <absolute-project> --json
 ```
 
-The bare official URL selects the current release tag (`v1.3.4`); an explicit
-official `/tree/<ref>` URL selects that branch or tag. The lifecycle validates
+The bare official URL uses the lifecycle's release selection. An explicit official
+`/tree/<ref>` URL selects that branch or tag. The lifecycle validates
 source and receipts before promotion, preserves prior releases on update,
 and requires explicit SHA confirmation when an update changes revision without
 changing version. It reports package readiness separately from host readiness.
@@ -111,5 +111,5 @@ node dist/index.js verify --must-pass
 ```
 
 Package readiness is not a host-readiness claim. Perform the applicable host
-proof from the table in [lazykimi-evaluation.md](../../lazykimi-evaluation.md)
+proof from the table in [lazykimi-evaluation.md](https://github.com/elvinzhao10/LazyKimi/blob/main/lazykimi-evaluation.md)
 before relying on integration behavior.

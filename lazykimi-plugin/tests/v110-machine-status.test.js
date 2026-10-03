@@ -56,7 +56,7 @@ test('installed-only package load check validates machine status without release
   assert.match(result.stdout, /machine status v2/i);
 });
 
-test('machine status publishes authoritative v1.3.4 Kimi route boundaries', () => {
+test('machine status publishes authoritative v1.3.5 Kimi route boundaries', () => {
   // Given: the checked-in v1.3.4 package and its marketplace route declarations.
   const expectedHosts = [
     ['kimi', 'kimi-plugin-manifest', 'invoke-documented', 'documented-tested'],
@@ -70,7 +70,7 @@ test('machine status publishes authoritative v1.3.4 Kimi route boundaries', () =
   const report = JSON.parse(result.stdout);
   assert.equal(report.schema_version, 2);
   assert.equal(report.contract_version, '2.0.0');
-  assert.equal(report.version, '1.3.4');
+  assert.equal(report.version, '1.3.5');
   assert.deepEqual(report.package_readiness, { status: 'ready', scope: 'package' });
   assert.deepEqual(report.host_readiness, { status: 'pending' });
   assert.deepEqual(report.hosts.map((row) => [row.host, row.route, row.native_mode, row.public_label]), expectedHosts);
@@ -87,7 +87,7 @@ test('machine status publishes authoritative v1.3.4 Kimi route boundaries', () =
   assert.equal(report.routes[1].coexists_with_default, false);
 });
 
-test('authoritative version fields advance in lockstep with the shipped lifecycle example', () => {
+test('authoritative versions advance while the initial public lifecycle example stays frozen', () => {
   // Given: current package manifests plus immutable historical lifecycle examples.
   // LazyKimi ships one marketplace.json v2 inside the plugin tree (entry
   // identified by id, not version) — the opposite of ZCode's root+plugins pair.
@@ -109,11 +109,9 @@ test('authoritative version fields advance in lockstep with the shipped lifecycl
     path.join(PLUGIN_ROOT, 'marketplace.json'), 'utf8',
   ));
 
-  // Then: every current authority is v1.3.4, the marketplace entry is the
-  // single lazykimi plugin, and the shipped lifecycle example stays in
-  // lockstep (LazyKimi has no pre-1.0 receipt history — its 0.x past is
-  // preserved as labeled-historical docs, not lifecycle receipts).
-  assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.4'));
+  // Then: current authorities advance independently of the immutable initial
+  // public lifecycle example. The marketplace retains its v2 catalog identity.
+  assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.5'));
   assert.equal(marketplace.version, '2');
   assert.equal(marketplace.plugins.length, 1);
   assert.equal(marketplace.plugins[0].id, 'lazykimi');
