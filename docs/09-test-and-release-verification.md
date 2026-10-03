@@ -82,8 +82,8 @@ runtime, installer, or CI dependency between packages.
 
 The final host layer is intentionally manual. A Kimi Code CLI or Kimi Work
 session must show the selected plugin surface, hook behavior where relevant,
-and MCP connection before those facts are claimed. Current package evidence
-is verified on macOS only.
+and MCP connection before those facts are claimed. Package CI covers macOS
+and Linux; current native acceptance remains pending for each selected client.
 
 ## Verification matrix
 
