@@ -8,7 +8,7 @@ Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
 
-> **Verified on macOS only.** Linux and Windows paths and host behaviour are unverified. Package checks prove the copied package and its local contracts; a Kimi Code CLI or Kimi Work session remains the authority for plugin loading, hooks, and MCP connection.
+> **Package checks cover macOS and Linux; current host acceptance is pending.** A selected Kimi client session remains the authority for plugin loading, hooks and MCP connections. Windows host behaviour is unverified.
 
 > **Honest-claims discipline.** Package evidence proves copied files and declarations, not plugin loading, SessionStart, hooks, or an MCP connection. A Kimi Code CLI or Kimi Work session must confirm connection. **HOST READINESS: PENDING** until a complete observation receipt exists.
 
@@ -33,9 +33,10 @@ capabilities.
    `/<name>`; native modes `/swarm <task>`, `/goal <objective>`, and
    `/plan on|off` map onto the Explore, Plan, and Implement phases.
 
-**Verification scope:** macOS only. Repository-level public guides cover the
-workflow and host-specific onboarding/offboarding; package readiness remains
-package evidence, not proof of live host loading or MCP connection.
+**Verification scope:** package CI covers macOS and Linux; current native host
+acceptance remains pending for each client. Repository-level public guides cover
+host-specific onboarding/offboarding. Package readiness does not prove live host
+loading or MCP connections.
 
 ## What this plugin provides
 

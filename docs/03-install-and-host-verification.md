@@ -46,9 +46,9 @@ asset is published. Durable onboarding verifies the selected official source
 revision before promotion; preserve the existing installation if that source
 is unavailable or fails integrity checks.
 
-For the durable lifecycle, use Node 20+, Git and Python 3.10+. This guide
-describes the v1.3.5 candidate; publication is pending. After the release is
-published and its official source verified, select it explicitly:
+For the durable lifecycle, use Node 24 (recommended), 22, or 20 for core
+compatibility, plus Git and Python 3.10+. Verify the official v1.3.5 release
+and select its source explicitly:
 
 ```bash
 node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
@@ -56,8 +56,7 @@ node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
   --install-root <absolute-install-root> --project <absolute-project> --json
 ```
 
-The bare official URL uses the lifecycle's release selection; it is not proof
-that the v1.3.5 candidate has been published. An explicit official
+The bare official URL uses the lifecycle's release selection. An explicit official
 `/tree/<ref>` URL selects that branch or tag. The lifecycle validates
 source and receipts before promotion, preserves prior releases on update,
 and requires explicit SHA confirmation when an update changes revision without

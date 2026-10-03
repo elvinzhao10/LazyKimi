@@ -109,8 +109,8 @@ for the MCP servers. The lifecycle also accepts Node.js 20 for compatibility.
 Follow [AGENTS.md](AGENTS.md) and the
 [installation guide](docs/03-install-and-host-verification.md).
 
-The corrected `v1.3.5` tag includes the bootstrap repair and family
-documentation at commit `6b5984e`. Clone the versioned source:
+Use the published `v1.3.5` release for the current package and build instructions.
+Clone the versioned source:
 
 ```bash
 git clone --branch v1.3.5 https://github.com/elvinzhao10/LazyKimi.git
