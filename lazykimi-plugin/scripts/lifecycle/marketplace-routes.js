@@ -1,10 +1,10 @@
 'use strict';
 
 const crypto = require('node:crypto');
-const fs = require('node:fs');
 const path = require('node:path');
 const { LifecycleError } = require('./errors');
 const { safeFile } = require('./files');
+const { inventory } = require('./marketplace-inventory');
 
 const CONTRACT_PATH = path.resolve(__dirname, '..', '..', 'contracts', 'marketplace-route-contract.v1.json');
 // LazyKimi ships ONE marketplace.json v2 inside the plugin directory; it serves
@@ -101,37 +101,6 @@ function validateManifest(value, expectedVersion) {
       }
     }
   }
-}
-
-function inventory(pluginRoot, policy) {
-  const records = [];
-  const walk = (relative) => {
-    const directory = path.join(pluginRoot, relative);
-    let names;
-    try {
-      names = fs.readdirSync(directory).sort((left, right) => Buffer.compare(Buffer.from(left), Buffer.from(right)));
-    } catch (error) {
-      throw new LifecycleError('MARKETPLACE_PAYLOAD_INVALID', `canonical payload root unavailable: ${relative}`, error);
-    }
-    for (const name of names) {
-      const child = path.posix.join(relative, name);
-      const absolute = path.join(pluginRoot, child);
-      const stat = fs.lstatSync(absolute);
-      if (name === '__pycache__' || name.endsWith('.pyc')) continue; // contract payload method excludes python bytecode
-      if (stat.isDirectory() && !stat.isSymbolicLink()) walk(child);
-      else if (stat.isFile() && stat.nlink === 1 && name !== '.gitkeep') {
-        records.push({ path: child, sha256: digest(safeFile(absolute, 'MARKETPLACE_PAYLOAD_INVALID').bytes) });
-      } else if (name !== '.gitkeep') {
-        throw new LifecycleError('MARKETPLACE_PAYLOAD_INVALID', `canonical payload must contain only regular files: ${child}`);
-      }
-    }
-  };
-  for (const root of policy.roots) walk(root);
-  for (const relative of policy.files) {
-    records.push({ path: relative, sha256: digest(safeFile(path.join(pluginRoot, relative), 'MARKETPLACE_PAYLOAD_INVALID').bytes) });
-  }
-  records.sort((left, right) => Buffer.compare(Buffer.from(left.path), Buffer.from(right.path)));
-  return records;
 }
 
 function validateArtifact(file, expectedDigest, expectedVersion, { identityArtifact = false } = {}) {
