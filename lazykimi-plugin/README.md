@@ -3,7 +3,7 @@
 > Self-contained evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.
 
 This package belongs to the LazyKimi project, the Kimi-native family port of
-the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.3.5.
+the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.4.0.
 Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
@@ -73,8 +73,9 @@ be verified in a live session:
 | `commands/` | 20 named slash-command workflows | Host entry points incl. lifecycle commands |
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 34 tools | Host starts each over stdio; declarations are recipes, not running services |
+| `shared/` | Hash-pinned vendored dashboard core (`dashboard/` + `dashboard.vendor.json`) plus the Kimi-native `dashboard-host/` adapter | Local browser surface: transactional edits, queue planning (edits never start work), context copy; host readiness pending |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
-| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.5 |
+| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.4.0 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |
 | `scripts/` | State scripts, loop orchestration, lifecycle, verification utilities | Used by package readiness and workflow checks |
 
@@ -169,6 +170,10 @@ node dist/index.js doctor
 node dist/index.js verify --must-pass
 LAZYKIMI_VERIFY_SUITE=all bash scripts/lazykimi-verify.sh
 ```
+
+`load-check` validates a bare extraction on its own; `doctor` is
+project-scoped and exits 1 with init guidance until `lazykimi init` has run
+for the selected project.
 
 `lazykimi verify --must-pass` checks **PACKAGE READINESS** — copied assets,
 declarations, regression tests, and evidence files. It does **NOT** check
@@ -284,17 +289,17 @@ only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` (or the
 plugin manifest) actually fires them. Package readiness does not prove hook
 execution. Full policy: [docs/reference/hook-policy.md](docs/reference/hook-policy.md).
 
-## MCP list (6 servers, 32 tools)
+## MCP list (6 servers, 34 tools)
 
 | Server | Tools | Purpose |
 | --- | ---: | --- |
 | `lazykimi-run-ledger` | 9 | Durable workflow records (`create_run`, `list_runs`, `latest_run`, `read_state`, `summarize_run`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`) |
 | `lazykimi-verification` | 7 | Verification store and gates (`create_repair_task`, `discover_checks`, `list_gate_results`, `record_criterion_result`, `record_gate_result`, `run_check`, `summarize_verification`) |
-| `lazykimi-status-dashboard` | 4 | Status views (`show_run_status`, `show_task_graph`, `show_verification_matrix`, `show_pending_approvals`) |
+| `lazykimi-status-dashboard` | 6 | Status views plus local dashboard service and producer-context copy (`show_run_status`, `show_task_graph`, `show_verification_matrix`, `show_pending_approvals`, `dashboard_service`, `copy_task_context`) |
 | `lazykimi-context-graph` | 5 | Local relationships (`blast_radius`, `file_deps`, `symbol_search`, `symbol_refs`, `repo_overview`) |
 | `lazykimi-code-intel` | 5 | Code helpers (`diagnostics`, `typecheck`, `find_references`, `goto_definition`, `symbols`) |
 | `lazykimi-docs` | 2 | Fixed-registry docs (`get_library_docs`, `list_supported_registries`) |
-| **Total** | **32** | Six stdio servers behind the profile gate |
+| **Total** | **34** | Six stdio servers behind the profile gate |
 
 Each declaration is a recipe for a host: it becomes a service only when
 Kimi Code CLI starts it over stdio. The six endpoints have JSON-RPC stream

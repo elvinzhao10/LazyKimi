@@ -1,5 +1,13 @@
 # LazyKimi Plugin Changelog
 
+## [1.4.0] - Local dashboard core and honest capability labels
+
+- Vendor the family's portable dashboard core hash-pinned (`shared/dashboard/` + `dashboard.vendor.json`) and ship the Kimi-native `shared/dashboard-host/` adapter: browser entry, loopback-bound local service (port-0 default, credentials at mode 0600), transactional edits, queue planning, and producer-context copy.
+- Grow `lazykimi-status-dashboard` from 4 to 6 tools (`dashboard_service` plus the read-only `copy_task_context`); the declared surface is 6 servers / 34 tools.
+- Record honest capability labels: browser, transactional edits, project queue, context copy, and observations available; embedding, chat handoff, and wake unobserved; native host readiness pending. Queue edits never start work; activation is a separate explicit action, and project-bound MCP binding rules are unchanged.
+- Add the hash-pinned vendored-tree exemption to the product-naming guard: vendored bytes stay exempt only while they match `dashboard.vendor.json` pins, so edits resurface review.
+- Correct the stale tool-count mirrors (status-dashboard 4 to 6, family total 32 to 34) across the README and docs, neutralize a committed machine-local path in the history docs, and document the project-scoped doctor init gate (`load-check` validates bare extractions).
+
 ## [1.3.5] - Runtime verification and platform clarity
 
 - Execute real runtime-floor exercises and check optional LSP requirements separately.

@@ -1,66 +1,90 @@
-# LazyKimi v1.3.5 - runtime verification and platform clarity
+# LazyKimi v1.4.0 - local dashboard core and honest capability labels
 
-A maintenance release across the six LazySeries siblings. It carries forward
-the workflow and run-integrity foundation from 1.3.0 through 1.3.4.
+A dashboard release across the six LazySeries siblings. Each package vendors
+the family's portable dashboard core behind its own host adapter; LazyKimi
+adds the Kimi-native adapter surface and keeps every host claim labeled,
+bounded and pending.
 
 ## Eval-driven fixes
 
-- Runtime-floor checks execute named package, installation and lifecycle tests.
-  Missing or unknown exercises and failed subprocesses cannot report PASS.
-- Optional TypeScript LSP installation is tested separately with engine-strict
-  dependency installation and the installed server executable.
-- Hook payloads are bounded before parsing and kept out of process arguments.
-  Invalid or oversized events preserve each adapter's exit and state contract.
-- Current product names, configuration scopes and native extension capabilities
-  are distinguished from legacy routes and unverified live integration.
+- The status-dashboard MCP server grows from 4 to 6 tools:
+  `dashboard_service` (start, inspect, stop, or return the local browser
+  dashboard entry) and the read-only `copy_task_context` (copy a validated
+  native Kimi producer context without executing or consuming it). The
+  declared tool total moves from 32 to 34 across the six servers.
+- The portable dashboard core is vendored hash-pinned under
+  `lazykimi-plugin/shared/dashboard/` with a tracked vendor manifest, and the
+  Kimi-native adapter ships beside it (`shared/dashboard-host/`). The
+  product-naming guard exempts vendored bytes only while they still match the
+  pinned hashes, so any local edit resurfaces review instead of riding the
+  exemption.
+- Queue planning (create, amend, reorder queued plans) is available through
+  the browser UI; queue edits never start work. Activation remains a
+  separate explicit bridge action.
+- Documentation mirrors now state the exact surface (6 servers / 34 tools)
+  and correct the stale 4-tool and 32-tool strings, including the capability
+  comparison row; a committed machine-local path in the history docs was
+  replaced with a workspace placeholder.
+- The extracted-package self-check boundary is documented: `doctor` is
+  project-scoped and exits 1 in a bare extraction until `lazykimi init` has
+  bound a project; use `load-check` for bare-extraction verification.
 
 ## Measured efficiency
 
-Hook boundary repairs avoid payload-sized process arguments and bound input
-memory. The first host-independent verification unit is vendored identically
-in sibling packages, with product-specific exercises in small adapters.
 No latency, token, cost or native-host performance improvement is claimed.
-Persistent LSP sessions and event-ledger compaction remain future measured work.
+The dashboard service binds locally (loopback-only access, port-0 default
+binding, credential files at mode 0600, challenge-gated stop). Transactional
+edits, queue planning and context copy are package behaviors verified by
+local tests; they are not native host observations.
 
 ## Host capability matrix
 
-Kimi Code CLI, Kimi Code for VS Code, CLI through ACP editors, Kimi Code Desktop and Kimi Work are distinct acceptance targets. Current Code CLI is a Node.js rewrite of legacy `kimi-cli`. Work documents full plugins, but LazyKimi's full Work integration remains experimental; Kimi web documents skills and MCP.
+Kimi Code CLI, Kimi Code for VS Code, CLI through ACP editors, Kimi Code
+Desktop and Kimi Work remain distinct acceptance targets. The 1.4.0 package
+capability labels are: browser, transactional edits, project queue, context
+copy and observations `available`; embedding, chat handoff and wake
+`unobserved`; native host readiness `pending`. Project-bound MCP binding
+rules are unchanged: manifest MCP launchers still fail closed without
+explicit project binding, and the project init route remains the route for
+project-bound MCP.
 
 See [the dated platform audit](docs/reference/platform-status-2026-10-02.md).
-**HOST READINESS: PENDING** until the selected current client demonstrates
+**HOST READINESS: PENDING** until the selected client demonstrates
 discovery, skill/command execution, relevant hooks and MCP connections.
 Official feature documentation and package tests are separate evidence.
 
 ## Dependencies and runtime requirements
 
 Node.js 24 is recommended. Core lifecycle compatibility remains Node.js 20;
-LazyTrae's standalone CLI also retains its separate Node.js 18 compatibility
-tier. Optional TypeScript language-server 6.x requires Node.js 22.22.2 or later;
-5.x providers retain their own Node.js 20 requirement.
-Python language-server providers are aligned at basedpyright 1.40.1.
-LazyTrae uses fast-uri 4.2.1 directly and the patched 3.1.8 Ajv edge, with
-security and normalization regressions preserved.
+optional TypeScript language-server 6.x requires Node.js 22.22.2 or later.
+Python 3.10+ is required for the MCP servers. LazyTrae's standalone CLI
+retains its separate Node.js 18 compatibility tier, and LazyTrae carries the
+fast-uri 4.2.1 dependency with the patched 3.1.8 Ajv edge; neither changes
+this package's runtime floors.
 
 ## Migration and upgrade
 
 Use the receipt-aware lifecycle update with an explicit project binding.
-Preserve populated run state, modified assets, unknown files and host settings.
-Select the exact client and version before following a native installation route.
-Kimi Code clients can share configuration; Kimi Work is a separate target.
+Preserve populated run state, modified assets, unknown files and host
+settings. The previous v1.3.5 release archive remains valid; select the
+newly versioned archive explicitly when upgrading. A bare extraction passes
+`load-check` immediately; `doctor` reports project-scoped checks as failing
+until `lazykimi init` has run for the selected project.
 
 Read [AGENTS.md](AGENTS.md), [README.md](README.md) and the selected host guide.
-Use a newly versioned archive; existing 1.3.4 tags and assets remain intact.
 
 ## Known risks
 
-Authenticated current-client acceptance remains pending. A copied configuration,
-manifest validation, or isolated lifecycle fixture cannot establish host loading.
+Authenticated current-client acceptance remains pending. A copied
+configuration, manifest validation, or isolated lifecycle fixture cannot
+establish host loading. Dashboard embedding into a Kimi host surface, chat
+handoff and wake remain unobserved; no host support is claimed for them.
 Optional providers must satisfy their own runtime floor.
-Native features added upstream are not automatically wired into the adapter.
 
 ## Rollback
 
 Retain the previous release and receipts. Follow the scoped lifecycle removal
-or rollback plan, preserving user-modified and foreign assets. Host-managed
-registrations require their selected client's removal flow; never remove
+or rollback plan, preserving user-modified and foreign assets. Stopping the
+dashboard service is a local action (`dashboard_service` stop or the adapter
+CLI stop entry) and never touches host-managed registrations; never remove
 credentials, sessions or entire shared configuration directories.

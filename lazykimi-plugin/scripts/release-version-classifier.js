@@ -8,8 +8,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const RELEASE_VERSION = '1.3.5';
-const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0', '1.3.4'];
+const RELEASE_VERSION = '1.4.0';
+const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0', '1.3.4', '1.3.5'];
 const VERSION_JSON_PATHS = [
   ['lazykimi-plugin/kimi.plugin.json', ['version']],
   ['lazykimi-plugin/package.json', ['version']],
@@ -56,6 +56,7 @@ function walk(root, directory = root) {
 }
 
 function previousVersionClassification(relativePath, line) {
+  if (/platform-status-\d{4}-\d{2}-\d{2}\.md$/.test(relativePath)) return 'dated-platform-snapshot';
   if (relativePath.startsWith('lazykimi-plugin/docs/history/')) return 'historical-release-history';
   if (relativePath === 'RELEASE_NOTES.md') return 'historical-migration-reference';
   if (relativePath === 'lazykimi-plugin/CHANGELOG.md') return 'historical-release-history';
@@ -109,6 +110,7 @@ function classify(root) {
     try { contents = fs.readFileSync(path.join(root, relativePath), 'utf8'); } catch { continue; }
     contents.split('\n').forEach((line, index) => {
       if (!/(?:^|\/)(?:test|tests|docs\/history)\//.test(relativePath)
+        && !/platform-status-\d{4}-\d{2}-\d{2}\.md$/.test(relativePath)
         && /\bcurrent\b/i.test(line) && /\b(?:release|version)\b/i.test(line)) {
         const versions = line.match(/1\.\d+\.\d+/g) || [];
         if (versions.some(version => version !== RELEASE_VERSION)) {

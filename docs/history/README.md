@@ -17,6 +17,6 @@ The v0.x per-task run evidence (`.lazykimi/evidence/*.md`) was tracked in git
 and remains retrievable from the pre-v1.3.4 history (through commit
 `69450fd`); it was not copied here because it is run output, not planning
 provenance. The canonical LazyTrae content lives in
-`/Users/Admin/Desktop/lazyseries/LazyTrae` upstream (the `.trae/`/
+`<workspace>/LazyTrae` upstream (the `.trae/`/
 `.lazytrae/` copies that existed in this repo root during v0.x development
 were untracked LazyTrae-managed infrastructure and were deleted).

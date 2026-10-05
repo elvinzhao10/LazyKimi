@@ -48,7 +48,7 @@ capability surface. Each is a Python stdio process started by the host:
 | --- | ---: | --- | --- |
 | `lazykimi-run-ledger` | 9 | Read/write durable workflow records | Path-boundary checked |
 | `lazykimi-verification` | 7 | Verification store, checks, and gates | Path-boundary checked |
-| `lazykimi-status-dashboard` | 4 | Display package and run status | Read-only |
+| `lazykimi-status-dashboard` | 6 | Status views plus local dashboard service and producer-context copy | Read-only run state; service binds to local loopback |
 | `lazykimi-context-graph` | 5 | Local grep-based relationships | Heuristic, not CodeGraph |
 | `lazykimi-code-intel` | 5 | Local code-oriented helpers | Path-boundary checked |
 | `lazykimi-docs` | 2 | Fixed-registry documentation lookup | SSRF boundaries; npm/PyPI only |

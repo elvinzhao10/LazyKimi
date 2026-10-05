@@ -188,7 +188,7 @@ workflow heritage and the same MIT license.
 | Commands | — | — | — | 20 |
 | Agents | 13 | 11 | 5 (TOML) | 13 family roles (mapped to 3 Kimi sub-agents + main) |
 | Hooks | 12 | eight | 24 | 16 |
-| MCP servers | 6 | 15 tools | N/A | 6 (34 tools) |
+| MCP servers | 6 | 16 tools | N/A | 6 (34 tools) |
 | Host | CodeBuddy | Trae IDE/Work/CLI | Codex | Kimi Code CLI |
 | Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Bash/Python MCP |
 | Native swarm | No | No | No | Yes (/swarm 300 agents) |
@@ -215,8 +215,9 @@ workflow heritage and the same MIT license.
   with the lazyzcode v1.3.3 hardened pre-tool semantics.
 - **MCP**: LazyKimi inherits LazyBuddy's six-server model (run-ledger,
   verification, status-dashboard, context-graph, code-intel, docs), rebuilt
-  in v1.3.3 to the family 32-tool surface behind the profile gate. LazyTrae
-  consolidates into a single Node.js core server exposing 15 tools.
+  in v1.3.3 to the family tool surface behind the profile gate (32 tools
+  then; 34 since the v1.4.0 status-dashboard service tools). LazyTrae
+  consolidates into a single Node.js core server exposing 16 tools.
 - **Native modes**: LazyKimi is the only harness in the series whose target
   host exposes native swarm, goal, and plan modes. The other harnesses
   emulate these through agents and loops.

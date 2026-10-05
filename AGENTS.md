@@ -15,10 +15,10 @@ using legacy-client evidence.
 See [the current platform audit](docs/reference/platform-status-2026-10-02.md)
 for version-specific native features and legacy route limits.
 
-## Current documentation release: v1.3.5
+## Current documentation release: v1.4.0
 
-The package version is v1.3.5, aligned at family contract
-parity with LazyZCode v1.3.5. Fresh Kimi host readiness requires direct observation. This
+The package version is v1.4.0, aligned at family contract
+parity with LazyZCode v1.4.0. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
 (the default full-plugin route), `project-init-route` (the manual project
@@ -38,7 +38,7 @@ Optional TypeScript LSP requires Node.js **22.22.2+**; core lifecycle compatibil
 with Node.js 20 does not imply compatibility with that optional provider.
 
 For new installations use **Node.js 20 or later** plus **Git** and
-**Python 3.10+** for the MCP servers. The v1.3.5 family port adds the
+**Python 3.10+** for the MCP servers. The v1.3.5 family port added the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
 LazyKimi/` on macOS, mirroring the LazyZCode pattern. The public source is
@@ -70,7 +70,9 @@ When the user types `onboard`:
 2. Run the safe package checks first: `lazykimi load-check` and
    `lazykimi doctor`. These validate package manifests, skills,
    declarations, and local contracts without installing a host plugin,
-   changing host settings, or contacting providers.
+   changing host settings, or contacting providers. `load-check` works in a
+   bare extraction; `doctor` is project-scoped and exits 1 with init
+   guidance until `lazykimi init` has bound the selected project.
 3. When upgrading from an earlier release, inventory receipt-owned versus
    modified/unknown assets first. Preserve user changes and host settings
    until the new session is observed. Never infer host readiness from a
@@ -125,6 +127,10 @@ node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
 ```
+
+`load-check` is the bare-extraction verification entry. `doctor` is
+project-scoped: in a bare extraction (no `lazykimi init`) it exits 1 listing
+the missing project bindings instead of package defects.
 
 Do not enable optional remote, browser, or architecture capabilities during
 onboarding, and do not run `npm`/`npx` merely to inspect workflow files.
