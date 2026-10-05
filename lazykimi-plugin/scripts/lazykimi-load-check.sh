@@ -75,8 +75,8 @@ EXPECTED_COMMANDS = 20
 EXPECTED_AGENTS = 13
 EXPECTED_HOOK_EVENTS = 16
 EXPECTED_MCP_SERVERS = 6
-EXPECTED_MCP_TOOLS = 32
-EXPECTED_VERSION = "1.3.5"
+EXPECTED_MCP_TOOLS = 34
+EXPECTED_VERSION = "1.4.0"
 KIMI_HOOK_EVENTS = {
     "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse",
     "PostToolUseFailure", "Stop", "SubagentStop", "SubagentStart",
@@ -386,7 +386,7 @@ if mcp is not None:
     else:
         result("FAIL", "MCP typed profile contract", profile_check.stderr.strip() or "profile validation failed")
 
-# Tool surface: 32 tools derived from the canonical declaration table in
+# Tool surface: 34 tools derived from the canonical declaration table in
 # src/lib/mcp-validation.ts (generated counts from canonical files; the live
 # handshake stays owned by lazykimi-mcp-test.sh).
 tool_surface_path = os.path.join(root, "src", "lib", "mcp-validation.ts")

@@ -47,12 +47,12 @@ revision before promotion; preserve the existing installation if that source
 is unavailable or fails integrity checks.
 
 For the durable lifecycle, use Node 24 (recommended), 22, or 20 for core
-compatibility, plus Git and Python 3.10+. Verify the official v1.3.5 release
+compatibility, plus Git and Python 3.10+. Verify the official v1.4.0 release
 and select its source explicitly:
 
 ```bash
 node lazykimi-plugin/scripts/lazykimi-lifecycle.js onboard \
-  --source https://github.com/elvinzhao10/LazyKimi/tree/v1.3.5 \
+  --source https://github.com/elvinzhao10/LazyKimi/tree/v1.4.0 \
   --install-root <absolute-install-root> --project <absolute-project> --json
 ```
 
@@ -109,6 +109,11 @@ node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
 ```
+
+`load-check` validates a bare extraction or fresh build on its own. `doctor`
+is project-scoped and exits 1 with init guidance until `lazykimi init` has
+bound the selected project; treat those failures as missing bindings, not
+package defects.
 
 Package readiness is not a host-readiness claim. Perform the applicable host
 proof from the table in [lazykimi-evaluation.md](https://github.com/elvinzhao10/LazyKimi/blob/main/lazykimi-evaluation.md)

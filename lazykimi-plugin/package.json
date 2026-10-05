@@ -1,6 +1,6 @@
 {
   "name": "lazykimi",
-  "version": "1.3.5",
+  "version": "1.4.0",
   "description": "Kimi-native evidence-led agent workflow harness (port of LazyBuddy/LazyTrae to Kimi Code CLI)",
   "type": "commonjs",
   "main": "dist/index.js",
@@ -34,6 +34,7 @@
     "mcp",
     "commands",
     "scripts",
+    "shared",
     "tooling",
     "contracts",
     "kimi.plugin.json",

@@ -1,6 +1,6 @@
 # Host routes reference
 
-Status: v1.3.5. LazyKimi reaches its hosts through three routes. The
+Status: v1.4.0. LazyKimi reaches its hosts through three routes. The
 authoritative machine-readable definition is
 `contracts/marketplace-route-contract.v1.json` (inventory: 19 skills, 20
 commands, 13 agents, 16 hook events, 6 MCP servers, 32 MCP tools); this page
@@ -64,7 +64,7 @@ launcher; run from a checkout, `<root>` is the absolute path to the
 | --- | --- | --- |
 | `lazykimi-run-ledger` | `node <root>/scripts/kimi-project-mcp.js run-ledger --project <project>` | Durable run records (9 tools) |
 | `lazykimi-verification` | `node <root>/scripts/kimi-project-mcp.js verification --project <project>` | Verification store and gates (7 tools) |
-| `lazykimi-status-dashboard` | `node <root>/scripts/kimi-project-mcp.js status-dashboard --project <project>` | Run status views (4 tools) |
+| `lazykimi-status-dashboard` | `node <root>/scripts/kimi-project-mcp.js status-dashboard --project <project>` | Run status views plus the local dashboard service and producer-context copy (6 tools) |
 | `lazykimi-context-graph` | `node <root>/scripts/kimi-project-mcp.js context-graph --project <project>` | Local relationship queries (5 tools) |
 | `lazykimi-code-intel` | `node <root>/scripts/kimi-project-mcp.js code-intel --project <project>` | Diagnostics/navigation helpers (5 tools) |
 | `lazykimi-docs` | `node <root>/scripts/kimi-project-mcp.js docs --project <project>` | Fixed-registry docs lookup (2 tools) |

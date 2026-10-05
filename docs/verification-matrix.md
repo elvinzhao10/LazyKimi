@@ -10,7 +10,7 @@ file: `## <section>` headings plus `| Verification Step | Command | Expected | A
 
 | Verification Step | Command | Expected | Artifact |
 | --- | --- | --- | --- |
-| MCP integration | `bash scripts/lazykimi-mcp-test.sh` | `MCP test: ALL PASS` (6 servers, 32 tools, state round-trip) | command output |
+| MCP integration | `bash scripts/lazykimi-mcp-test.sh` | `MCP test: ALL PASS` (6 servers, 34 tools, state round-trip) | command output |
 | MCP params robustness | `bash tests/v103-mcp-params-regression.sh` | Every server rejects malformed `tools/call` params without ending the session | command output |
 | MCP path boundary | `bash tests/v003-mcp-path-traversal-regression.sh` | Path escapes and symlink escapes are rejected | command output |
 | MCP SSRF boundary | `bash tests/v003-ssrf-boundary-regression.sh` and `bash tests/v001-ssrf-regression.sh` | Only fixed HTTPS registry URLs are fetched; hostile names produce no fetch | command output |

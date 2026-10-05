@@ -11,7 +11,7 @@ flowchart TB
       Skills[".kimi-code/skills/ (19)"]
       Agents["agents/ (13 roles)"]
       HookScripts["hooks/*.sh (16)"]
-      MCP["mcp/*/server.* (6 servers, 32 tools)"]
+      MCP["mcp/*/server.* (6 servers, 34 tools)"]
       CLI["src/ (TypeScript CLI)"]
       Scripts["scripts/"]
     end

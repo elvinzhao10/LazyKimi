@@ -19,7 +19,7 @@ NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-session-start.XXXXXX")
 trap 'rm -f "$NOTES_FILE" "$HOOK_INPUT_FILE"' EXIT
 note() { printf '%s\n' "$1" >>"$NOTES_FILE"; }
 
-note "(LazyKimi v1.3.5): Session starting — checking project state..."
+note "(LazyKimi v1.4.0): Session starting — checking project state..."
 
 # --- Bootstrap the .lazykimi/ directory tree so skills/agents that read
 # plans/, context/, drafts/, rules/, ulw-loop/, or runs/ don't crash on a
@@ -115,7 +115,7 @@ PY
     [ -n "$ACTIVE_LOOP" ] && note "$ACTIVE_LOOP"
 fi
 
-# --- Active run summary (v1.3.5 run state under .lazykimi/runs/) ---
+# --- Active run summary (v1.4.0 run state under .lazykimi/runs/) ---
 RUNS_DIR="$CWD/.lazykimi/runs"
 if [ -d "$RUNS_DIR" ]; then
     for run_dir in "$RUNS_DIR"/*/; do

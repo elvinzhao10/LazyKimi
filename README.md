@@ -2,7 +2,7 @@
 
 ![LazyKimi](lazykimi-banner.png)
 
-[![Package 1.3.5](https://img.shields.io/badge/package-1.3.5-7ce8d1)](RELEASE_NOTES.md)
+[![Package 1.4.0](https://img.shields.io/badge/package-1.4.0-7ce8d1)](RELEASE_NOTES.md)
 [![MIT License](https://img.shields.io/badge/license-MIT-silver)](LICENSE)
 [![LazySeries family](https://img.shields.io/badge/LazySeries-6_siblings-7ce8d1)](#lazyseries-family)
 
@@ -15,25 +15,30 @@ are separate acceptance targets. Kimi Code Desktop and Kimi Work are distinct
 products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
 [Platform status](docs/reference/platform-status-2026-10-02.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
-[1.3.5 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
+[1.4.0 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
 
-> **Current package version: v1.3.5. HOST READINESS: PENDING.** Local checks and release
+> **Current package version: v1.4.0. HOST READINESS: PENDING.** Local checks and release
 > archives prove package behavior; a fresh host session must prove loading,
 > command/skill execution and MCP connections.
 
-## What's in 1.3.5
+## What's in 1.4.0
 
+- The family's portable dashboard core is vendored hash-pinned in the package, with a Kimi-native adapter (`shared/dashboard-host/`) and a local browser UI: Work / Verification / Plan edits, task inspector, evidence preview, and queue planning.
+- The status-dashboard MCP server grows from 4 to 6 tools (`dashboard_service`, `copy_task_context`); the declared tool total is 34 across 6 servers.
+- Honest capability labels ship with the adapter: browser, transactional edits, project queue, context copy and observations are `available`; embedding, chat handoff and wake are `unobserved`; native host readiness is `pending`.
+- Queue edits never start work: queued plans can be created, amended and reordered, but activation is a separate explicit action.
+- Project-bound MCP binding rules are unchanged; manifest MCP launchers still fail closed without explicit project binding.
 - Runtime checks execute real package and lifecycle paths; unknown exercises and failed checks cannot report success.
-- Core and optional TypeScript LSP requirements are checked separately, including unsupported runtimes.
 - Hook input is bounded before parsing and stays out of process arguments.
-- Platform guides distinguish current native capabilities, legacy routes and integrations awaiting live acceptance.
 
-This is a maintenance release. It includes the workflow foundation introduced
-in the family since v1.3.0 and subsequent reliability work. For Kimi and DeepSeek,
-that describes inherited family behavior, not prior public releases of these
-ports. The details below describe the cumulative v1.3.5 experience; the
-[release notes](RELEASE_NOTES.md) distinguish this patch's fixes from inherited
-features. No new speed, token-saving or cost claim is made.
+This release adds the local dashboard surface on top of the workflow
+foundation introduced in the family since v1.3.0. For Kimi and DeepSeek,
+earlier milestones describe inherited family behavior, not prior public
+releases of these ports. The details below describe the cumulative v1.4.0
+experience; the [release notes](RELEASE_NOTES.md) distinguish this release's
+additions from inherited features. No new speed, token-saving or cost claim
+is made, and no native host support is claimed for the dashboard: it is a
+local package surface until a fresh host session is observed.
 
 | Family milestone | What you get in the current package |
 | --- | --- |
@@ -43,6 +48,7 @@ features. No new speed, token-saving or cost claim is made.
 | v1.3.3 hardening | Host-specific hook, MCP and publication repairs. |
 | v1.3.4 maintenance | Transactional run integrity, safer lifecycle and native adapter repairs. |
 | v1.3.5 repairs | Real runtime exercises, bounded hooks, dependency updates and current platform guidance. |
+| v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 6-tool status-dashboard (34 tools total), honest capability labels. |
 
 ### Just ask, or use a command — both work
 
@@ -96,7 +102,7 @@ Open an AI coding assistant in your project and paste this:
 
 > Help me install LazyKimi from https://github.com/elvinzhao10/LazyKimi for
 > this project. Read AGENTS.md and the current install guide. Use the
-> versioned v1.3.5 source and run safe
+> versioned v1.4.0 source and run safe
 > package checks first, choose one explicitly project-bound route, and ask me
 > before changing plugins, global hooks, MCP, credentials or trust settings.
 
@@ -109,11 +115,11 @@ for the MCP servers. The lifecycle also accepts Node.js 20 for compatibility.
 Follow [AGENTS.md](AGENTS.md) and the
 [installation guide](docs/03-install-and-host-verification.md).
 
-Use the published `v1.3.5` release for the current package and build instructions.
+Use the published `v1.4.0` release for the current package and build instructions.
 Clone the versioned source:
 
 ```bash
-git clone --branch v1.3.5 https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.4.0 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
 ```
 
@@ -126,6 +132,10 @@ npm run build
 node dist/index.js load-check
 node dist/index.js doctor
 ```
+
+`load-check` is the bare-extraction verification entry: it needs no bound
+project. `doctor` is project-scoped — in a bare extraction it exits 1 with
+init guidance until `lazykimi init` has bound the selected project.
 
 Run `lifecycle onboard` for a durable installation. Use its stable launcher
 for later status, update and receipt-safe offboard, with the selected project:
@@ -208,8 +218,19 @@ safe package checks separate from marketplace and connector changes.
 | Skills | 19 | Host-facing workflow policies for planning, execution, review, and verification. |
 | Commands | 20 | Named host entry points for those workflow policies. |
 | Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
-| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (32 tools). |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (34 tools). |
 | Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
+
+## Local dashboard surface (v1.4.0)
+
+- Entry: `node lazykimi-plugin/shared/dashboard-host/cli.mjs start|status|open|stop --project-root <root> --project-id <id> --run-id <run> [--port N]`. `open` returns the browser entry; the service binds locally (loopback only, port-0 default binding, credential files at mode 0600).
+- MCP tools: `dashboard_service` (start, inspect, stop, or return the local dashboard entry) and the read-only `copy_task_context` on the status-dashboard server — 6 tools there, 34 across the six servers.
+- Capability labels shipped with the adapter: browser, transactional edits, project queue, context copy, observations — `available`; embedding, chat handoff, wake — `unobserved`; native host readiness — `pending`.
+- Queue planning (create, amend, reorder) is available in the browser UI; queue edits never start work, and activation is a separate explicit action.
+
+These are package behaviors verified by local tests, not native host
+observations: dashboard embedding into a Kimi host surface, chat handoff and
+wake remain unobserved, and no host support is claimed for them.
 
 ## LazySeries family
 
@@ -227,7 +248,7 @@ acceptance evidence. These packages run independently.
 | [LazyDeepSeek](https://github.com/elvinzhao10/LazyDeepSeek) | DeepSeek Harness 0.2.0-rc.2 |
 
 The family shares planning, evidence, decision-memory and completion contracts.
-The first shared verification core is vendored in every package; product adapters keep host setup and permissions explicit. Matching contracts do not make host capabilities interchangeable. In particular,
+The first shared verification core is vendored in every package, and since v1.4.0 the shared dashboard core is vendored the same hash-pinned way; product adapters keep host setup and permissions explicit. Matching contracts do not make host capabilities interchangeable. In particular,
 Kimi Work remains experimental for LazyKimi, and DeepSeek's synthesized events
 are not native hooks. Use each sibling's host guide before installation.
 

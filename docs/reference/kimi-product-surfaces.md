@@ -56,7 +56,7 @@ The upstream command is `kimi`; the package's `lazykimi` command is the
 LazyKimi harness CLI. LazyKimi's Python MCP prerequisites do not imply the
 current upstream Kimi Code CLI is Python-based.
 
-## LazyKimi v1.3.5 support statement
+## LazyKimi v1.4.0 support statement
 
 Package fixtures, extracted archives and isolated lifecycle checks are separate
 from native client acceptance; consult their run artifacts for results.
