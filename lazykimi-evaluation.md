@@ -38,8 +38,8 @@ LazyTrae, or lazycodex at runtime.
 
 LazyKimi packages 19 `lazy-` skills, 20 `lazy-*` command documents, 13 family
 role-agent definitions, 16 hook event declarations (critical 8 on the TOML
-route), and six local MCP declarations exposing 32 tools: `run-ledger` (9),
-`verification` (7), `status-dashboard` (4), `context-graph` (5), `code-intel`
+route), and six local MCP declarations exposing 34 tools: `run-ledger` (9),
+`verification` (7), `status-dashboard` (6), `context-graph` (5), `code-intel`
 (5), and `docs` (2). The package checks validate manifests, component
 inventory, JSON, executable MCP scripts, internal Markdown links, hook and
 security behavior, and MCP protocol regressions.
@@ -188,7 +188,7 @@ workflow heritage and the same MIT license.
 | Commands | — | — | — | 20 |
 | Agents | 13 | 11 | 5 (TOML) | 13 family roles (mapped to 3 Kimi sub-agents + main) |
 | Hooks | 12 | eight | 24 | 16 |
-| MCP servers | 6 | 15 tools | N/A | 6 (32 tools) |
+| MCP servers | 6 | 15 tools | N/A | 6 (34 tools) |
 | Host | CodeBuddy | Trae IDE/Work/CLI | Codex | Kimi Code CLI |
 | Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Bash/Python MCP |
 | Native swarm | No | No | No | Yes (/swarm 300 agents) |

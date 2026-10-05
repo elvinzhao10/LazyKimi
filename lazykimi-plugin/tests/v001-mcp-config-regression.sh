@@ -2,7 +2,8 @@
 # v001-mcp-config-regression.sh
 # Verify .kimi-code/mcp.json is valid JSON with 6 servers, all required:false,
 # and that the six declared servers expose the exact v1.3.4 family tool
-# surface: 9/7/4/5/5/2 tools = 32 total (v1.3.4 port expectation).
+# surface: 9/7/6/5/5/2 tools = 34 total (status-dashboard ships the dashboard_service
+# and copy_task_context tools alongside the four read-only report tools).
 set -euo pipefail
 
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -42,7 +43,7 @@ for name, cfg in servers.items():
 PYEOF
 
 # Live tool-surface check: every server.sh answers tools/list with the exact
-# family tool set (32 tools across 6 servers). Kimi provides no env
+# family tool set (34 tools across 6 servers). Kimi provides no env
 # interpolation; the launcher derives the plugin root from its own path and
 # the project CWD comes from the CWD env (as init injects it).
 python3 - "$PLUGIN_ROOT" "$TMP" <<'PYEOF'
@@ -52,7 +53,7 @@ plugin, project = sys.argv[1:]
 expected = {
     "run-ledger": "create_run,list_runs,latest_run,read_state,summarize_run,append_event,update_task,create_checkpoint,recover_run",
     "verification": "discover_checks,run_check,record_gate_result,record_criterion_result,list_gate_results,create_repair_task,summarize_verification",
-    "status-dashboard": "show_run_status,show_task_graph,show_verification_matrix,show_pending_approvals",
+    "status-dashboard": "show_run_status,show_task_graph,show_verification_matrix,show_pending_approvals,dashboard_service,copy_task_context",
     "context-graph": "blast_radius,file_deps,symbol_search,symbol_refs,repo_overview",
     "code-intel": "diagnostics,typecheck,find_references,goto_definition,symbols",
     "docs": "get_library_docs,list_supported_registries",
@@ -78,8 +79,8 @@ for server, csv in expected.items():
     if names != want:
         raise SystemExit(f"{server}: tool surface mismatch: got {names}, expected {want}")
     total += len(names)
-if total != 32:
-    raise SystemExit(f"expected 32 tools across 6 servers, counted {total}")
+if total != 34:
+    raise SystemExit(f"expected 34 tools across 6 servers, counted {total}")
 print(f"tool surface: 6 servers, {total} tools, exact family sets")
 PYEOF
 

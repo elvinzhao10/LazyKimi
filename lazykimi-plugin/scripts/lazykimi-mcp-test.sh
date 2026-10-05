@@ -3,7 +3,7 @@
 #
 # Ported from the LazyZCode v1.3.4 family script (lazyzcode-mcp-test.sh):
 # exercises initialize + tools/list on every server, asserts the exact
-# 32-tool family surface (9/7/4/5/5/2 per server), runs the run-state
+# 34-tool family surface (9/7/6/5/5/2 per server), runs the run-state
 # round-trip through the run-ledger tools against a temp project CWD, plus
 # one safe representative tool call per server, the stream-protocol
 # robustness check, malformed-params robustness, and the SSRF/path-boundary
@@ -184,7 +184,7 @@ print(json.dumps({
 PYEOF
 }
 
-echo "=== LazyKimi MCP integration test (6 declared servers, 32 tools) ==="
+echo "=== LazyKimi MCP integration test (6 declared servers, 34 tools) ==="
 echo "Plugin root: $PLUGIN"
 echo "Project CWD: $CWD"
 echo ""
@@ -221,11 +221,11 @@ check "verification/discover_checks" "MCP integration" "$OUT"
 OUT=$(rpc verification '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"summarize_verification","arguments":{"run_id":"mcptest"}}}')
 check "verification/summarize_verification" "\"run_id\": *\"mcptest\"" "$OUT"
 
-echo "--- status-dashboard (4 tools) ---"
+echo "--- status-dashboard (6 tools) ---"
 OUT=$(rpc status-dashboard '{"jsonrpc":"2.0","id":1,"method":"initialize"}')
 check "status-dashboard/initialize" "status-dashboard" "$OUT"
 OUT=$(rpc status-dashboard '{"jsonrpc":"2.0","id":2,"method":"tools/list"}')
-tool_names 4 "show_run_status,show_task_graph,show_verification_matrix,show_pending_approvals" "$OUT"
+tool_names 6 "show_run_status,show_task_graph,show_verification_matrix,show_pending_approvals,dashboard_service,copy_task_context" "$OUT"
 OUT=$(rpc status-dashboard '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"show_run_status","arguments":{"run_id":"mcptest"}}}')
 check "status-dashboard/show_run_status" "completion_assessment" "$OUT"
 OUT=$(rpc status-dashboard '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"show_task_graph","arguments":{"run_id":"mcptest"}}}')

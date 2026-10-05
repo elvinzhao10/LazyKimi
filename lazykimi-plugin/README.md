@@ -72,7 +72,7 @@ be verified in a live session:
 | `agents/` | 13 family role-agent definitions | Used by the orchestrator for role dispatch |
 | `commands/` | 20 named slash-command workflows | Host entry points incl. lifecycle commands |
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
-| `mcp/` | 6 local MCP servers (bash + Python stdio) with 32 tools | Host starts each over stdio; declarations are recipes, not running services |
+| `mcp/` | 6 local MCP servers (bash + Python stdio) with 34 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
 | `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.3.5 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |

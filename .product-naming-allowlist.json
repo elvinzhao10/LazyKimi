@@ -2295,6 +2295,13 @@
       "count": 3,
       "classification": "source-identity",
       "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard.vendor.json",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Vendored generated-dashboard provenance manifest naming its upstream source repository and path; the vendored files it pins stay hash-exempt only while their bytes match the pinned sha256 values."
     }
   ],
   "stableIdentityFiles": [

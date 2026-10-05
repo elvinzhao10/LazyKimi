@@ -208,7 +208,7 @@ safe package checks separate from marketplace and connector changes.
 | Skills | 19 | Host-facing workflow policies for planning, execution, review, and verification. |
 | Commands | 20 | Named host entry points for those workflow policies. |
 | Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
-| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (32 tools). |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (34 tools). |
 | Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
 
 ## LazySeries family
