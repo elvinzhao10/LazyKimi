@@ -2302,6 +2302,13 @@
       "count": 2,
       "classification": "source-identity",
       "reason": "Vendored generated-dashboard provenance manifest naming its upstream source repository and path; the vendored files it pins stay hash-exempt only while their bytes match the pinned sha256 values."
+    },
+    {
+      "path": "lazykimi-plugin/shared/project.vendor.json",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Vendor provenance sidecar for the pinned shared/project family: names the LazyBuddy source repository and payload path exactly as the family vendor manifest records them (same source-identity basis as dashboard.vendor.json)."
     }
   ],
   "stableIdentityFiles": [

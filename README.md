@@ -24,7 +24,7 @@ products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 ## What's in 1.4.0
 
 - The family's portable dashboard core is vendored hash-pinned in the package, with a Kimi-native adapter (`shared/dashboard-host/`) and a local browser UI: Work / Verification / Plan edits, task inspector, evidence preview, and queue planning.
-- The status-dashboard MCP server grows from 4 to 6 tools (`dashboard_service`, `copy_task_context`); the declared tool total is 34 across 6 servers.
+- The status-dashboard MCP server grows from 4 to 7 tools (`dashboard_service`, `copy_task_context`, and the typed `project` platform tool); the declared tool total is 35 across 6 servers.
 - Honest capability labels ship with the adapter: browser, transactional edits, project queue, context copy and observations are `available`; embedding, chat handoff and wake are `unobserved`; native host readiness is `pending`.
 - Queue edits never start work: queued plans can be created, amended and reordered, but activation is a separate explicit action.
 - Project-bound MCP binding rules are unchanged; manifest MCP launchers still fail closed without explicit project binding.
@@ -48,7 +48,7 @@ local package surface until a fresh host session is observed.
 | v1.3.3 hardening | Host-specific hook, MCP and publication repairs. |
 | v1.3.4 maintenance | Transactional run integrity, safer lifecycle and native adapter repairs. |
 | v1.3.5 repairs | Real runtime exercises, bounded hooks, dependency updates and current platform guidance. |
-| v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 6-tool status-dashboard (34 tools total), honest capability labels. |
+| v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 7-tool status-dashboard (35 tools total), honest capability labels. |
 
 ### Just ask, or use a command — both work
 
@@ -218,13 +218,13 @@ safe package checks separate from marketplace and connector changes.
 | Skills | 19 | Host-facing workflow policies for planning, execution, review, and verification. |
 | Commands | 20 | Named host entry points for those workflow policies. |
 | Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
-| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (34 tools). |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (35 tools). |
 | Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
 
 ## Local dashboard surface (v1.4.0)
 
 - Entry: `node lazykimi-plugin/shared/dashboard-host/cli.mjs start|status|open|stop --project-root <root> --project-id <id> --run-id <run> [--port N]`. `open` returns the browser entry; the service binds locally (loopback only, port-0 default binding, credential files at mode 0600).
-- MCP tools: `dashboard_service` (start, inspect, stop, or return the local dashboard entry) and the read-only `copy_task_context` on the status-dashboard server — 6 tools there, 34 across the six servers.
+- MCP tools: `dashboard_service` (start, inspect, stop, or return the local dashboard entry), the read-only `copy_task_context`, and the typed `project` platform tool on the status-dashboard server — 7 tools there, 35 across the six servers.
 - Capability labels shipped with the adapter: browser, transactional edits, project queue, context copy, observations — `available`; embedding, chat handoff, wake — `unobserved`; native host readiness — `pending`.
 - Queue planning (create, amend, reorder) is available in the browser UI; queue edits never start work, and activation is a separate explicit action.
 

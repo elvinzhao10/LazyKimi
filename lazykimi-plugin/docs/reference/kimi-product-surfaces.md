@@ -73,3 +73,28 @@ record the exact app name. Use [the install guide](../03-install-and-host-verifi
 for package checks and [the Work guide](../11-kimi-work-setup.md) for fallback limits.
 
 See [the current platform audit](platform-status-2026-10-02.md) for the current plugin commands, managed-copy retention and shared-core boundary.
+
+## Project platform capability surface record (v1.4.0, T24)
+
+The persistent project platform (vendored `shared/project` family, the Kimi
+project record under `.lazykimi/project/`, the neutral `.lazyseries/project.json`
+registry, source editing, plan/baseline records and honest run observations) is
+proven at the **package** scope only: real CLI round trips through
+`shared/project/cli.mjs` and `shared/dashboard-host/project.mjs`, and real
+MCP stdio round trips through the status-dashboard `project` tool, all driven
+from this repository's tests against disposable fixture projects. Package
+proof does not establish native host adoption.
+
+| Capability | Package evidence (this repo) | Kimi Code CLI | VS Code / ACP editor | Code Desktop | Kimi Work |
+| --- | --- | --- | --- | --- | --- |
+| Project init/read/command (`.lazykimi/project/`) | `shared/dashboard-host/test/project-adapter.test.mjs` (real bridge round trips) | not observed in a host session | not observed | not observed | not observed |
+| Registered original-source editing | same test, `source.edit` preview/apply with fence/prose preservation | not observed | not observed | not observed | not observed |
+| Native run link + honest execution observation | same test, `link_native_run` + `observe` over `.lazykimi` journal/CAS manifests | not observed | not observed | not observed | not observed |
+| Typed project tools over MCP | same test, status-dashboard `project` tool stdio round trip | host adoption pending (project-bound MCP route exists; not observed in a client) | not observed | not observed | not delivered by the skills fallback (fallback ships skills only, no MCP) |
+| Pre-init inertness (typed hint, no side effects) | same test (IO-1/IO-3 probes) | n/a — property of the package route | n/a | n/a | n/a |
+
+Conversational host-session consumption, automatic wake and host embedding of
+the project tools stay explicitly **unavailable/unobserved** on every surface
+until the exact named host surface exercises them; `HOST READINESS: PENDING`
+remains authoritative. Native delivery/consumption of recorded requests is
+reported by the native runtime only and is never inferred from file writes.

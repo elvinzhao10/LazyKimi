@@ -11,7 +11,8 @@ bounded and pending.
   `dashboard_service` (start, inspect, stop, or return the local browser
   dashboard entry) and the read-only `copy_task_context` (copy a validated
   native Kimi producer context without executing or consuming it). The
-  declared tool total moves from 32 to 34 across the six servers.
+  declared tool total moves from 32 to 34 across the six servers, extended
+  to 35 by the typed `project` platform tool below.
 - The portable dashboard core is vendored hash-pinned under
   `lazykimi-plugin/shared/dashboard/` with a tracked vendor manifest, and the
   Kimi-native adapter ships beside it (`shared/dashboard-host/`). The
@@ -21,13 +22,24 @@ bounded and pending.
 - Queue planning (create, amend, reorder queued plans) is available through
   the browser UI; queue edits never start work. Activation remains a
   separate explicit bridge action.
-- Documentation mirrors now state the exact surface (6 servers / 34 tools)
+- Documentation mirrors now state the exact surface (6 servers / 35 tools)
   and correct the stale 4-tool and 32-tool strings, including the capability
   comparison row; a committed machine-local path in the history docs was
   replaced with a workspace placeholder.
 - The extracted-package self-check boundary is documented: `doctor` is
   project-scoped and exits 1 in a bare extraction until `lazykimi init` has
   bound a project; use `load-check` for bare-extraction verification.
+- The persistent project platform is vendored hash-pinned under
+  `lazykimi-plugin/shared/project/` (with `project.vendor.json`, the same
+  hash-pinned exemption as the dashboard core) and ported through the Kimi
+  native adapter: a persistent project record under `.lazykimi/project/`,
+  the neutral `.lazyseries/project.json` registry, registered original-source
+  editing with crash-recovery journaling, honest native run observations from
+  Kimi's own journal/CAS evidence, and a typed `project` tool on the
+  status-dashboard server. Pre-init surfaces stay inert with typed hints, and
+  every capability stays package-scoped per
+  [the surface record](docs/reference/kimi-product-surfaces.md) — no host
+  adoption is claimed for any Kimi surface.
 
 ## Measured efficiency
 

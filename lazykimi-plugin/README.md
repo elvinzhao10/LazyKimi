@@ -72,7 +72,7 @@ be verified in a live session:
 | `agents/` | 13 family role-agent definitions | Used by the orchestrator for role dispatch |
 | `commands/` | 20 named slash-command workflows | Host entry points incl. lifecycle commands |
 | `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
-| `mcp/` | 6 local MCP servers (bash + Python stdio) with 34 tools | Host starts each over stdio; declarations are recipes, not running services |
+| `mcp/` | 6 local MCP servers (bash + Python stdio) with 35 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `shared/` | Hash-pinned vendored dashboard core (`dashboard/` + `dashboard.vendor.json`) plus the Kimi-native `dashboard-host/` adapter | Local browser surface: transactional edits, queue planning (edits never start work), context copy; host readiness pending |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
 | `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.4.0 |
@@ -289,13 +289,13 @@ only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` (or the
 plugin manifest) actually fires them. Package readiness does not prove hook
 execution. Full policy: [docs/reference/hook-policy.md](docs/reference/hook-policy.md).
 
-## MCP list (6 servers, 34 tools)
+## MCP list (6 servers, 35 tools)
 
 | Server | Tools | Purpose |
 | --- | ---: | --- |
 | `lazykimi-run-ledger` | 9 | Durable workflow records (`create_run`, `list_runs`, `latest_run`, `read_state`, `summarize_run`, `append_event`, `update_task`, `create_checkpoint`, `recover_run`) |
 | `lazykimi-verification` | 7 | Verification store and gates (`create_repair_task`, `discover_checks`, `list_gate_results`, `record_criterion_result`, `record_gate_result`, `run_check`, `summarize_verification`) |
-| `lazykimi-status-dashboard` | 6 | Status views plus local dashboard service and producer-context copy (`show_run_status`, `show_task_graph`, `show_verification_matrix`, `show_pending_approvals`, `dashboard_service`, `copy_task_context`) |
+| `lazykimi-status-dashboard` | 7 | Status views plus local dashboard service, producer-context copy and the typed project platform tool (`show_run_status`, `show_task_graph`, `show_verification_matrix`, `show_pending_approvals`, `dashboard_service`, `copy_task_context`, `project`) |
 | `lazykimi-context-graph` | 5 | Local relationships (`blast_radius`, `file_deps`, `symbol_search`, `symbol_refs`, `repo_overview`) |
 | `lazykimi-code-intel` | 5 | Code helpers (`diagnostics`, `typecheck`, `find_references`, `goto_definition`, `symbols`) |
 | `lazykimi-docs` | 2 | Fixed-registry docs (`get_library_docs`, `list_supported_registries`) |
