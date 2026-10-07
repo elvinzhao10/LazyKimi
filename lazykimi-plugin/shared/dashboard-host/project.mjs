@@ -190,6 +190,7 @@ function contextSummary(snapshot) {
     requests: { total: requests.length, by_delivery: tally(requests, request => request.delivery) },
     boundaries: { native_delivery: 'unobserved', host_wake: 'unclaimed',
       native_approval_observation: 'unobserved',
+      git_observation: 'vendored collectors byte-pinned but not wired to any Kimi-exposed route; commit links are run-side repo_head/content_revision only',
       consumption: 'reported by the native runtime only; never inferred from file writes' },
   };
 }

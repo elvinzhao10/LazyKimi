@@ -2,6 +2,10 @@
 
 Root release history for LazyKimi. Detailed plugin-level history (including the v0.x record) remains in [lazykimi-plugin/CHANGELOG.md](lazykimi-plugin/CHANGELOG.md).
 
+## [1.4.0] - 2026-10-07 — project platform
+
+Adopt the family's persistent project platform through the Kimi-native adapter: the vendored `lazykimi-plugin/shared/project/` family re-pins to tree `95c0e0fc…` (source revision `7bf5bd8`; its README no longer links files the family selection excludes and its CLI entry guard resolves symlinked invocation paths instead of silently no-oping), while Kimi's journal/CAS, namespace, and per-surface boundaries remain the owning surfaces. The project context summary gains the explicit git-observation boundary: the vendored collectors are byte-pinned but wired to no Kimi-exposed route, and commit links stay run-side (`repo_head`/`content_revision`). The T24-R1 no-observed-host-adoption capability assertion stays in force unchanged. Host embedding, chat handoff, and wake remain unobserved; host readiness stays pending; each surface (CLI, VS Code/ACP, Code Desktop, Work) still requires its own current-client acceptance. See RELEASE_NOTES.md.
+
 ## [1.4.0] - 2026-10-05
 
 Vendor the family's portable dashboard core hash-pinned behind a Kimi-native adapter, grow the status-dashboard MCP server from 4 to 6 tools (34 declared tools across 6 servers), and publish honest capability labels: browser, transactional edits, project queue, context copy and observations available; embedding, chat handoff and wake unobserved; native host readiness pending. Queue edits never start work; project-bound MCP binding rules are unchanged. Correct the stale tool-count mirrors, neutralize a committed machine-local path in the history docs, and document the project-scoped doctor init gate (`load-check` validates bare extractions). See RELEASE_NOTES.md for verification scope and pending native host acceptance.

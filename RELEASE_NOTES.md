@@ -5,6 +5,23 @@ the family's portable dashboard core behind its own host adapter; LazyKimi
 adds the Kimi-native adapter surface and keeps every host claim labeled,
 bounded and pending.
 
+## Project platform (2026-10-07)
+
+- The persistent project record is vendored as the family's second pinned
+  tree: `lazykimi-plugin/shared/project/` + `project.vendor.json` re-pin to
+  family tree `95c0e0fc…` (source revision `7bf5bd8`). Kimi's adapter keeps
+  its own authority — journal/CAS, the Kimi namespace, and per-surface
+  boundaries — over the shared runtime's init/read/command/observe routes,
+  registered original-source editing, reconciliation, and telemetry.
+- The project context summary states the git-observation boundary explicitly:
+  the vendored collectors are byte-pinned but wired to no Kimi-exposed route,
+  and commit links stay run-side (`repo_head`/`content_revision`).
+- The T24-R1 capability-honesty assertion (no capability key ever claims
+  observed host adoption) stays in force unchanged; host embedding, chat
+  handoff, and host wake remain unobserved, native host readiness stays
+  pending, and each surface (Kimi Code CLI, VS Code/ACP, Code Desktop, Work)
+  still requires its own current-client acceptance.
+
 ## Eval-driven fixes
 
 - The status-dashboard MCP server grows from 4 to 6 tools:
