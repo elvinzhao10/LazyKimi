@@ -8,6 +8,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { digest, host, plugin, processCall, testPython } from './fixture.mjs';
 import { ACTIVITY_OBSERVER, producerAttemptObservations } from '../project.mjs';
+import { capabilities } from '../capabilities.mjs';
 
 const pythonDir = testPython.includes('/') ? dirname(testPython) : null;
 const PATH_PREFIX = [pythonDir, dirname(process.execPath)].filter(Boolean).join(':');
@@ -416,4 +417,10 @@ test('status-dashboard MCP serves project tools over the Kimi project record', a
     assert.equal(approvals.live_approval_tracking, false);
     assert.deepEqual(approvals.pending, [{ name: 'release', status: 'pending', result: '' }]);
   } finally { await f.cleanup(); }
+});
+
+test('per-surface capability record claims no observed host adoption', () => {
+  for (const [capability, status] of Object.entries(capabilities)) {
+    assert.notEqual(status, 'observed', `${capability} must not claim observed host adoption`);
+  }
 });

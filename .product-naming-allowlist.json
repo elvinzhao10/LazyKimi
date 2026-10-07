@@ -2309,6 +2309,20 @@
       "count": 2,
       "classification": "source-identity",
       "reason": "Vendor provenance sidecar for the pinned shared/project family: names the LazyBuddy source repository and payload path exactly as the family vendor manifest records them (same source-identity basis as dashboard.vendor.json)."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/state/project-dashboard-bridge.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Bridge source-path guard enumerates the family state-directory host ids (machine identifiers) its protected-path regex refuses to traverse."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/project-adapter.test.mjs",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Vendor-provenance test asserts the canonical LazyBuddy source repository URL exactly as the pinned shared/project family vendor manifest records it."
     }
   ],
   "stableIdentityFiles": [
