@@ -9,7 +9,7 @@ bounded and pending.
 
 - The persistent project record is vendored as the family's second pinned
   tree: `lazykimi-plugin/shared/project/` + `project.vendor.json` re-pin to
-  family tree `95c0e0fc…` (source revision `7bf5bd8`). Kimi's adapter keeps
+  family tree `1feb5646…` (source revision `537f393`). Kimi's adapter keeps
   its own authority — journal/CAS, the Kimi namespace, and per-surface
   boundaries — over the shared runtime's init/read/command/observe routes,
   registered original-source editing, reconciliation, and telemetry.
