@@ -14,8 +14,11 @@ bounded and pending.
   boundaries — over the shared runtime's init/read/command/observe routes,
   registered original-source editing, reconciliation, and telemetry.
 - The project context summary states the git-observation boundary explicitly:
-  the vendored collectors are byte-pinned but wired to no Kimi-exposed route,
-  and commit links stay run-side (`repo_head`/`content_revision`).
+  the served dashboard does expose a live git view — a live probe saw
+  `/api/project/git` answer 200 behind the authenticated session and invoke the
+  vendored `git-observation/local` collector, reporting `observed` with the
+  fixture's commit facts (unauthenticated reads reject 401) — while run-side
+  commit links stay `repo_head`/`content_revision`.
 - The T24-R1 capability-honesty assertion (no capability key ever claims
   observed host adoption) stays in force unchanged; host embedding, chat
   handoff, and host wake remain unobserved, native host readiness stays
