@@ -176,7 +176,7 @@ sources are in the [surface guide](docs/reference/kimi-product-surfaces.md).
 | Route | Package behavior | Remaining acceptance |
 | --- | --- | --- |
 | Kimi Code CLI project init | `lazykimi init` creates explicitly bound project MCP configuration; the hook helper installs eight critical hooks in the selected Kimi config. | Fresh session loading, command/skill use, hooks and MCP. |
-| Kimi plugin manifest | Declares skills, commands, agents, sixteen hooks and six MCP launchers. Unbound project-state MCP fails closed. | Full plugin acceptance and supported request-context project binding. Use the project route for bound MCP. |
+| Kimi plugin manifest | Declares skills, commands, agents, nineteen hooks and six MCP launchers. Unbound project-state MCP fails closed. | Full plugin acceptance and supported request-context project binding. Use the project route for bound MCP. |
 | Kimi Work | Experimental full plugin; fallback imports skills and uses manual MCP configuration. | Full plugin loading, agents, commands, hooks and project binding. Fallback excludes commands, agents and hooks. |
 
 Choose one route per project; combining manifest and project routes may fire

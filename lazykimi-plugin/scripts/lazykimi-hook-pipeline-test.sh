@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-# lazykimi-hook-pipeline-test.sh — Simulates Kimi's 16-event hook lifecycle by
-# piping realistic payloads (from tests/fixtures/hook-events/) through each
-# hook in sequence. Ported from the LazyZCode v1.3.4 hook-pipeline-test.sh and
-# extended to the Kimi 16-event surface, including oversized-input and
-# wrapper-resolution adversarial cases. Proves the entire hook chain works
-# end-to-end without requiring a live Kimi session.
+# lazykimi-hook-pipeline-test.sh — Simulates LazyKimi's adopted 19-event Kimi
+# hook lifecycle by piping realistic payloads (from tests/fixtures/hook-events/)
+# through each hook in sequence. Ported from the LazyZCode v1.3.4
+# hook-pipeline-test.sh and extended to the Kimi surface (host documents 20
+# events; SessionHeartbeat is not adopted — T8 rescan 2026-10-18), including
+# oversized-input and wrapper-resolution adversarial cases. Proves the entire
+# hook chain works end-to-end without requiring a live Kimi session.
 #
 # Kimi output contract under test:
 #   - SessionStart / UserPromptSubmit / Stop / SubagentStop / PostCompact print
@@ -98,7 +99,7 @@ expect_deny() {
     fi
 }
 
-echo "=== LazyKimi Hook Pipeline Activation Test (Kimi 16-event surface) ==="
+echo "=== LazyKimi Hook Pipeline Activation Test (Kimi 19-adopted-event surface) ==="
 echo "Simulating the Kimi hook lifecycle with realistic payloads (project: $CWD)..."
 echo ""
 
@@ -221,7 +222,7 @@ else
     report "Stop (context pressure)" fail "expected silent pass-through, got: ${out:0:80}"
 fi
 
-# --- Advisory 8 (plugin-manifest route only) ---
+# --- Advisory 11 (plugin-manifest route only) ---
 
 # 17. SubagentStart — silent dispatch ledger event (no active run here).
 expect_stdout "SubagentStart" "subagent-start.sh" "SubagentStart.json" "-" 0
@@ -251,6 +252,14 @@ expect_stdout "StopFailure" "stop-failure.sh" "StopFailure.json" "-" 0
 expect_stdout "Interrupt" "interrupt.sh" "Interrupt.json" "-" 0
 expect_stdout "Notification" "notification.sh" "Notification.json" "-" 0
 
+# 25-27. TurnStarted / UserPromptQueued / TaskStarted — silent advisory ledger
+#        consumers adopted from the Kimi Code CLI hooks reference (0.32.0,
+#        2026-08-04; re-verified 2026-10-18, T8 rescan). Structural metadata
+#        only; prompt/description prose is never ledgered.
+expect_stdout "TurnStarted" "turn-started.sh" "TurnStarted.json" "-" 0
+expect_stdout "UserPromptQueued" "user-prompt-queued.sh" "UserPromptQueued.json" "-" 0
+expect_stdout "TaskStarted" "task-started.sh" "TaskStarted.json" "-" 0
+
 printf '%b' "$RESULTS"
 echo ""
 echo "=== Results ==="
@@ -260,7 +269,7 @@ echo ""
 if [ "$FAIL" -eq 0 ]; then
     echo "Hook pipeline test: ALL PASS"
     echo ""
-    echo "All 16 Kimi hook events produce correct output for realistic payloads."
+    echo "All 19 adopted Kimi hook events produce correct output for realistic payloads."
     echo "Package-level hook behavior passed; live host registration remains unchecked."
     exit 0
 else

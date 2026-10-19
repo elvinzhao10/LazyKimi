@@ -71,7 +71,7 @@ be verified in a live session:
 | `.kimi-code/mcp.json` | 6 local MCP server declarations with explicit project binding | Kimi Code CLI project route; manual Kimi Work connectors require live proof |
 | `agents/` | 13 family role-agent definitions | Used by the orchestrator for role dispatch |
 | `commands/` | 20 named slash-command workflows | Host entry points incl. lifecycle commands |
-| `hooks/` | 16 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 8 advisory hooks activate only through the plugin manifest |
+| `hooks/` | 19 hook event declarations + shell scripts | Critical 8 installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`; the remaining 11 advisory hooks (incl. TurnStarted/UserPromptQueued/TaskStarted adopted 2026-10-18) activate only through the plugin manifest |
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 35 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `shared/` | Hash-pinned vendored dashboard core (`dashboard/` + `dashboard.vendor.json`) plus the Kimi-native `dashboard-host/` adapter | Local browser surface: transactional edits, queue planning (edits never start work), context copy; host readiness pending |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
@@ -88,7 +88,7 @@ specification):
 - **Plugin manifest route (recommended):** `/plugins marketplace <absolute-path-to-marketplace.json>`
   with `lazykimi-plugin/marketplace.json` (v2), then select and install the `lazykimi`
   plugin. Kimi Code CLI reads `kimi.plugin.json`, activates skills and
-  commands and declares 16 inline hooks and 6 MCP launchers. Unbound manifest
+  commands and declares 19 inline hooks and 6 MCP launchers. Unbound manifest
   MCP launchers fail closed: managed plugin cwd is not the user's project.
   Use the project route for project-bound MCP. Live activation remains experimental.
 - **Project config route (for cloned repos):** `lazykimi init [--mcp-mode
@@ -263,7 +263,7 @@ still require the independent hook permission layer. Model, effort, turn
 budgets, and worktree isolation are plan/session decisions, not agent header
 enforcement. See [native adapter boundaries](docs/reference/native-adapter.md).
 
-## Hook list (16)
+## Hook list (19)
 
 | Event | Script | Enforcement |
 | --- | --- | --- |
@@ -283,6 +283,9 @@ enforcement. See [native adapter boundaries](docs/reference/native-adapter.md).
 | `StopFailure` | `stop-failure.sh` | Advisory: stop-failure ledger event |
 | `Interrupt` | `interrupt.sh` | Advisory: interrupt ledger event |
 | `Notification` | `notification.sh` | Advisory: no-op logger |
+| `TurnStarted` | `turn-started.sh` | Advisory: turn ledger event (adopted 2026-10-18) |
+| `UserPromptQueued` | `user-prompt-queued.sh` | Advisory: queue ledger event (adopted 2026-10-18) |
+| `TaskStarted` | `task-started.sh` | Advisory: task ledger event (adopted 2026-10-18) |
 
 Hooks are host-governed: the package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` (or the

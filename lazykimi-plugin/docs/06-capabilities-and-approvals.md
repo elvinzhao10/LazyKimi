@@ -60,8 +60,10 @@ This is an SSRF boundary, not a general web fetch.
 
 ## Hook policy
 
-The sixteen hook scripts under `hooks/` apply narrow local policy to host
-events with the v1.3.4 hardened semantics (1 MiB input cap with
+The nineteen hook scripts under `hooks/` (19 of the 20 host-documented
+events; `SessionHeartbeat` is documented but deliberately not adopted —
+60-second firing cadence, no gating consumer) apply narrow local policy to
+host events with the v1.3.4 hardened semantics (1 MiB input cap with
 oversized-input rejection, malformed-payload rejection, identity
 normalization + wrapper resolution, role-scoped writes, secret-like path
 denial, destructive-operation denial, deny = exit 2, fail-open on internal
@@ -85,6 +87,9 @@ errors):
 | `PermissionRequest` | Record approval request in the ledger. |
 | `PermissionResult` | Record approval decision in the ledger. |
 | `Notification` | No-op logger. |
+| `TurnStarted` | Turn ledger event; structural metadata only (adopted 2026-10-18). |
+| `UserPromptQueued` | Queue ledger event; structural metadata only (adopted 2026-10-18). |
+| `TaskStarted` | Task ledger event; structural metadata only (adopted 2026-10-18). |
 
 Hooks are host-governed. The package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` actually

@@ -420,7 +420,7 @@ for dir in .kimi-code/skills commands agents hooks mcp scripts schemas tests doc
     fi
 done
 
-# 5. Hook wiring: the manifest carries the 16 inline Kimi events and every
+# 5. Hook wiring: the manifest carries the 19 inline Kimi events and every
 # referenced consumer script exists and is executable.
 if hook_result=$("$PYTHON_BIN" - "${PLUGIN_ROOT}" <<'PY' 2>&1
 import json
@@ -435,6 +435,9 @@ expected_events = [
     "PostToolUseFailure", "Stop", "SubagentStop", "SubagentStart",
     "PreCompact", "PostCompact", "SessionEnd", "StopFailure", "Interrupt",
     "PermissionRequest", "PermissionResult", "Notification",
+    # Adopted from the Kimi Code CLI hooks reference (T8 rescan,
+    # re-verified 2026-10-18); SessionHeartbeat intentionally not adopted.
+    "TurnStarted", "UserPromptQueued", "TaskStarted",
 ]
 errors = []
 
@@ -496,9 +499,9 @@ if errors:
 print("ok")
 PY
 ); then
-    check "Hook wiring (16 inline events -> executable consumers)" ok
+    check "Hook wiring (19 inline events -> executable consumers)" ok
 else
-    check "Hook wiring (16 inline events -> executable consumers)" "${hook_result}"
+    check "Hook wiring (19 inline events -> executable consumers)" "${hook_result}"
 fi
 
 # 6. MCP scaffold exists (.kimi-code/mcp.json project template).

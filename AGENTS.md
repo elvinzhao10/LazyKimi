@@ -93,7 +93,7 @@ When the user types `onboard`:
    - **Plugin manifest route (`kimi-plugin-manifest`, default full
      route):** use `/plugins marketplace <absolute-release-root>/lazykimi-plugin/marketplace.json`
      (v2), or `/plugins install <pinned-repository-url>` on clients matching the
-     current official plugin guide. Declares skills, commands, agents and 16 inline hooks. Manifest MCP
+     current official plugin guide. Declares skills, commands, agents and 19 inline hooks. Manifest MCP
      launchers fail closed without explicit project binding; use the project
      init route for project-bound MCP until manifest request context is supported.
    - **Project init route (`project-init-route`, manual project route):**
@@ -126,7 +126,7 @@ When the user types `onboard`:
 
 | Route | Safe package artifact | Host action and expected observation |
 | --- | --- | --- |
-| **Kimi plugin manifest (`kimi-plugin-manifest`)** | `lazykimi-plugin/marketplace.json` (v2) + `lazykimi-plugin/kimi.plugin.json`; 19 skills, 20 commands, 13 agents, 16 hook events, 6 MCP servers (35 tools). | `/plugins marketplace <absolute-path-to-marketplace.json>` to browse and install the selected plugin, or `/plugins install <pinned-repository-url>`; reload or start a fresh session. Verify skills/commands and hooks. Manifest MCP remains blocked without a supported project binding; use the project route for project-bound MCP. |
+| **Kimi plugin manifest (`kimi-plugin-manifest`)** | `lazykimi-plugin/marketplace.json` (v2) + `lazykimi-plugin/kimi.plugin.json`; 19 skills, 20 commands, 13 agents, 19 hook events, 6 MCP servers (35 tools). | `/plugins marketplace <absolute-path-to-marketplace.json>` to browse and install the selected plugin, or `/plugins install <pinned-repository-url>`; reload or start a fresh session. Verify skills/commands and hooks. Manifest MCP remains blocked without a supported project binding; use the project route for project-bound MCP. |
 | **Project init (`project-init-route`)** | `lazykimi init` output: project `.kimi-code/` (skills, `AGENTS.md`, `mcp.json` with rewritten absolute paths) + `.lazykimi/` state; `scripts/install-hooks.sh` appends the eight critical `[[hooks]]` TOML entries. | Open the project in Kimi Code CLI; confirm via `/status` and `/mcp` that the six servers connect with the rewritten absolute paths. |
 | **Kimi Work fallback (`kimi-work-skills-fallback`)** | `scripts/install-kimi-work.sh` copying the `lazy-*` skills only. | Restart Kimi Work, observe one imported skill, add each `lazykimi-*` MCP connector manually one at a time. |
 

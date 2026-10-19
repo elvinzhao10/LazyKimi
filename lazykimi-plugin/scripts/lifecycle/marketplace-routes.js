@@ -16,7 +16,7 @@ const PLUGIN_MANIFEST_ARTIFACT = `${PLUGIN_DIR}/kimi.plugin.json`;
 // Canonical payload components: manifest component field -> plugin-root-relative
 // target. Kimi's plugin manifest declares skills (project-route payload dir) and
 // commands as directory strings; agents are auto-discovered from ./agents and
-// hooks (16 events) and mcpServers (6 servers) are declared INLINE in the
+// hooks (19 events) and mcpServers (6 servers) are declared INLINE in the
 // manifest — the opposite of ZCode's hooks.json/.mcp.json layout.
 const PAYLOAD_COMPONENTS = Object.freeze({
   skills: '.kimi-code/skills',
@@ -25,7 +25,7 @@ const PAYLOAD_COMPONENTS = Object.freeze({
 const OPTIONAL_COMPONENTS = Object.freeze({
   agents: 'agents',
 });
-const INLINE_HOOK_EVENTS = 16;
+const INLINE_HOOK_EVENTS = 19;
 const INLINE_MCP_SERVERS = 6;
 
 function digest(bytes) {

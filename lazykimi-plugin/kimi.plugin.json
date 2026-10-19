@@ -149,6 +149,21 @@
       "event": "Notification",
       "command": "bash ./hooks/notification.sh",
       "timeout": 5
+    },
+    {
+      "event": "TurnStarted",
+      "command": "bash ./hooks/turn-started.sh",
+      "timeout": 5
+    },
+    {
+      "event": "UserPromptQueued",
+      "command": "bash ./hooks/user-prompt-queued.sh",
+      "timeout": 5
+    },
+    {
+      "event": "TaskStarted",
+      "command": "bash ./hooks/task-started.sh",
+      "timeout": 5
     }
   ],
   "commands": "./commands/",

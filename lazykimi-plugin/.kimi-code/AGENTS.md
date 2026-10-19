@@ -112,7 +112,7 @@ JSON Schema (Draft 2020-12) files at `.lazykimi/schemas/` validate the runtime s
 Kimi Work (desktop agent, Beta 2026-06-03) is supported as a secondary host via skill import only. Limitations:
 
 - **No plugin manifest support**: `kimi.plugin.json` is ignored. No `/plugins install` route.
-- **No hooks**: The 16 hook scripts do not run on Kimi Work.
+- **No hooks**: The 19 hook scripts do not run on Kimi Work.
 - **No `sessionStart.skill`**: No automatic skill loading on session start.
 - **Manual MCP configuration**: Kimi Work does not auto-load `.kimi-code/mcp.json`. Add each of the 6 `lazykimi-*` MCP servers manually through Kimi Work's MCP configuration UI.
 
