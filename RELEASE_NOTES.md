@@ -5,11 +5,45 @@ the family's portable dashboard core behind its own host adapter; LazyKimi
 adds the Kimi-native adapter surface and keeps every host claim labeled,
 bounded and pending.
 
+## Completion pass (2026-10-19)
+
+A scoped completion pass over the 1.4.0 surfaces; every bullet cites the
+branch commit that delivers it.
+
+- Per-repo dashboard isolation: the family-wide per-repo store isolation and
+  foreign-runtime refusal matrix (d2f9651) — a foreign runtime's state and
+  event writes are refused, and each repository's dashboard stores stay
+  isolated to this package's own roots.
+- Served-project truth reconciled (b767b59): the Kimi served dashboard does
+  expose the live git view (`/api/project/git` answers 200 behind the
+  authenticated session and invokes the vendored `git-observation/local`
+  collector); run-side commit links stay `repo_head`/`content_revision`.
+- Kimi host-harness rescan adoption (8b3a782): the three stable native hook
+  events shipped in Kimi Code CLI 0.32.0 — TurnStarted, UserPromptQueued,
+  TaskStarted — are adopted as advisory manifest-only ledger consumers
+  (16 → 19 inline hook events; structural fields only, prose never
+  ledgered); SessionHeartbeat is documented but deliberately not adopted.
+  The per-surface rescan table records observation dates and URLs.
+- Family repin (be663b4): both vendored families re-pinned at source
+  revision `bb696092` — dashboard tree `e55a9c00…`, project tree `16561f3…`
+  — carrying the family's completed project-dashboard UI (dark-first design
+  tokens v2, de-tabbed shell with the static retractable sidebar and
+  in-place navigation, six redesigned views, navigation guards,
+  measured-and-held performance budgets) into this package byte-identically.
+- Residuals, honestly: dashboard embedding into a Kimi host surface, chat
+  handoff, and host wake remain unobserved; each surface (Kimi Code CLI,
+  VS Code/ACP, Code Desktop, Work) still requires its own current-client
+  acceptance; this package's known wall-clock telemetry flake is
+  pre-existing (observed before this pass, unchanged by it).
+
 ## Project platform (2026-10-07)
 
 - The persistent project record is vendored as the family's second pinned
-  tree: `lazykimi-plugin/shared/project/` + `project.vendor.json` re-pin to
-  family tree `1feb5646…` (source revision `537f393`). Kimi's adapter keeps
+  tree: `lazykimi-plugin/shared/project/` + `project.vendor.json` re-pinned
+  at delivery prep to family tree `1feb5646…` (source revision `537f393`)
+  and in the completion repin to tree `16561f3…` at source revision
+  `bb696092` (be663b4, alongside the dashboard family at tree `e55a9c00…`).
+  Kimi's adapter keeps
   its own authority — journal/CAS, the Kimi namespace, and per-surface
   boundaries — over the shared runtime's init/read/command/observe routes,
   registered original-source editing, reconciliation, and telemetry.

@@ -27,6 +27,13 @@ products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 - The status-dashboard MCP server grows from 4 to 7 tools (`dashboard_service`, `copy_task_context`, and the typed `project` platform tool); the declared tool total is 35 across 6 servers.
 - Honest capability labels ship with the adapter: browser, transactional edits, project queue, context copy and observations are `available`; embedding, chat handoff and wake are `unobserved`; native host readiness is `pending`.
 - Queue edits never start work: queued plans can be created, amended and reordered, but activation is a separate explicit action.
+- The completion pass repinned both vendored families at `bb696092`
+  (dashboard tree `e55a9c00…`, project tree `16561f3…`), carrying the
+  family's redesigned project dashboard — dark-first family design language,
+  a de-tabbed shell with a static retractable sidebar and in-place
+  navigation, six redesigned views — alongside this package's per-repo store
+  isolation matrix and the rescan adoption of the TurnStarted,
+  UserPromptQueued and TaskStarted hook events (19 inline hook events).
 - Project-bound MCP binding rules are unchanged; manifest MCP launchers still fail closed without explicit project binding.
 - Runtime checks execute real package and lifecycle paths; unknown exercises and failed checks cannot report success.
 - Hook input is bounded before parsing and stays out of process arguments.
@@ -49,6 +56,7 @@ local package surface until a fresh host session is observed.
 | v1.3.4 maintenance | Transactional run integrity, safer lifecycle and native adapter repairs. |
 | v1.3.5 repairs | Real runtime exercises, bounded hooks, dependency updates and current platform guidance. |
 | v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 7-tool status-dashboard (35 tools total), honest capability labels. |
+| v1.4.0 completion | Repinned families at `bb696092` with the redesigned project dashboard (dark-first, sidebar shell, in-place navigation), per-repo isolation and the 3-event hook adoption (19 inline hooks). |
 
 ### Just ask, or use a command — both work
 
@@ -219,7 +227,7 @@ safe package checks separate from marketplace and connector changes.
 | Commands | 20 | Named host entry points for those workflow policies. |
 | Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
 | MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (35 tools). |
-| Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
+| Hooks | 19 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 19 ride the plugin manifest (TurnStarted, UserPromptQueued and TaskStarted adopted from the 2026-10-18 rescan as advisory manifest-only consumers). |
 
 ## Local dashboard surface (v1.4.0)
 
@@ -227,6 +235,17 @@ safe package checks separate from marketplace and connector changes.
 - MCP tools: `dashboard_service` (start, inspect, stop, or return the local dashboard entry), the read-only `copy_task_context`, and the typed `project` platform tool on the status-dashboard server — 7 tools there, 35 across the six servers.
 - Capability labels shipped with the adapter: browser, transactional edits, project queue, context copy, observations — `available`; embedding, chat handoff, wake — `unobserved`; native host readiness — `pending`.
 - Queue planning (create, amend, reorder) is available in the browser UI; queue edits never start work, and activation is a separate explicit action.
+- After an explicit project init the served UI mounts the family's project
+  dashboard — a tab-free single surface: a static retractable
+  sidebar (WORKSPACE/OBSERVATION destination groups, 56px icon rail,
+  Cmd/Ctrl+B; Cmd/Ctrl+1..7 jump to destinations) navigates in place over a
+  capped history stack, with the dock inspector on the right. The family
+  design language is dark-first (light/dark/system persists) on design
+  tokens v2. Keyboard map: Tab keeps the native ring; `j`/`k` traverse list
+  scopes; `/` focuses the first filter; Escape closes the topmost overlay
+  and returns focus; segmented controls take Arrow/Home/End. Each
+  repository's dashboard stores stay isolated to that repository, and a
+  foreign runtime's writes are refused.
 
 These are package behaviors verified by local tests, not native host
 observations: dashboard embedding into a Kimi host surface, chat handoff and
