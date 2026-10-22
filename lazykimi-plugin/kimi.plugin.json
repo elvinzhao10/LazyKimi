@@ -23,7 +23,7 @@
   "sessionStart": {
     "skill": "lazy-init-deep"
   },
-  "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /lazy-init-deep on first use.",
+  "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /skill:lazykimi:lazy-init-deep on first use (qualified skill name; Kimi Code CLI 2.3.0+ dropped bare-name skill invocation).",
   "mcpServers": {
     "lazykimi-run-ledger": {
       "command": "node",
