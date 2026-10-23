@@ -157,7 +157,7 @@ KEYWORD_ROUTES = (
     (r'\bhandoff\b', 'handoff', '/lazy-handoff'),
     (r'\bstop-continuation\b', 'stop-continuation', '/lazy-stop-continuation'),
     (r'\bralph-loop\b', 'ralph-loop', '/lazy-ralph-loop'),
-    (r'\binit-deep\b', 'init-deep', '/lazy-init-deep'),
+    (r'\binit-deep\b', 'init-deep', 'the `/skill:lazykimi:lazy-init-deep` skill'),
     (r'\breview-work\b', 'review-work', '/lazy-review-work'),
     (r'\bremove-ai-slops\b', 'remove-ai-slops', 'the `lazy-remove-ai-slops` skill'),
 )

@@ -44,7 +44,7 @@ Triggers: `onboard`, `install LazyKimi`, `set up the plugin`, `verify the instal
       in a Kimi Code CLI session, add the repository through
       `/plugins marketplace` using `lazykimi-plugin/marketplace.json` (v2),
       then install the `lazykimi` plugin as a separate approved action. This
-      route delivers skills, commands, agents, the 16 inline hooks, and the
+      route delivers skills, commands, agents, the 19 inline hooks, and the
       6 inline `mcpServers`.
    2. **Project init route (`project-init-route`, manual project route):**
       from the target project, run `lazykimi init` (copies `.kimi-code/` and

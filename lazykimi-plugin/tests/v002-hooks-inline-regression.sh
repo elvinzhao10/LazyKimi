@@ -18,11 +18,11 @@ const m = require('${MANIFEST}');
 if (!Array.isArray(m.hooks) || m.hooks.length === 0) { console.error('no inline hooks array in manifest'); process.exit(1); }
 " || fail "manifest has no inline hooks array"
 
-# 3. Manifest has 16 hooks (8 original + 8 new advisory)
+# 3. Manifest has 19 hooks (8 critical + 11 advisory)
 node -e "
 const m = require('${MANIFEST}');
-if (m.hooks.length !== 16) { console.error('expected 16 hooks, got ' + m.hooks.length); process.exit(1); }
-" || fail "manifest should have 16 hooks (8 original + 8 advisory)"
+if (m.hooks.length !== 19) { console.error('expected 19 hooks, got ' + m.hooks.length); process.exit(1); }
+" || fail "manifest should have 19 hooks (8 critical + 11 advisory)"
 
 # 4. Each hook has event, command, timeout
 node -e "
@@ -42,9 +42,9 @@ for (const h of m.hooks) {
 }
 " || fail "some hook command does not use ./hooks/ prefix"
 
-# 6. 16 hook scripts exist
+# 6. 19 hook scripts exist
 count=$(ls "${PLUGIN_ROOT}/hooks/"*.sh 2>/dev/null | wc -l)
-[[ ${count} -eq 16 ]] || fail "expected 16 hook scripts, got ${count}"
+[[ ${count} -eq 19 ]] || fail "expected 19 hook scripts, got ${count}"
 
 # 7. All hook scripts pass bash -n
 for f in "${PLUGIN_ROOT}/hooks/"*.sh; do

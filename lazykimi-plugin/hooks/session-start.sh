@@ -67,7 +67,7 @@ fi
 if [ -f "$CWD/AGENTS.md" ] || [ -f "$CWD/.kimi-code/AGENTS.md" ]; then
     note "(LazyKimi): Project memory found (AGENTS.md)."
 else
-    note "(LazyKimi): Project memory (AGENTS.md) missing. Run /lazy-init-deep or ask to initialize project memory."
+    note "(LazyKimi): Project memory (AGENTS.md) missing. Run /skill:lazykimi:lazy-init-deep or ask to initialize project memory."
 fi
 
 # --- Check for project rules ---

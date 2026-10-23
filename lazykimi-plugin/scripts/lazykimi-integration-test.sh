@@ -57,25 +57,25 @@ for f in plan-reread.md test-runs.md manual-qa.md adversarial-qa.md reviewer.md;
   echo "- Integration test evidence stub ($f)" > "$TMP/.lazykimi/evidence/$f"
 done
 
-# Step 4: doctor must PASS in the fresh project and report 16 hooks.
+# Step 4: doctor must PASS in the fresh project and report 19 hooks.
 if ( cd "$TMP" && HOME="$TMP" node "$CLI" doctor ) >"$TMP/doctor.out" 2>&1 \
   && grep -q 'PASS' "$TMP/doctor.out" \
-  && grep -q 'hooks count (16 expected)' "$TMP/doctor.out"; then
-  pass "doctor passes in fresh project (16 hooks)"
+  && grep -q 'hooks count (19 expected)' "$TMP/doctor.out"; then
+  pass "doctor passes in fresh project (19 hooks)"
 else
   cat "$TMP/doctor.out" >&2
-  fail "doctor did not pass or did not report 16 hooks"
+  fail "doctor did not pass or did not report 19 hooks"
 fi
 
 # Step 5: load-check must report the v1.3.4 inventory: 19/19 skills, 20/20
-# commands, 13/13 agents, 16/16 inline hook events, 6/6 MCP servers.
+# commands, 13/13 agents, 19/19 inline hook events, 6/6 MCP servers.
 if node "$CLI" load-check >"$TMP/load.out" 2>&1 \
   && grep -q '19/19' "$TMP/load.out" \
   && grep -q '20/20' "$TMP/load.out" \
   && grep -q '13/13' "$TMP/load.out" \
-  && grep -q '16/16' "$TMP/load.out" \
+  && grep -q '19/19 hooks' "$TMP/load.out" \
   && grep -q '6/6 MCP' "$TMP/load.out"; then
-  pass "load-check reports 19/19 skills, 20/20 commands, 13/13 agents, 16/16 hooks, 6/6 MCP"
+  pass "load-check reports 19/19 skills, 20/20 commands, 13/13 agents, 19/19 hooks, 6/6 MCP"
 else
   cat "$TMP/load.out" >&2
   fail "load-check counts mismatch"

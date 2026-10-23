@@ -12,8 +12,8 @@
     "stdout_contract": "strict JSON {\"additionalContext\": ...} or nothing; diagnostics to stderr",
     "active_statuses": ["active", "paused", "created", "planning", "executing", "blocked", "verifying", "reviewing"],
     "registration_routes": {
-      "kimi-plugin-manifest": "all 16 events inline in kimi.plugin.json",
-      "project-init-route": "8 critical events via scripts/install-hooks.sh [[hooks]] TOML; the 8 advisory events below activate only through the plugin manifest"
+      "kimi-plugin-manifest": "all 19 events inline in kimi.plugin.json",
+      "project-init-route": "8 critical events via scripts/install-hooks.sh [[hooks]] TOML; the 11 advisory events below activate only through the plugin manifest"
     }
   },
   "events": {
@@ -32,6 +32,9 @@
     "SessionEnd": { "consumer": "hooks/session-end.sh", "critical": false, "role": "ledger-close", "mode": "advisory", "completion_authority": false, "invalidates": [] },
     "StopFailure": { "consumer": "hooks/stop-failure.sh", "critical": false, "role": "stop-failure-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
     "Interrupt": { "consumer": "hooks/interrupt.sh", "critical": false, "role": "interrupt-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
-    "Notification": { "consumer": "hooks/notification.sh", "critical": false, "role": "notification-logger", "mode": "advisory", "completion_authority": false, "invalidates": [] }
+    "Notification": { "consumer": "hooks/notification.sh", "critical": false, "role": "notification-logger", "mode": "advisory", "completion_authority": false, "invalidates": [] },
+    "TurnStarted": { "consumer": "hooks/turn-started.sh", "critical": false, "role": "turn-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [], "adopted_from": "Kimi Code CLI 0.32.0 (2026-08-04), hooks reference re-verified 2026-10-18; structural fields only (turn_id, origin_kind), prompt text never ledgered" },
+    "UserPromptQueued": { "consumer": "hooks/user-prompt-queued.sh", "critical": false, "role": "queue-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [], "adopted_from": "Kimi Code CLI 0.32.0 (2026-08-04), hooks reference re-verified 2026-10-18; structural fields only (prompt_id, queue_length), queued prompt text never ledgered" },
+    "TaskStarted": { "consumer": "hooks/task-started.sh", "critical": false, "role": "task-ledger", "mode": "advisory", "completion_authority": false, "invalidates": [], "adopted_from": "Kimi Code CLI 0.32.0 (2026-08-04), hooks reference re-verified 2026-10-18; structural fields only (task_id, detached), description never ledgered" }
   }
 }

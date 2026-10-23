@@ -34,8 +34,8 @@ test('single marketplace.json v2 exposes the plugin in lockstep with the manifes
   assert.equal(marketplace.plugins[0].source, './');
   assert.equal(manifest.version, '1.4.0');
   // Kimi auto-wires the full plugin surface through the manifest itself.
-  assert.equal(Array.isArray(manifest.hooks), true, 'Kimi declares 16 hook events inline');
-  assert.equal(manifest.hooks.length, 16);
+  assert.equal(Array.isArray(manifest.hooks), true, 'Kimi declares 19 hook events inline');
+  assert.equal(manifest.hooks.length, 19);
   assert.equal(Object.keys(manifest.mcpServers).length, 6);
 });
 

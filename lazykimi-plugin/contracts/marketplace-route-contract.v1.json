@@ -9,7 +9,7 @@
   },
   "artifacts": {
     "lazykimi-plugin/marketplace.json": "8c808d29c676f2682e358f143445f41b95c12208e35e4618da95148f575ecc75",
-    "lazykimi-plugin/kimi.plugin.json": "3e5fa92e8c4a72c22e5ce418d728e680eace5595ac41962358ff61a17ff795de"
+    "lazykimi-plugin/kimi.plugin.json": "7a206e626116eaf0b4622c1664439c10e48587650c5df1a61ecc704fc91c65d0"
   },
   "routes": {
     "kimi-plugin-manifest": {
@@ -29,9 +29,9 @@
         "lazykimi-plugin/marketplace.json",
         "lazykimi-plugin/kimi.plugin.json"
       ],
-      "hook_events": 16,
+      "hook_events": 19,
       "mcp_servers": 6,
-      "notes": "16 inline hooks (./hooks/<script>.sh) and 6 inline mcpServers (python3 ./mcp/<server>/server.py); sessionStart.skill = lazy-init-deep; always-orchestrated MCP profile (no env plumbing on this route)."
+      "notes": "19 inline hooks (./hooks/<script>.sh) and 6 inline mcpServers (python3 ./mcp/<server>/server.py); sessionStart.skill = lazy-init-deep; always-orchestrated MCP profile (no env plumbing on this route)."
     },
     "project-init-route": {
       "kind": "manual-project",
@@ -88,11 +88,11 @@
       "skills": 19,
       "commands": 20,
       "agents": 13,
-      "hook_events": 16,
+      "hook_events": 19,
       "mcp_servers": 6
     },
-    "file_count": 110,
-    "inventory_sha256": "a0e790519398690ba7008d66c43282e2538ba5dd21c2f1e31a50713ddfdf9d08"
+    "file_count": 113,
+    "inventory_sha256": "48e909e486ac91fad3331e7d05901cbcf34894299997e2346ab86acfd8f0141e"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

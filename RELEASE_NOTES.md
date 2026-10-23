@@ -5,13 +5,68 @@ the family's portable dashboard core behind its own host adapter; LazyKimi
 adds the Kimi-native adapter surface and keeps every host claim labeled,
 bounded and pending.
 
+## Completion pass (2026-10-19)
+
+A scoped completion pass over the 1.4.0 surfaces; every bullet cites the
+branch commit that delivers it.
+
+- Per-repo dashboard isolation: the family-wide per-repo store isolation and
+  foreign-runtime refusal matrix (d2f9651) — a foreign runtime's state and
+  event writes are refused, and each repository's dashboard stores stay
+  isolated to this package's own roots.
+- Served-project truth reconciled (b767b59): the Kimi served dashboard does
+  expose the live git view (`/api/project/git` answers 200 behind the
+  authenticated session and invokes the vendored `git-observation/local`
+  collector); run-side commit links stay `repo_head`/`content_revision`.
+- Kimi host-harness rescan adoption (8b3a782): the three stable native hook
+  events shipped in Kimi Code CLI 0.32.0 — TurnStarted, UserPromptQueued,
+  TaskStarted — are adopted as advisory manifest-only ledger consumers
+  (16 → 19 inline hook events; structural fields only, prose never
+  ledgered); SessionHeartbeat is documented but deliberately not adopted.
+  The per-surface rescan table records observation dates and URLs.
+- Family repin (be663b4): both vendored families re-pinned at source
+  revision `bb696092` — dashboard tree `e55a9c00…`, project tree `16561f3…`
+  — carrying the family's completed project-dashboard UI (dark-first design
+  tokens v2, de-tabbed shell with the static retractable sidebar and
+  in-place navigation, six redesigned views, navigation guards,
+  measured-and-held performance budgets) into this package byte-identically.
+- Residuals, honestly: dashboard embedding into a Kimi host surface, chat
+  handoff, and host wake remain unobserved; each surface (Kimi Code CLI,
+  VS Code/ACP, Code Desktop, Work) still requires its own current-client
+  acceptance; this package's known wall-clock telemetry flake is
+  pre-existing (observed before this pass, unchanged by it).
+
+## Project platform (2026-10-07)
+
+- The persistent project record is vendored as the family's second pinned
+  tree: `lazykimi-plugin/shared/project/` + `project.vendor.json` re-pinned
+  at delivery prep to family tree `1feb5646…` (source revision `537f393`)
+  and in the completion repin to tree `16561f3…` at source revision
+  `bb696092` (be663b4, alongside the dashboard family at tree `e55a9c00…`).
+  Kimi's adapter keeps
+  its own authority — journal/CAS, the Kimi namespace, and per-surface
+  boundaries — over the shared runtime's init/read/command/observe routes,
+  registered original-source editing, reconciliation, and telemetry.
+- The project context summary states the git-observation boundary explicitly:
+  the served dashboard does expose a live git view — a live probe saw
+  `/api/project/git` answer 200 behind the authenticated session and invoke the
+  vendored `git-observation/local` collector, reporting `observed` with the
+  fixture's commit facts (unauthenticated reads reject 401) — while run-side
+  commit links stay `repo_head`/`content_revision`.
+- The T24-R1 capability-honesty assertion (no capability key ever claims
+  observed host adoption) stays in force unchanged; host embedding, chat
+  handoff, and host wake remain unobserved, native host readiness stays
+  pending, and each surface (Kimi Code CLI, VS Code/ACP, Code Desktop, Work)
+  still requires its own current-client acceptance.
+
 ## Eval-driven fixes
 
 - The status-dashboard MCP server grows from 4 to 6 tools:
   `dashboard_service` (start, inspect, stop, or return the local browser
   dashboard entry) and the read-only `copy_task_context` (copy a validated
   native Kimi producer context without executing or consuming it). The
-  declared tool total moves from 32 to 34 across the six servers.
+  declared tool total moves from 32 to 34 across the six servers, extended
+  to 35 by the typed `project` platform tool below.
 - The portable dashboard core is vendored hash-pinned under
   `lazykimi-plugin/shared/dashboard/` with a tracked vendor manifest, and the
   Kimi-native adapter ships beside it (`shared/dashboard-host/`). The
@@ -21,13 +76,24 @@ bounded and pending.
 - Queue planning (create, amend, reorder queued plans) is available through
   the browser UI; queue edits never start work. Activation remains a
   separate explicit bridge action.
-- Documentation mirrors now state the exact surface (6 servers / 34 tools)
+- Documentation mirrors now state the exact surface (6 servers / 35 tools)
   and correct the stale 4-tool and 32-tool strings, including the capability
   comparison row; a committed machine-local path in the history docs was
   replaced with a workspace placeholder.
 - The extracted-package self-check boundary is documented: `doctor` is
   project-scoped and exits 1 in a bare extraction until `lazykimi init` has
   bound a project; use `load-check` for bare-extraction verification.
+- The persistent project platform is vendored hash-pinned under
+  `lazykimi-plugin/shared/project/` (with `project.vendor.json`, the same
+  hash-pinned exemption as the dashboard core) and ported through the Kimi
+  native adapter: a persistent project record under `.lazykimi/project/`,
+  the neutral `.lazyseries/project.json` registry, registered original-source
+  editing with crash-recovery journaling, honest native run observations from
+  Kimi's own journal/CAS evidence, and a typed `project` tool on the
+  status-dashboard server. Pre-init surfaces stay inert with typed hints, and
+  every capability stays package-scoped per
+  [the surface record](docs/reference/kimi-product-surfaces.md) — no host
+  adoption is claimed for any Kimi surface.
 
 ## Measured efficiency
 
