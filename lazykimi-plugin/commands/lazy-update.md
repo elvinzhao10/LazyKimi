@@ -62,8 +62,8 @@ Triggers: `update LazyKimi`, `upgrade the plugin`, `refresh the install`.
    ref requires `--confirm-revision <full-sha>`).
 7. **Re-verify host readiness in a fresh session.** After the update, ask the
    user to start a NEW Kimi session and confirm the checklist:
-   - One real skill loads (invoked as `/skill:<name>` or `/<name>`).
-   - One command appears as a slash menu entry (for example `/lazy-status`).
+   - One real skill loads: `/skill:lazykimi:lazy-ulw-plan` on the manifest route or `/skill:lazy-ulw-plan` on the project route.
+   - One command appears as a slash menu entry (for example `/lazykimi:lazy-status` on the manifest route).
    - All six MCP connections are visible: `run-ledger`, `verification`,
      `status-dashboard`, `context-graph`, `code-intel`, `docs`.
    - Hooks are active with the plugin enabled.

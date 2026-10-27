@@ -136,6 +136,14 @@ else
     report "UserPromptSubmit (keyword)" fail "expected keyword routing, got: ${out:0:80}"
 fi
 
+# Plugin hooks receive KIMI_PLUGIN_ROOT and must name the plugin command namespace.
+out=$(printf '%s' "$KW_PAYLOAD" | KIMI_PLUGIN_ROOT="$PLUGIN_ROOT" run_hook bash "$HOOKS_DIR/user-prompt-submit.sh" 2>/dev/null); status=$?
+if [ "$status" -eq 0 ] && printf '%s' "$out" | grep -Fq '/lazykimi:lazy-ultrawork'; then
+    report "UserPromptSubmit (plugin namespace)" pass "routed to the qualified plugin command"
+else
+    report "UserPromptSubmit (plugin namespace)" fail "qualified plugin command missing"
+fi
+
 # 4. UserPromptSubmit — context-pressure marker triggers the recovery directive.
 CP_PAYLOAD='{"session_id":"'"$SESSION_ID"'","cwd":"'"$CWD"'","hook_event_name":"UserPromptSubmit","prompt":"context compacted; continue the plan"}'
 out=$(printf '%s' "$CP_PAYLOAD" | run_hook bash "$HOOKS_DIR/user-prompt-submit.sh" 2>/dev/null); status=$?

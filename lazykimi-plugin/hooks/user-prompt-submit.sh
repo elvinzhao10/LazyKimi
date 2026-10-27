@@ -119,7 +119,7 @@ if freshness_json and freshness_entry and os.path.isfile(freshness_entry):
             'runtimeFreshness': result if isinstance(result, dict) else {'status': 'blocked'},
         }
         add('[LazyKimi] Adaptive continuation rejected (' + blocked + '). '
-            'Resume via /lazy-start-work with a fresh plan; do not continue stale work.')
+            'Resume with a fresh plan using the lazy-start-work workflow; do not continue stale work.')
     elif adaptive_runtime and os.path.isfile(adaptive_runtime):
         out = run(['python3', adaptive_runtime], raw)
         if out:
@@ -157,7 +157,7 @@ KEYWORD_ROUTES = (
     (r'\bhandoff\b', 'handoff', '/lazy-handoff'),
     (r'\bstop-continuation\b', 'stop-continuation', '/lazy-stop-continuation'),
     (r'\bralph-loop\b', 'ralph-loop', '/lazy-ralph-loop'),
-    (r'\binit-deep\b', 'init-deep', 'the `/skill:lazykimi:lazy-init-deep` skill'),
+    (r'\binit-deep\b', 'init-deep', 'the `lazy-init-deep` skill'),
     (r'\breview-work\b', 'review-work', '/lazy-review-work'),
     (r'\bremove-ai-slops\b', 'remove-ai-slops', 'the `lazy-remove-ai-slops` skill'),
 )
@@ -168,6 +168,8 @@ for pattern, keyword, route in KEYWORD_ROUTES:
         if keyword == 'ultrawork' and ('ulw-loop' in matched or 'ulw-plan' in matched):
             continue  # specific ulw-* keyword already routed
         if route.startswith('/'):
+            if os.environ.get('KIMI_PLUGIN_ROOT'):
+                route = '/lazykimi:' + route[1:]
             add(f"[LazyKimi] Command keyword '{keyword}' detected — use the `{route}` command (skill `lazy-{keyword}`) for this request.")
         else:
             add(f"[LazyKimi] Command keyword '{keyword}' detected — use {route} for this request.")

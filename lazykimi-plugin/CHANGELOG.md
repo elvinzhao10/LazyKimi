@@ -1,5 +1,9 @@
 # LazyKimi Plugin Changelog
 
+## Platform audit (2026-10-27)
+
+Document CLI 2.3.0 qualified plugin skill and command names, route-specific host acceptance, the hook cwd documentation conflict, and current dashboard features. Local MCP integration verifies six servers and 35 tools; no live current-client acceptance or new efficiency claim. See the [platform audit](docs/reference/platform-status-2026-10-27.md).
+
 ## [1.4.0] - Local dashboard core and honest capability labels
 
 - Vendor the family's portable dashboard core hash-pinned (`shared/dashboard/` + `dashboard.vendor.json`) and ship the Kimi-native `shared/dashboard-host/` adapter: browser entry, loopback-bound local service (port-0 default, credentials at mode 0600), transactional edits, queue planning, and producer-context copy.

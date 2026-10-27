@@ -14,7 +14,7 @@ Kimi Code for VS Code, IDE integration through ACP, and **Kimi Code Desktop**
 are separate acceptance targets. Kimi Code Desktop and Kimi Work are distinct
 products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
-[Platform status](docs/reference/platform-status-2026-10-02.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
+[Platform status](docs/reference/platform-status-2026-10-27.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
 [1.4.0 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
 
 > **Current package version: v1.4.0. HOST READINESS: PENDING.** Local checks and release
@@ -27,13 +27,7 @@ products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 - The status-dashboard MCP server grows from 4 to 7 tools (`dashboard_service`, `copy_task_context`, and the typed `project` platform tool); the declared tool total is 35 across 6 servers.
 - Honest capability labels ship with the adapter: browser, transactional edits, project queue, context copy and observations are `available`; embedding, chat handoff and wake are `unobserved`; native host readiness is `pending`.
 - Queue edits never start work: queued plans can be created, amended and reordered, but activation is a separate explicit action.
-- The completion pass repinned both vendored families at `bb696092`
-  (dashboard tree `e55a9c00…`, project tree `16561f3…`), carrying the
-  family's redesigned project dashboard — dark-first family design language,
-  a de-tabbed shell with a static retractable sidebar and in-place
-  navigation, six redesigned views — alongside this package's per-repo store
-  isolation matrix and the rescan adoption of the TurnStarted,
-  UserPromptQueued and TaskStarted hook events (19 inline hook events).
+- The current vendored dashboard includes a run monitor, token, activity and efficiency charts, trace views, Health inventory, research capture with hash references, and polling state. Its local browser surface remains package evidence, not host embedding. Per-repo isolation and the three advisory TurnStarted, UserPromptQueued and TaskStarted events remain in the package (19 inline hook events).
 - Project-bound MCP binding rules are unchanged; manifest MCP launchers still fail closed without explicit project binding.
 - Runtime checks execute real package and lifecycle paths; unknown exercises and failed checks cannot report success.
 - Hook input is bounded before parsing and stays out of process arguments.
@@ -56,7 +50,7 @@ local package surface until a fresh host session is observed.
 | v1.3.4 maintenance | Transactional run integrity, safer lifecycle and native adapter repairs. |
 | v1.3.5 repairs | Real runtime exercises, bounded hooks, dependency updates and current platform guidance. |
 | v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 7-tool status-dashboard (35 tools total), honest capability labels. |
-| v1.4.0 completion | Repinned families at `bb696092` with the redesigned project dashboard (dark-first, sidebar shell, in-place navigation), per-repo isolation and the 3-event hook adoption (19 inline hooks). |
+| v1.4.0 completion | Current local dashboard monitor and Health views, per-repo isolation and the 3-event hook adoption (19 inline hooks). |
 
 ### Just ask, or use a command — both work
 
@@ -64,8 +58,7 @@ Two entry routes converge on the same execution authority and gates:
 
 - **Natural language**: describe the work plainly — "Fix the typo in the
   welcome label" — and the smallest sufficient workflow is selected and run.
-- **Explicit commands**: `/lazy-ulw-plan <idea>` builds a new plan, and
-  `/lazy-start-work <plan>` executes a known plan. Same authority, same gates.
+- **Explicit entry**: on the manifest route, `/lazykimi:lazy-ulw-plan <idea>` and `/lazykimi:lazy-start-work <plan>` invoke plugin commands. On the project skills route, use `/skill:lazy-ulw-plan` and `/skill:lazy-start-work`. These routes remain subject to host observation.
 
 No slash command is required for a clear implementation request. Conversely,
 asking to *explain*, quoting a command, or saying "plan only" never touches

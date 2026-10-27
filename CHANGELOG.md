@@ -1,5 +1,9 @@
 # Changelog
 
+## Platform audit (2026-10-27)
+
+Document CLI 2.3.0 qualified plugin skill and command names, route-specific host acceptance, the hook cwd documentation conflict, and current dashboard features. Local MCP integration verifies six servers and 35 tools; no live current-client acceptance or new efficiency claim. See the [platform audit](docs/reference/platform-status-2026-10-27.md).
+
 Root release history for LazyKimi. Detailed plugin-level history (including the v0.x record) remains in [lazykimi-plugin/CHANGELOG.md](lazykimi-plugin/CHANGELOG.md).
 
 ## [1.4.0] - 2026-10-19 — completion pass (isolation, hook adoption, repin)

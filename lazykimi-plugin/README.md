@@ -26,11 +26,8 @@ capabilities.
 2. **Verify the package** — from this `lazykimi-plugin/` directory, run
    `lazykimi load-check`, then `lazykimi doctor`. These checks report
    package readiness, not host loading or MCP connection.
-3. **Verify the host** — in Kimi Code CLI, confirm a `/skill:lazy-<command>`
-   or `/<command>` shorthand and any required MCP connection. In Kimi Work,
-   verify a loaded Skills entry and Agent Swarm session.
-4. **Use the workflow** — invoke skills via `/skill:lazy-<name>` or
-   `/<name>`; native modes `/swarm <task>`, `/goal <objective>`, and
+3. **Verify the host** — on the manifest route, confirm `/skill:lazykimi:lazy-<name>` and the required MCP connection; on the project route, confirm `/skill:lazy-<name>`. In Kimi Work, verify a loaded Skills entry and Agent Swarm session.
+4. **Use the workflow** — plugin commands use `/lazykimi:lazy-<name>` and plugin skills use `/skill:lazykimi:lazy-<name>` in CLI 2.3.0; project skills use `/skill:lazy-<name>`. Native modes `/swarm <task>`, `/goal <objective>`, and
    `/plan on|off` map onto the Explore, Plan, and Implement phases.
 
 **Verification scope:** package CI covers macOS and Linux; current native host
@@ -334,7 +331,7 @@ LazyKimi follows the canonical evidence-led loop:
    review report.
 6. **Librarian** — Memory update. Output: `.lazykimi/runs/<id>/memory_updates/`
    findings.
-7. **Handoff** — `/lazy-handoff`. Output: parseable handoff summary.
+7. **Handoff** — `/lazykimi:lazy-handoff` on the manifest route. Output: parseable handoff summary.
 
 Every completion must pass all five evidence gates:
 

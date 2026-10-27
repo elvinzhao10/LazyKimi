@@ -75,7 +75,7 @@ For IDEs record the editor and extension or ACP transport; for desktop apps
 record the exact app name. Use [the install guide](../03-install-and-host-verification.md)
 for package checks and [the Work guide](../11-kimi-work-setup.md) for fallback limits.
 
-See [the current platform audit](platform-status-2026-10-02.md) for the current plugin commands, managed-copy retention and shared-core boundary.
+See [the current platform audit](platform-status-2026-10-27.md) for the current plugin commands, managed-copy retention and shared-core boundary.
 
 ## Project platform capability surface record (v1.4.0, T24)
 

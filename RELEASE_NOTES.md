@@ -1,5 +1,9 @@
 # LazyKimi v1.4.0 - local dashboard core and honest capability labels
 
+## Platform audit (2026-10-27)
+
+The current documentation distinguishes CLI 2.3.0 plugin skill and command namespaces from project skills, records the official hook cwd documentation conflict, and keeps each host acceptance pending. The local dashboard now includes a run monitor, token/activity/efficiency charts, trace, Health inventory, research capture with hash references, and polling state. Local MCP tests observed 35 tools across six servers. No new speed, token-saving or cost claim is made. See the [dated audit](docs/reference/platform-status-2026-10-27.md).
+
 A dashboard release across the six LazySeries siblings. Each package vendors
 the family's portable dashboard core behind its own host adapter; LazyKimi
 adds the Kimi-native adapter surface and keeps every host claim labeled,
