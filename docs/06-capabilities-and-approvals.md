@@ -12,7 +12,7 @@ boundary inherited from the LazyBuddy tooling contract.
 | Local text search | `rg` / ripgrep | Resolves through `tooling/node_modules` (locked `@vscode/ripgrep`); host search otherwise. |
 | Structural search | `sg` / ast-grep | Resolves through `tooling/node_modules` (locked `@ast-grep/cli`); `lazy-ast-grep` skill. |
 | Codebase semantic search | Kimi Code CLI `search_tools` | Host-native; no package-side index. |
-| JS/TS or Python navigation | LSP | `tooling/lsp/` bridges; host LSP if available. |
+| JS/TS or Python navigation | LSP | `tooling/lsp/` provider packages; use the host LSP. The optional MCP LSP bridge is not implemented. |
 | Architecture exploration | CodeGraph | `tooling/` codegraph lifecycle (explicit, caller-survival semantics); heuristic `context-graph` otherwise. |
 | Current library documentation | Context7 | Not bundled; explicit remote selection. |
 | Browser automation | Playwright | Not bundled; explicit approval required. |
@@ -109,3 +109,8 @@ fires them. Package readiness does not prove hook execution.
   filesystem capability, scoped to the project.
 
 Read [safe removal](08-safe-removal.md) before uninstalling any tooling.
+
+The locked TypeScript provider uses `typescript-language-server@6.0.0` with
+`typescript@6.0.3` and requires Node.js 22.22.2 or newer. TypeScript 6 supplies
+the `tsserver` API required by the language server; TypeScript 7 uses a different native
+server. Core lifecycle commands continue to support Node.js 20.
