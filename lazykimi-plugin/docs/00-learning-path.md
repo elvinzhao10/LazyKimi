@@ -35,8 +35,9 @@ in that path, but only a host observation proves loading or connection.
 - `.kimi-code/skills/` (19), `commands/` (20), `agents/` (13 roles): policy,
   entry points, and role definitions;
 - `.kimi-code/mcp.json` and `mcp/`: MCP declarations and local JSON-RPC
-  endpoints with their launchers (6 servers, 34 tools);
-- `hooks/`: 16 hook event declarations + shell scripts; the critical 8 are
+  endpoints with their launchers (6 servers, 35 tools);
+- `hooks/`: 19 hook event declarations + shell scripts (20 host events
+  documented; `SessionHeartbeat` not adopted); the critical 8 are
   installed into `~/.kimi-code/config.toml` via `scripts/install-hooks.sh`;
 - `src/`: the TypeScript `lazykimi` CLI (init, doctor, load-check, verify,
   mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall);

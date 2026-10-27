@@ -14,7 +14,7 @@ Kimi Code for VS Code, IDE integration through ACP, and **Kimi Code Desktop**
 are separate acceptance targets. Kimi Code Desktop and Kimi Work are distinct
 products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
-[Platform status](docs/reference/platform-status-2026-10-02.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
+[Platform status](docs/reference/platform-status-2026-10-27.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
 [1.4.0 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
 
 > **Current package version: v1.4.0. HOST READINESS: PENDING.** Local checks and release
@@ -23,32 +23,69 @@ products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
 ## What's in 1.4.0
 
-- The family's portable dashboard core is vendored hash-pinned in the package, with a Kimi-native adapter (`shared/dashboard-host/`) and a local browser UI: Work / Verification / Plan edits, task inspector, evidence preview, and queue planning.
-- The status-dashboard MCP server grows from 4 to 6 tools (`dashboard_service`, `copy_task_context`); the declared tool total is 34 across 6 servers.
-- Honest capability labels ship with the adapter: browser, transactional edits, project queue, context copy and observations are `available`; embedding, chat handoff and wake are `unobserved`; native host readiness is `pending`.
-- Queue edits never start work: queued plans can be created, amended and reordered, but activation is a separate explicit action.
-- Project-bound MCP binding rules are unchanged; manifest MCP launchers still fail closed without explicit project binding.
-- Runtime checks execute real package and lifecycle paths; unknown exercises and failed checks cannot report success.
-- Hook input is bounded before parsing and stays out of process arguments.
+- An authenticated local dashboard with eight destinations: **Overview, Project,
+  Plans, Health, Execution, Git, Evidence and Research**.
+- A project record, editable plans, queue planning and research capture, with
+  source revisions and evidence references visible for review.
+- A run monitor that separates execution progress from verified completion,
+  plus reported token usage, resource activity and retained-run history.
+- A Health inventory of package components, separate from observed host activity.
 
-This release adds the local dashboard surface on top of the workflow
-foundation introduced in the family since v1.3.0. For Kimi and DeepSeek,
-earlier milestones describe inherited family behavior, not prior public
-releases of these ports. The details below describe the cumulative v1.4.0
-experience; the [release notes](RELEASE_NOTES.md) distinguish this release's
-additions from inherited features. No new speed, token-saving or cost claim
-is made, and no native host support is claimed for the dashboard: it is a
-local package surface until a fresh host session is observed.
+The `status-dashboard` MCP server exposes seven tools, including
+`dashboard_service`, `copy_task_context` and typed `project` operations.
 
-| Family milestone | What you get in the current package |
-| --- | --- |
-| v1.3.0 foundation | Natural-language entry, editable plans, durable decisions and verification tiers. |
-| v1.3.1 reliability | Clearer execution intent, safer isolation and evidence comparisons. |
-| v1.3.2 handoff | Revision-bound verification-report contracts; generic completion APIs have separate limits. |
-| v1.3.3 hardening | Host-specific hook, MCP and publication repairs. |
-| v1.3.4 maintenance | Transactional run integrity, safer lifecycle and native adapter repairs. |
-| v1.3.5 repairs | Real runtime exercises, bounded hooks, dependency updates and current platform guidance. |
-| v1.4.0 dashboard | Vendored dashboard core, Kimi-native adapter, 6-tool status-dashboard (34 tools total), honest capability labels. |
+Manifest MCP launchers still require explicit project binding. The 19 inline
+hook declarations do not establish current-build hook cwd or delivery.
+
+The release builds on the existing planning, decision-memory and verification
+workflows described below. No speed, token-saving or cost improvement is
+claimed. See the [release notes](RELEASE_NOTES.md) for compatibility and upgrade
+boundaries; historical changes remain in `CHANGELOG.md`.
+
+## Browser dashboard (v1.4.0)
+
+After explicit project initialization, the dashboard provides **Overview,
+Project, Plans, Health, Execution, Git, Evidence and Research** in a collapsible
+sidebar. Contextual Details keep the selected item in view; maps support pan,
+zoom and an expanded modal. Theme and density preferences persist, and
+navigation guards protect unsaved edits.
+
+Execution progress and verification are separate. Token charts, resource
+activity and retained-run comparisons show available records; missing usage
+remains unknown. Health lists package Skills, commands, agents, hooks and MCP
+components without treating that inventory as host activation.
+
+Plans and research expose source revisions and evidence references. A hash
+reference does not preserve an immutable copy of its source or verify a
+finding. Source edits require authentication, the correct native project
+binding and a matching revision; stale edits conflict instead of overwriting
+newer work. Queue edits never start execution.
+
+The service binds to authenticated loopback, and each repository keeps its own
+project state. Browser access, transactional edits, queue planning, context
+copy and observations are package capabilities. Host embedding, chat handoff
+and wake remain unobserved; **HOST READINESS: PENDING** still applies.
+
+The portable dashboard and project cores are pinned in
+`lazykimi-plugin/shared/dashboard.vendor.json` and
+`lazykimi-plugin/shared/project.vendor.json`. The
+[learning path](docs/00-learning-path.md) covers package architecture and usage.
+
+### Dashboard gallery
+
+Recorded demo data served by the native local dashboard; not a live host-session receipt.
+
+**Overview** — execution and verification progress, recorded activity and the project map.
+
+![LazyKimi dashboard Overview with recorded demo data](docs/images/dashboard-overview.jpg)
+
+**Plans** — plan records, source context and revision-aware review.
+
+![LazyKimi dashboard Plans with recorded demo data](docs/images/dashboard-plans.jpg)
+
+**Health** — package component inventory, separate from observed host activity.
+
+![LazyKimi dashboard Health with recorded demo data](docs/images/dashboard-health.jpg)
 
 ### Just ask, or use a command — both work
 
@@ -56,8 +93,7 @@ Two entry routes converge on the same execution authority and gates:
 
 - **Natural language**: describe the work plainly — "Fix the typo in the
   welcome label" — and the smallest sufficient workflow is selected and run.
-- **Explicit commands**: `/lazy-ulw-plan <idea>` builds a new plan, and
-  `/lazy-start-work <plan>` executes a known plan. Same authority, same gates.
+- **Explicit entry**: on the manifest route, `/lazykimi:lazy-ulw-plan <idea>` and `/lazykimi:lazy-start-work <plan>` invoke plugin commands. On the project skills route, use `/skill:lazy-ulw-plan` and `/skill:lazy-start-work`. These routes remain subject to host observation.
 
 No slash command is required for a clear implementation request. Conversely,
 asking to *explain*, quoting a command, or saying "plan only" never touches
@@ -176,7 +212,7 @@ sources are in the [surface guide](docs/reference/kimi-product-surfaces.md).
 | Route | Package behavior | Remaining acceptance |
 | --- | --- | --- |
 | Kimi Code CLI project init | `lazykimi init` creates explicitly bound project MCP configuration; the hook helper installs eight critical hooks in the selected Kimi config. | Fresh session loading, command/skill use, hooks and MCP. |
-| Kimi plugin manifest | Declares skills, commands, agents, sixteen hooks and six MCP launchers. Unbound project-state MCP fails closed. | Full plugin acceptance and supported request-context project binding. Use the project route for bound MCP. |
+| Kimi plugin manifest | Declares skills, commands, agents, nineteen hooks and six MCP launchers. Unbound project-state MCP fails closed. | Full plugin acceptance and supported request-context project binding. Use the project route for bound MCP. |
 | Kimi Work | Experimental full plugin; fallback imports skills and uses manual MCP configuration. | Full plugin loading, agents, commands, hooks and project binding. Fallback excludes commands, agents and hooks. |
 
 Choose one route per project; combining manifest and project routes may fire
@@ -213,24 +249,17 @@ safe package checks separate from marketplace and connector changes.
 
 ## Package inventory
 
+These counts describe shipped definitions and declarations, not loaded host
+components.
+
 | Surface | Count | Role |
 | --- | ---: | --- |
 | Skills | 19 | Host-facing workflow policies for planning, execution, review, and verification. |
 | Commands | 20 | Named host entry points for those workflow policies. |
-| Agents | 13 | Family role definitions mapped to Kimi Code CLI's three sub-agent channels plus the main session. |
-| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (34 tools). |
-| Hooks | 16 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 16 ride the plugin manifest. |
+| Agents | 13 | Family role definitions; host selection and delegation require current-session observation. |
+| MCP declarations | 6 | Local services for ledger, verification, status, context, code intelligence, and docs (35 tools). |
+| Hooks | 19 | Hook event declarations; the critical 8 install into `~/.kimi-code/config.toml`, all 19 ride the plugin manifest (TurnStarted, UserPromptQueued and TaskStarted adopted from the 2026-10-18 rescan as advisory manifest-only consumers). |
 
-## Local dashboard surface (v1.4.0)
-
-- Entry: `node lazykimi-plugin/shared/dashboard-host/cli.mjs start|status|open|stop --project-root <root> --project-id <id> --run-id <run> [--port N]`. `open` returns the browser entry; the service binds locally (loopback only, port-0 default binding, credential files at mode 0600).
-- MCP tools: `dashboard_service` (start, inspect, stop, or return the local dashboard entry) and the read-only `copy_task_context` on the status-dashboard server — 6 tools there, 34 across the six servers.
-- Capability labels shipped with the adapter: browser, transactional edits, project queue, context copy, observations — `available`; embedding, chat handoff, wake — `unobserved`; native host readiness — `pending`.
-- Queue planning (create, amend, reorder) is available in the browser UI; queue edits never start work, and activation is a separate explicit action.
-
-These are package behaviors verified by local tests, not native host
-observations: dashboard embedding into a Kimi host surface, chat handoff and
-wake remain unobserved, and no host support is claimed for them.
 
 ## LazySeries family
 
@@ -245,7 +274,7 @@ acceptance evidence. These packages run independently.
 | [LazyQoder](https://github.com/elvinzhao10/LazyQoder) | Qoder CLI / IDE / app |
 | [LazyZCode](https://github.com/elvinzhao10/LazyZCode) | ZCode |
 | [LazyKimi](https://github.com/elvinzhao10/LazyKimi) **← you are here** | Kimi Code CLI · Kimi Work (experimental) |
-| [LazyDeepSeek](https://github.com/elvinzhao10/LazyDeepSeek) | DeepSeek Harness 0.2.0-rc.2 |
+| [LazyDeepSeek](https://github.com/elvinzhao10/LazyDeepSeek) | DeepSeek Harness 0.2.1-rc.3 |
 
 The family shares planning, evidence, decision-memory and completion contracts.
 The first shared verification core is vendored in every package, and since v1.4.0 the shared dashboard core is vendored the same hash-pinned way; product adapters keep host setup and permissions explicit. Matching contracts do not make host capabilities interchangeable. In particular,

@@ -1,12 +1,22 @@
 # Hook policy reference
 
-Status: v1.4.0. Kimi Code CLI exposes a 16-event hook surface. LazyKimi ships
-one consumer script per event under `hooks/` and ports the lazyzcode v1.3.4
-hardened hook semantics onto both Kimi registration routes. This page is the
-Kimi-native policy reference; there is no lazyzcode counterpart because the
-event sets differ.
+Status: v1.4.0 (T8 rescan 2026-10-18). Kimi Code CLI documents a 20-event hook
+surface ([hooks reference](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/hooks.html),
+re-verified 2026-10-18; the four events beyond the original 16 shipped in CLI
+0.32.0, 2026-08-04). LazyKimi ships one consumer script per **adopted** event
+under `hooks/` — 19 events — and ports the lazyzcode v1.3.4 hardened hook
+semantics onto both Kimi registration routes. This page is the Kimi-native
+policy reference; there is no lazyzcode counterpart because the event sets
+differ.
 
-## The 16 events and their consumers
+`SessionHeartbeat` is documented but deliberately **not adopted**: it fires
+every 60 seconds while a session is alive, so a consumer would add per-minute
+process spawns and ledger noise with no gating consumer to justify them
+(classified stable-documented, deferred; revisit when a staleness consumer
+exists). Adopted events remain `documented-untested` until a live host
+observation receipt lands.
+
+## The 19 adopted events and their consumers
 
 | Event | Script | Registration | Class |
 | --- | --- | --- | --- |
@@ -26,6 +36,9 @@ event sets differ.
 | `StopFailure` | `stop-failure.sh` | manifest only (advisory) | Stop-failure ledger event. |
 | `Interrupt` | `interrupt.sh` | manifest only (advisory) | Interrupt ledger event. |
 | `Notification` | `notification.sh` | manifest only (advisory) | No-op logger. |
+| `TurnStarted` | `turn-started.sh` | manifest only (advisory) | Turn ledger event (structural `turn_id`/`origin_kind` only; the prompt text is never ledgered). Adopted 2026-10-18 from the CLI hooks reference (0.32.0, 2026-08-04). |
+| `UserPromptQueued` | `user-prompt-queued.sh` | manifest only (advisory) | Queue ledger event (structural `prompt_id`/`queue_length` only; the queued prompt text is never ledgered). Adopted 2026-10-18 from the CLI hooks reference (0.32.0, 2026-08-04). |
+| `TaskStarted` | `task-started.sh` | manifest only (advisory) | Task ledger event (structural `task_id`/`detached` only; the description is never ledgered). Adopted 2026-10-18 from the CLI hooks reference (0.32.0, 2026-08-04). |
 
 The authoritative event-to-consumer table is the contract
 `contracts/kimi-hook-consumers.v1.json`; this page must not drift from it.
@@ -35,8 +48,8 @@ The authoritative event-to-consumer table is the contract
 Kimi Code CLI has two registration routes and they are intentionally unequal:
 
 1. **Plugin manifest route** (`kimi.plugin.json`, inline `hooks`): declares all
-   16 events with `./hooks/<script>.sh` paths. Active when the host loads the
-   plugin manifest.
+   19 adopted events with `./hooks/<script>.sh` paths. Active when the host
+   loads the plugin manifest.
 2. **Project TOML route** (`lazykimi init` + `scripts/install-hooks.sh`):
    appends exactly the **critical 8** `[[hooks]]` entries to
    `~/.kimi-code/config.toml` — `SessionStart`, `UserPromptSubmit`,
@@ -45,7 +58,7 @@ Kimi Code CLI has two registration routes and they are intentionally unequal:
 
 The critical 8 are the events that carry v1.3.4 gating semantics (state
 bootstrap, prompt intake, the pre-tool hardening gate, ledger appends, the
-stop gate, and the permission ledger). The remaining 8 advisory events are
+stop gate, and the permission ledger). The remaining 11 advisory events are
 only declared through the plugin manifest; the TOML route deliberately does
 not install them. The installer is idempotent, never overwrites existing
 entries, and never touches provider/model/permission configuration.
@@ -100,6 +113,14 @@ items below.
 - Every claim on this page that depends on a live host session (hook firing,
   deny enforcement, payload shape) is `documented-untested` until the host
   observation pass records an observation receipt.
+- 2026-10-18 rescan notes: the host hooks reference documents
+  snake_case event-specific payload fields for the adopted events
+  (`turn_id`/`origin_kind`, `prompt_id`/`queue_length`,
+  `task_id`/`detached`), states only `PreToolUse`, `Stop`, and
+  `UserPromptSubmit` returns affect the main flow (everything else,
+  including all three adopted events, is observation-only), and CLI 2.2.0
+  (2026-10-14) fixed UserPromptSubmit hook text-injection issues on the host
+  side. LazyKimi's strict-JSON `additionalContext` contract is unchanged.
 
 Cross-reference: [host-routes.md](host-routes.md) for how each registration
 route is installed, and [state-model.md](state-model.md) for the run-ledger

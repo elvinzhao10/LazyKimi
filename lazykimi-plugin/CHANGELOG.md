@@ -1,12 +1,18 @@
 # LazyKimi Plugin Changelog
 
+## Platform audit (2026-10-27)
+
+Document CLI 2.3.0 qualified plugin skill and command names, route-specific host acceptance, the hook cwd documentation conflict, and current dashboard features. Local MCP integration verifies six servers and 35 tools; no live current-client acceptance or new efficiency claim. See the [platform audit](docs/reference/platform-status-2026-10-27.md).
+
 ## [1.4.0] - Local dashboard core and honest capability labels
 
 - Vendor the family's portable dashboard core hash-pinned (`shared/dashboard/` + `dashboard.vendor.json`) and ship the Kimi-native `shared/dashboard-host/` adapter: browser entry, loopback-bound local service (port-0 default, credentials at mode 0600), transactional edits, queue planning, and producer-context copy.
-- Grow `lazykimi-status-dashboard` from 4 to 6 tools (`dashboard_service` plus the read-only `copy_task_context`); the declared surface is 6 servers / 34 tools.
+- Grow `lazykimi-status-dashboard` from 4 to 6 tools (`dashboard_service` plus the read-only `copy_task_context`); the declared surface is 6 servers / 34 tools, extended to 35 by the project platform tool.
 - Record honest capability labels: browser, transactional edits, project queue, context copy, and observations available; embedding, chat handoff, and wake unobserved; native host readiness pending. Queue edits never start work; activation is a separate explicit action, and project-bound MCP binding rules are unchanged.
 - Add the hash-pinned vendored-tree exemption to the product-naming guard: vendored bytes stay exempt only while they match `dashboard.vendor.json` pins, so edits resurface review.
 - Correct the stale tool-count mirrors (status-dashboard 4 to 6, family total 32 to 34) across the README and docs, neutralize a committed machine-local path in the history docs, and document the project-scoped doctor init gate (`load-check` validates bare extractions).
+- Port the persistent project platform through the Kimi native adapter: vendor the family's `shared/project/` tree hash-pinned (`project.vendor.json`), add `scripts/state/project-dashboard-bridge.py` over the `.lazykimi/project/` store and the `.lazyseries/project.json` registry, ship `shared/dashboard-host/project.mjs` (init/read/command, observe from Kimi journal/CAS producer evidence, typed tool surface with pre-init inertness), add the typed `project` tool to the status-dashboard server (6 servers / 35 tools), and record the per-surface capability table in the product-surfaces guide. Package proof only; no host adoption claimed.
+- T8 host-harness capability rescan (2026-10-18): adopt the stable native Kimi Code CLI hook events `TurnStarted`, `UserPromptQueued`, and `TaskStarted` (shipped upstream in CLI 0.32.0, 2026-08-04) as advisory manifest-only ledger hooks — 16 to 19 inline hook events; `SessionHeartbeat` is documented but deliberately not adopted (60-second firing cadence, no gating consumer). Record the per-surface rescan table (CLI 2.2.0, Desktop 1.1.0 Linux/Remote Control, plugin-manager `mcp enable|disable` and `reload`, `kimi app` as the documented chat-handoff seam) with observation dates and URLs; native host readiness and chat handoff stay pending.
 
 ## [1.3.5] - Runtime verification and platform clarity
 

@@ -14,7 +14,7 @@ const fixtureRoot = path.join(__dirname, 'fixtures', 'hook-events');
 const contract = JSON.parse(fs.readFileSync(path.join(pluginRoot, 'contracts', 'kimi-hook-consumers.v1.json'), 'utf8'));
 const temporaryProjects = [];
 
-// Kimi's exactly-sixteen hook events, declared inline in kimi.plugin.json and
+// Kimi's nineteen adopted hook events, declared inline in kimi.plugin.json and
 // mapped one-to-one onto contracts/kimi-hook-consumers.v1.json consumers.
 // Ported from lazyzcode v1.3.4 tests/hook-lifecycle-pipeline.test.js, which
 // exercises ZCode's seven-event hooks.json surface.
@@ -59,13 +59,14 @@ function recordedEvents(projectDir) {
     .filter(file => file.endsWith('.json'));
 }
 
-test('declares exactly the sixteen Kimi hook events with one consumer each', () => {
+test('declares exactly the nineteen adopted Kimi hook events with one consumer each', () => {
   // Given: the inline Kimi hook declaration and the Kimi hook-consumer contract.
   const declaration = readDeclaration();
   const byEvent = new Map(declaration.map((entry) => [entry.event, entry]));
 
-  // Then: the event set matches Kimi's sixteen-event surface and the contract.
-  assert.equal(declaration.length, 16);
+  // Then: the event set matches LazyKimi's nineteen-event adopted surface (the host
+// documents 20; SessionHeartbeat is not adopted — 60s cadence, T8 rescan).
+  assert.equal(declaration.length, 19);
   assert.deepEqual(new Set(byEvent.keys()), new Set(Object.keys(contract.events)));
   for (const [event, consumer] of Object.entries(contract.events)) {
     const entry = byEvent.get(event);

@@ -1,7 +1,7 @@
 #!/bin/bash
 # lazykimi-smoke-test.sh — ported from lazyzcode v1.3.4 scripts/lazyzcode-smoke-test.sh.
 # Checks each SKILL.md has valid YAML frontmatter, each command file is
-# non-empty Markdown, and the manifest declares the 16 inline Kimi events.
+# non-empty Markdown, and the manifest declares the 19 inline Kimi events.
 #
 # Usage: ./scripts/lazykimi-smoke-test.sh
 # Env:   LAZYKIMI_PLUGIN_ROOT (optional), otherwise script-relative plugin root.
@@ -89,10 +89,10 @@ for cmd_file in "${PLUGIN_ROOT}"/commands/*.md; do
     fi
 done
 
-# 3. Check kimi.plugin.json declares the 16 expected Kimi events
+# 3. Check kimi.plugin.json declares the 19 expected Kimi events
 MANIFEST="${PLUGIN_ROOT}/kimi.plugin.json"
 if [ -f "$MANIFEST" ]; then
-    EXPECTED_EVENTS="SessionStart UserPromptSubmit PreToolUse PostToolUse PostToolUseFailure Stop SubagentStop SubagentStart PreCompact PostCompact SessionEnd StopFailure Interrupt PermissionRequest PermissionResult Notification"
+    EXPECTED_EVENTS="SessionStart UserPromptSubmit PreToolUse PostToolUse PostToolUseFailure Stop SubagentStop SubagentStart PreCompact PostCompact SessionEnd StopFailure Interrupt PermissionRequest PermissionResult Notification TurnStarted UserPromptQueued TaskStarted"
     for event in $EXPECTED_EVENTS; do
         if grep -q "\"${event}\"" "$MANIFEST"; then
             check "Hooks: ${event} event type present" ok

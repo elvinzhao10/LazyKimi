@@ -44,7 +44,7 @@ Triggers: `onboard`, `install LazyKimi`, `set up the plugin`, `verify the instal
       in a Kimi Code CLI session, add the repository through
       `/plugins marketplace` using `lazykimi-plugin/marketplace.json` (v2),
       then install the `lazykimi` plugin as a separate approved action. This
-      route delivers skills, commands, agents, the 16 inline hooks, and the
+      route delivers skills, commands, agents, the 19 inline hooks, and the
       6 inline `mcpServers`.
    2. **Project init route (`project-init-route`, manual project route):**
       from the target project, run `lazykimi init` (copies `.kimi-code/` and
@@ -77,9 +77,8 @@ Triggers: `onboard`, `install LazyKimi`, `set up the plugin`, `verify the instal
 5. **Verify host readiness in a fresh session.** Host activation can only be
    observed in a NEW Kimi Code CLI (or Kimi Work) session. Ask the user to
    start one and confirm each item of the fresh-session checklist:
-   - One real skill loads (invoked as `/skill:<name>` or `/<name>`, for
-     example `lazy-ulw-plan`).
-   - One command appears as a slash menu entry (for example `/lazy-status`).
+   - One real skill loads: `/skill:lazykimi:lazy-ulw-plan` on the manifest route or `/skill:lazy-ulw-plan` on the project route.
+   - One command appears as a slash menu entry (for example `/lazykimi:lazy-status` on the manifest route).
    - All six MCP connections are visible via `/mcp`: `run-ledger`,
      `verification`, `status-dashboard`, `context-graph`, `code-intel`, and
      `docs`, each with the rewritten absolute server paths on the project

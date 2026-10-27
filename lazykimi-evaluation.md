@@ -38,8 +38,8 @@ LazyTrae, or lazycodex at runtime.
 
 LazyKimi packages 19 `lazy-` skills, 20 `lazy-*` command documents, 13 family
 role-agent definitions, 16 hook event declarations (critical 8 on the TOML
-route), and six local MCP declarations exposing 34 tools: `run-ledger` (9),
-`verification` (7), `status-dashboard` (6), `context-graph` (5), `code-intel`
+route), and six local MCP declarations exposing 35 tools: `run-ledger` (9),
+`verification` (7), `status-dashboard` (7), `context-graph` (5), `code-intel`
 (5), and `docs` (2). The package checks validate manifests, component
 inventory, JSON, executable MCP scripts, internal Markdown links, hook and
 security behavior, and MCP protocol regressions.
@@ -188,7 +188,7 @@ workflow heritage and the same MIT license.
 | Commands | — | — | — | 20 |
 | Agents | 13 | 11 | 5 (TOML) | 13 family roles (mapped to 3 Kimi sub-agents + main) |
 | Hooks | 12 | eight | 24 | 16 |
-| MCP servers | 6 | 16 tools | N/A | 6 (34 tools) |
+| MCP servers | 6 | 16 tools | N/A | 6 (35 tools) |
 | Host | CodeBuddy | Trae IDE/Work/CLI | Codex | Kimi Code CLI |
 | Language | Bash/Python | Node.js | TypeScript | TS CLI + Bash hooks + Bash/Python MCP |
 | Native swarm | No | No | No | Yes (/swarm 300 agents) |
@@ -216,7 +216,7 @@ workflow heritage and the same MIT license.
 - **MCP**: LazyKimi inherits LazyBuddy's six-server model (run-ledger,
   verification, status-dashboard, context-graph, code-intel, docs), rebuilt
   in v1.3.3 to the family tool surface behind the profile gate (32 tools
-  then; 34 since the v1.4.0 status-dashboard service tools). LazyTrae
+  then; 35 since the v1.4.0 status-dashboard service and project tools). LazyTrae
   consolidates into a single Node.js core server exposing 16 tools.
 - **Native modes**: LazyKimi is the only harness in the series whose target
   host exposes native swarm, goal, and plan modes. The other harnesses

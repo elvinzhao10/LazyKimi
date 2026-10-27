@@ -12,7 +12,7 @@ boundary inherited from the LazyBuddy tooling contract.
 | Local text search | `rg` / ripgrep | Resolves through `tooling/node_modules` (locked `@vscode/ripgrep`); host search otherwise. |
 | Structural search | `sg` / ast-grep | Resolves through `tooling/node_modules` (locked `@ast-grep/cli`); `lazy-ast-grep` skill. |
 | Codebase semantic search | Kimi Code CLI `search_tools` | Host-native; no package-side index. |
-| JS/TS or Python navigation | LSP | `tooling/lsp/` bridges; host LSP if available. |
+| JS/TS or Python navigation | LSP | `tooling/lsp/` provider packages; use the host LSP. The optional MCP LSP bridge is not implemented. |
 | Architecture exploration | CodeGraph | `tooling/` codegraph lifecycle (explicit, caller-survival semantics); heuristic `context-graph` otherwise. |
 | Current library documentation | Context7 | Not bundled; explicit remote selection. |
 | Browser automation | Playwright | Not bundled; explicit approval required. |
@@ -60,8 +60,10 @@ This is an SSRF boundary, not a general web fetch.
 
 ## Hook policy
 
-The sixteen hook scripts under `hooks/` apply narrow local policy to host
-events with the v1.3.4 hardened semantics (1 MiB input cap with
+The nineteen hook scripts under `hooks/` (19 of the 20 host-documented
+events; `SessionHeartbeat` is documented but deliberately not adopted —
+60-second firing cadence, no gating consumer) apply narrow local policy to
+host events with the v1.3.4 hardened semantics (1 MiB input cap with
 oversized-input rejection, malformed-payload rejection, identity
 normalization + wrapper resolution, role-scoped writes, secret-like path
 denial, destructive-operation denial, deny = exit 2, fail-open on internal
@@ -85,6 +87,9 @@ errors):
 | `PermissionRequest` | Record approval request in the ledger. |
 | `PermissionResult` | Record approval decision in the ledger. |
 | `Notification` | No-op logger. |
+| `TurnStarted` | Turn ledger event; structural metadata only (adopted 2026-10-18). |
+| `UserPromptQueued` | Queue ledger event; structural metadata only (adopted 2026-10-18). |
+| `TaskStarted` | Task ledger event; structural metadata only (adopted 2026-10-18). |
 
 Hooks are host-governed. The package can declare them and ship scripts, but
 only a Kimi Code CLI session that loads `~/.kimi-code/config.toml` actually
@@ -104,3 +109,8 @@ fires them. Package readiness does not prove hook execution.
   filesystem capability, scoped to the project.
 
 Read [safe removal](08-safe-removal.md) before uninstalling any tooling.
+
+The locked TypeScript provider uses `typescript-language-server@6.0.0` with
+`typescript@6.0.3` and requires Node.js 22.22.2 or newer. TypeScript 6 supplies
+the `tsserver` API required by the language server; TypeScript 7 uses a different native
+server. Core lifecycle commands continue to support Node.js 20.

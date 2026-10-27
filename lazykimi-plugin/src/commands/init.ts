@@ -8,7 +8,7 @@ import type { Receipt } from '../lib/receipt';
 const PLUGIN_VERSION = '1.4.0';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
-const EXPECTED_HOOKS = 16;
+const EXPECTED_HOOKS = 19;
 const EXPECTED_MCP = 6;
 
 // v1.3.4 MCP profile modes (mcp/profile-gate.sh server-selection table).
