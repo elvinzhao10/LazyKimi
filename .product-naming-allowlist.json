@@ -295,13 +295,6 @@
       "reason": "Lineage text names the sibling packages this port derives from."
     },
     {
-      "path": "RELEASE_NOTES.md",
-      "text": "lazytrae",
-      "count": 2,
-      "classification": "source-identity",
-      "reason": "Current release notes describe the separate LazyTrae adapter and its runtime floor."
-    },
-    {
       "path": "lazykimi-evaluation.md",
       "text": "codebuddy",
       "count": 2,
