@@ -2318,6 +2318,13 @@
       "reason": "Bridge source-path guard enumerates the family state-directory host ids (machine identifiers) its protected-path regex refuses to traverse."
     },
     {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/health-route.test.mjs",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "The health route test asserts the shared lazybuddy/plugin-health@1 wire schema identifier; it is not a product display name."
+    },
+    {
       "path": "lazykimi-plugin/shared/dashboard-host/test/project-adapter.test.mjs",
       "text": "lazybuddy",
       "count": 1,
