@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # session-end.sh — Kimi SessionEnd hook (advisory, ledger-close).
-# v1.3.5 mapped semantics: appends a session_end event to the active run's
+# v1.4.0 mapped semantics: appends a session_end event to the active run's
 # events.jsonl via the scripts/state append machinery (transactional).
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.

@@ -26,8 +26,11 @@ function serverNameForCapability(capability: string): string {
 
 export const OPTIONAL_MCP_SERVERS: readonly string[] = OPTIONAL_CAPABILITY_NAMES.map(serverNameForCapability);
 
-// v1.3.4 family tool surface: the exact tool-name sets of the LazyZCode v1.3.4
-// servers, split 9/7/4/5/5/2 across the six declared servers (32 tools total).
+// Family tool surface, updated in v1.4.0 from the v1.3.4 LazyZCode port:
+// the exact tool-name sets of the six declared servers, split 9/7/7/5/5/2
+// (35 tools total); status-dashboard gained `dashboard_service` and
+// `copy_task_context`, then the typed `project` tool over the vendored
+// project platform.
 // run-ledger/verification/status-dashboard are bash server.sh JSON-RPC loops
 // delegating to scripts/state/*; context-graph/code-intel/docs are python
 // servers behind profile-gated launchers.
@@ -42,6 +45,7 @@ export const MCP_TOOL_SURFACE: Readonly<Record<string, readonly string[]>> = {
   ],
   'lazykimi-status-dashboard': [
     'show_run_status', 'show_task_graph', 'show_verification_matrix', 'show_pending_approvals',
+    'dashboard_service', 'copy_task_context', 'project',
   ],
   'lazykimi-context-graph': [
     'blast_radius', 'file_deps', 'symbol_search', 'symbol_refs', 'repo_overview',

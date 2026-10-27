@@ -11,6 +11,7 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const { excludedEntry, inventory } = require('./lifecycle/marketplace-inventory');
 
 const releaseRoot = process.argv[2] === undefined
   ? path.resolve(__dirname, '..', '..')
@@ -27,34 +28,14 @@ for (const relative of Object.keys(contract.artifacts)) {
   contract.artifacts[relative] = digest(fs.readFileSync(path.join(releaseRoot, relative)));
 }
 
-// Payload inventory: same algorithm as lifecycle/marketplace-routes.js inventory().
-const records = [];
-const walk = (relative) => {
-  const directory = path.join(pluginRoot, relative);
-  for (const name of fs.readdirSync(directory).sort((l, r) => Buffer.compare(Buffer.from(l), Buffer.from(r)))) {
-    const child = path.posix.join(relative, name);
-    const absolute = path.join(pluginRoot, child);
-    const stat = fs.lstatSync(absolute);
-    if (stat.isDirectory() && !stat.isSymbolicLink()) walk(child);
-    else if (stat.isFile() && stat.nlink === 1 && name !== '.gitkeep') {
-      records.push({ path: child, sha256: digest(fs.readFileSync(absolute)) });
-    } else if (name !== '.gitkeep') {
-      throw new Error(`canonical payload must contain only regular files: ${child}`);
-    }
-  }
-};
-for (const root of contract.payload.roots) walk(root);
-for (const relative of contract.payload.files) {
-  records.push({ path: relative, sha256: digest(fs.readFileSync(path.join(pluginRoot, relative))) });
-}
-records.sort((l, r) => Buffer.compare(Buffer.from(l.path), Buffer.from(r.path)));
+const records = inventory(pluginRoot, contract.payload);
 contract.payload.file_count = records.length;
 contract.payload.inventory_sha256 = digest(Buffer.from(JSON.stringify(records)));
 
 // Derived counts from the canonical trees (never hand-maintained).
 const skillRoot = path.join(pluginRoot, '.kimi-code', 'skills');
 contract.payload.counts.skills = fs.readdirSync(skillRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory()).length;
+  .filter((entry) => entry.isDirectory() && !excludedEntry(entry.name)).length;
 const countFiles = (relative, filter) => fs.readdirSync(path.join(pluginRoot, relative))
   .filter((name) => !name.startsWith('.') && filter(name)).length;
 contract.payload.counts.commands = countFiles('commands', (n) => n.endsWith('.md'));

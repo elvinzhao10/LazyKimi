@@ -73,15 +73,19 @@ failed = False
 EXPECTED_SKILLS = 19
 EXPECTED_COMMANDS = 20
 EXPECTED_AGENTS = 13
-EXPECTED_HOOK_EVENTS = 16
+EXPECTED_HOOK_EVENTS = 19
 EXPECTED_MCP_SERVERS = 6
-EXPECTED_MCP_TOOLS = 32
-EXPECTED_VERSION = "1.3.5"
+EXPECTED_MCP_TOOLS = 35
+EXPECTED_VERSION = "1.4.0"
 KIMI_HOOK_EVENTS = {
     "SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse",
     "PostToolUseFailure", "Stop", "SubagentStop", "SubagentStart",
     "PreCompact", "PostCompact", "SessionEnd", "StopFailure", "Interrupt",
     "PermissionRequest", "PermissionResult", "Notification",
+    # Adopted from the Kimi Code CLI hooks reference (0.32.0, 2026-08-04;
+    # re-verified 2026-10-18 — T8 rescan). SessionHeartbeat is documented but
+    # deliberately not adopted (60-second firing cadence).
+    "TurnStarted", "UserPromptQueued", "TaskStarted",
 }
 
 def result(state, label, detail):
@@ -270,7 +274,7 @@ if manifest is not None:
         else:
             result("FAIL", f"plugin manifest {component}", f"expected {target!r}, got {raw!r}")
     if "hooks" not in manifest or not isinstance(manifest.get("hooks"), list):
-        result("FAIL", "plugin manifest hooks", "expected the 16 inline Kimi hook events")
+        result("FAIL", "plugin manifest hooks", "expected the 19 inline Kimi hook events")
     else:
         events = sorted({entry.get("event") for entry in manifest["hooks"] if isinstance(entry, dict)})
         if not events or events[0] is None:
@@ -325,7 +329,7 @@ if os.path.isdir(skills_dir):
 count_files("commands", os.path.join(root, "commands"), EXPECTED_COMMANDS, lambda _base, name: name.endswith(".md"))
 count_files("agents", os.path.join(root, "agents"), EXPECTED_AGENTS, lambda _base, name: name.endswith(".md"))
 
-# Hook scripts: the manifest declares 16 inline events; every referenced
+# Hook scripts: the manifest declares 19 inline events; every referenced
 # consumer script must exist under hooks/ and be executable.
 if manifest is not None and isinstance(manifest.get("hooks"), list):
     hook_errors = []
@@ -386,7 +390,7 @@ if mcp is not None:
     else:
         result("FAIL", "MCP typed profile contract", profile_check.stderr.strip() or "profile validation failed")
 
-# Tool surface: 32 tools derived from the canonical declaration table in
+# Tool surface: 35 tools derived from the canonical declaration table in
 # src/lib/mcp-validation.ts (generated counts from canonical files; the live
 # handshake stays owned by lazykimi-mcp-test.sh).
 tool_surface_path = os.path.join(root, "src", "lib", "mcp-validation.ts")

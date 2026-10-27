@@ -21,7 +21,7 @@ grep -q 'NAMING_OK' "$TMPDIR/.v104-naming.out" || fail "guard did not report NAM
 
 # 2) Negative: injecting a sibling-product string into a skill must fail.
 T1="$(mktemp -d)"
-trap 'rm -rf "$T1"' EXIT
+trap 'rm -rf "$T1" "${T3:-}" "${T4:-}"' EXIT
 mkdir -p "$T1/lazykimi-plugin/.kimi-code/skills/lazy-demo"
 printf '%s\n' '---' 'name: lazy-demo' '---' 'Ported from lazyzcode.' \
     > "$T1/lazykimi-plugin/.kimi-code/skills/lazy-demo/SKILL.md"
@@ -53,4 +53,41 @@ grep -q 'lazyseries-shared-semantics.v1.json :: ' "$TMPDIR/.v104-neg2.out" \
     || { cat "$TMPDIR/.v104-neg2.out" >&2; fail "tampered-contract run did not name the resurfaced vocabulary"; }
 rm -rf "$T2"
 
-echo "PASS: v104 product-naming guard (positive, injected-skill, tampered-contract)"
+# 4) The schema exception is scoped to one token in one test file.
+T3="$(mktemp -d)"
+health_path='lazykimi-plugin/shared/dashboard-host/test/health-route.test.mjs'
+mkdir -p "$T3/$(dirname "$health_path")"
+cp "$REPO_ROOT/$health_path" "$T3/$health_path"
+retired_token="lazy"'buddy'
+printf '{"formerDisplayNames":[{"path":"%s","text":"%s","count":1,"classification":"stable-machine-id","reason":"Shared wire schema identifier."}],"stableIdentityFiles":[],"currentHostPages":[]}\n' \
+    "$health_path" "$retired_token" > "$T3/.product-naming-allowlist.json"
+PRODUCT_NAMING_ROOT="$T3" node "$GUARD" >"$TMPDIR/.v104-scoped.out" 2>&1 \
+    || { cat "$TMPDIR/.v104-scoped.out" >&2; fail "guard rejected the scoped schema identifier"; }
+printf '\n%s\n' "$retired_token" >> "$T3/$health_path"
+if PRODUCT_NAMING_ROOT="$T3" node "$GUARD" >"$TMPDIR/.v104-count.out" 2>&1; then
+    fail "guard accepted a second occurrence in the schema test"
+fi
+grep -q 'expected 1 allowlisted occurrence(s), found 2' "$TMPDIR/.v104-count.out" \
+    || { cat "$TMPDIR/.v104-count.out" >&2; fail "guard did not enforce the scoped occurrence count"; }
+
+# 5) Removed release-note exceptions must not permit the old prose to return.
+T4="$(mktemp -d)"
+cp "$REPO_ROOT/RELEASE_NOTES.md" "$T4/RELEASE_NOTES.md"
+node - "$REPO_ROOT/.product-naming-allowlist.json" > "$T4/.product-naming-allowlist.json" <<'JS'
+const fs = require('node:fs');
+const source = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+process.stdout.write(JSON.stringify({
+  formerDisplayNames: source.formerDisplayNames.filter(entry => entry.path === 'RELEASE_NOTES.md'),
+  stableIdentityFiles: [],
+  currentHostPages: [],
+}));
+JS
+release_token="lazy"'trae'
+printf '\n%s\n%s\n' "$release_token" "$release_token" >> "$T4/RELEASE_NOTES.md"
+if PRODUCT_NAMING_ROOT="$T4" node "$GUARD" >"$TMPDIR/.v104-release.out" 2>&1; then
+    fail "guard accepted reintroduced release-note sibling prose"
+fi
+grep -Fq "RELEASE_NOTES.md :: $release_token has 2 unallowlisted former display-name occurrence(s)" "$TMPDIR/.v104-release.out" \
+    || { cat "$TMPDIR/.v104-release.out" >&2; fail "guard did not reject the removed release-note exception"; }
+
+echo "PASS: v104 product-naming guard (positive, injected-skill, tampered-contract, scoped-count, release-note-reintroduction)"

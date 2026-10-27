@@ -12,13 +12,13 @@ distinct products. See the [surface guide](docs/reference/kimi-product-surfaces.
 Current-client acceptance is pending for each surface; record its build before
 using legacy-client evidence.
 
-See [the current platform audit](docs/reference/platform-status-2026-10-02.md)
+See [the current platform audit](docs/reference/platform-status-2026-10-27.md)
 for version-specific native features and legacy route limits.
 
-## Current documentation release: v1.3.5
+## Current documentation release: v1.4.0
 
-The package version is v1.3.5, aligned at family contract
-parity with LazyZCode v1.3.5. Fresh Kimi host readiness requires direct observation. This
+The package version is v1.4.0, aligned at family contract
+parity with LazyZCode v1.4.0. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
 (the default full-plugin route), `project-init-route` (the manual project
@@ -32,13 +32,25 @@ choose the smallest sufficient workflow. Until the host is observed, that
 result is selection-only: it does not claim native workflow loading or
 dispatch, and **HOST READINESS: PENDING** remains authoritative.
 
+The v1.4.0 project platform adds a persistent project record
+(`lazykimi-plugin/shared/project/` vendored hash-pinned from the family
+source, the Kimi bridge `scripts/state/project-dashboard-bridge.py` over
+`.lazykimi/project/` plus the neutral `.lazyseries/project.json` registry,
+and the `shared/dashboard-host/project.mjs` route with a typed `project`
+tool on the status-dashboard server). Its capabilities are package-scoped:
+proven by real CLI and MCP round trips from this repository's tests, never
+by host adoption. Before initialization every project surface answers a
+typed not-initialized hint and creates nothing. See the
+[surface record](lazykimi-plugin/docs/reference/kimi-product-surfaces.md)
+for the per-surface capability table.
+
 ## Durable onboarding (start here)
 
 Optional TypeScript LSP requires Node.js **22.22.2+**; core lifecycle compatibility
 with Node.js 20 does not imply compatibility with that optional provider.
 
 For new installations use **Node.js 20 or later** plus **Git** and
-**Python 3.10+** for the MCP servers. The v1.3.5 family port adds the
+**Python 3.10+** for the MCP servers. The v1.3.5 family port added the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
 LazyKimi/` on macOS, mirroring the LazyZCode pattern. The public source is
@@ -70,7 +82,9 @@ When the user types `onboard`:
 2. Run the safe package checks first: `lazykimi load-check` and
    `lazykimi doctor`. These validate package manifests, skills,
    declarations, and local contracts without installing a host plugin,
-   changing host settings, or contacting providers.
+   changing host settings, or contacting providers. `load-check` works in a
+   bare extraction; `doctor` is project-scoped and exits 1 with init
+   guidance until `lazykimi init` has bound the selected project.
 3. When upgrading from an earlier release, inventory receipt-owned versus
    modified/unknown assets first. Preserve user changes and host settings
    until the new session is observed. Never infer host readiness from a
@@ -79,7 +93,7 @@ When the user types `onboard`:
    - **Plugin manifest route (`kimi-plugin-manifest`, default full
      route):** use `/plugins marketplace <absolute-release-root>/lazykimi-plugin/marketplace.json`
      (v2), or `/plugins install <pinned-repository-url>` on clients matching the
-     current official plugin guide. Declares skills, commands, agents and 16 inline hooks. Manifest MCP
+     current official plugin guide. Declares skills, commands, agents and 19 inline hooks. Manifest MCP
      launchers fail closed without explicit project binding; use the project
      init route for project-bound MCP until manifest request context is supported.
    - **Project init route (`project-init-route`, manual project route):**
@@ -112,7 +126,7 @@ When the user types `onboard`:
 
 | Route | Safe package artifact | Host action and expected observation |
 | --- | --- | --- |
-| **Kimi plugin manifest (`kimi-plugin-manifest`)** | `lazykimi-plugin/marketplace.json` (v2) + `lazykimi-plugin/kimi.plugin.json`; 19 skills, 20 commands, 13 agents, 16 hook events, 6 MCP servers (32 tools). | `/plugins marketplace <absolute-path-to-marketplace.json>` to browse and install the selected plugin, or `/plugins install <pinned-repository-url>`; reload or start a fresh session. Verify skills/commands and hooks. Manifest MCP remains blocked without a supported project binding; use the project route for project-bound MCP. |
+| **Kimi plugin manifest (`kimi-plugin-manifest`)** | `lazykimi-plugin/marketplace.json` (v2) + `lazykimi-plugin/kimi.plugin.json`; 19 skills, 20 commands, 13 agents, 19 hook events, 6 MCP servers (35 tools). | `/plugins marketplace <absolute-path-to-marketplace.json>` to browse and install the selected plugin, or `/plugins install <pinned-repository-url>`; reload or start a fresh session. Verify skills/commands and hooks. Manifest MCP remains blocked without a supported project binding; use the project route for project-bound MCP. |
 | **Project init (`project-init-route`)** | `lazykimi init` output: project `.kimi-code/` (skills, `AGENTS.md`, `mcp.json` with rewritten absolute paths) + `.lazykimi/` state; `scripts/install-hooks.sh` appends the eight critical `[[hooks]]` TOML entries. | Open the project in Kimi Code CLI; confirm via `/status` and `/mcp` that the six servers connect with the rewritten absolute paths. |
 | **Kimi Work fallback (`kimi-work-skills-fallback`)** | `scripts/install-kimi-work.sh` copying the `lazy-*` skills only. | Restart Kimi Work, observe one imported skill, add each `lazykimi-*` MCP connector manually one at a time. |
 
@@ -125,6 +139,10 @@ node dist/index.js load-check
 node dist/index.js doctor
 node dist/index.js verify --must-pass
 ```
+
+`load-check` is the bare-extraction verification entry. `doctor` is
+project-scoped: in a bare extraction (no `lazykimi init`) it exits 1 listing
+the missing project bindings instead of package defects.
 
 Do not enable optional remote, browser, or architecture capabilities during
 onboarding, and do not run `npm`/`npx` merely to inspect workflow files.

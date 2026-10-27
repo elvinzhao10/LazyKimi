@@ -19,7 +19,7 @@ NOTES_FILE=$(mktemp "${TMPDIR:-/tmp}/lazykimi-session-start.XXXXXX")
 trap 'rm -f "$NOTES_FILE" "$HOOK_INPUT_FILE"' EXIT
 note() { printf '%s\n' "$1" >>"$NOTES_FILE"; }
 
-note "(LazyKimi v1.3.5): Session starting — checking project state..."
+note "(LazyKimi v1.4.0): Session starting — checking project state..."
 
 # --- Bootstrap the .lazykimi/ directory tree so skills/agents that read
 # plans/, context/, drafts/, rules/, ulw-loop/, or runs/ don't crash on a
@@ -67,7 +67,7 @@ fi
 if [ -f "$CWD/AGENTS.md" ] || [ -f "$CWD/.kimi-code/AGENTS.md" ]; then
     note "(LazyKimi): Project memory found (AGENTS.md)."
 else
-    note "(LazyKimi): Project memory (AGENTS.md) missing. Run /lazy-init-deep or ask to initialize project memory."
+    note "(LazyKimi): Project memory (AGENTS.md) missing. Use lazy-init-deep (manifest: /skill:lazykimi:lazy-init-deep; project: /skill:lazy-init-deep) or ask to initialize project memory."
 fi
 
 # --- Check for project rules ---
@@ -109,13 +109,13 @@ except Exception:
 if not isinstance(d, dict):
     raise SystemExit(0)
 plan = d.get('plan_name') or d.get('plan') or d.get('goal') or 'unknown'
-print(f"(LazyKimi): Active loop present: {plan}. Continue with /lazy-ulw-loop or /lazy-start-work.")
+print(f"(LazyKimi): Active loop present: {plan}. Continue with the lazy-ulw-loop or lazy-start-work workflow.")
 PY
 )
     [ -n "$ACTIVE_LOOP" ] && note "$ACTIVE_LOOP"
 fi
 
-# --- Active run summary (v1.3.5 run state under .lazykimi/runs/) ---
+# --- Active run summary (v1.4.0 run state under .lazykimi/runs/) ---
 RUNS_DIR="$CWD/.lazykimi/runs"
 if [ -d "$RUNS_DIR" ]; then
     for run_dir in "$RUNS_DIR"/*/; do
@@ -151,7 +151,7 @@ print(f"{p.get('completed_checkboxes', p.get('completed', 0))}/{p.get('total_che
 PY
 )
                 note "(LazyKimi): Active run found: $PLAN (status: $STATUS, progress: $PROGRESS)"
-                note "(LazyKimi): Run /lazy-start-work or ask to continue the planned work."
+                note "(LazyKimi): Use the lazy-start-work workflow or ask to continue the planned work."
                 break
             fi
         fi

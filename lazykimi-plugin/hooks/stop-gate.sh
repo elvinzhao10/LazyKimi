@@ -153,7 +153,7 @@ REMAINING=$(printf '%s' "$UNCHECKED" | awk '{print $1}')
 NEXT_TASK=$(printf '%s' "$UNCHECKED" | cut -d ' ' -f2-)
 PLAN_NAME=$(basename "$PLAN_PATH" .md)
 
-REMINDER="[LazyKimi] Completion gate: $REMAINING unfinished task(s) in plan \`$PLAN_NAME\`. Next: $NEXT_TASK. Do not claim completion without verification. Run /lazy-start-work $PLAN_NAME to continue the planned work."
+REMINDER="[LazyKimi] Completion gate: $REMAINING unfinished task(s) in plan \`$PLAN_NAME\`. Next: $NEXT_TASK. Do not claim completion without verification. Use the lazy-start-work workflow for $PLAN_NAME to continue the planned work."
 
 # --- Emit strict JSON only: {"additionalContext": "<reminder>"} ---
 printf '%s' "$REMINDER" | python3 -c 'import json,sys; print(json.dumps({"additionalContext": sys.stdin.read()}))'

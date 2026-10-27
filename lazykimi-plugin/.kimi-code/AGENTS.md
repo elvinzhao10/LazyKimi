@@ -2,7 +2,7 @@
 
 ## OVERVIEW
 
-LazyKimi is the Kimi-native member of the LazySeries evidence-gated agent workflow family (at parity with LazyZCode v1.3.5). It runs the thirteen family role agents on Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main session, preserving the Explore -> Plan -> Implement -> Verify -> Review loop, the DoneClaim -> independent verification -> completion contract, and the five-agent ALL-MUST-PASS review panel. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
+LazyKimi is the Kimi-native member of the LazySeries evidence-gated agent workflow family (at parity with LazyZCode v1.4.0). It runs the thirteen family role agents on Kimi Code CLI's three built-in sub-agent channels (`coder`, `explore`, `plan`) plus the top-level main session, preserving the Explore -> Plan -> Implement -> Verify -> Review loop, the DoneClaim -> independent verification -> completion contract, and the five-agent ALL-MUST-PASS review panel. The harness is driven by the `lazykimi` CLI and the Kimi-native `/swarm`, `/goal`, and `/plan` modes; state lives under `.lazykimi/`, configuration under `.kimi-code/`.
 
 ## AGENT ROLE CATALOG
 
@@ -112,7 +112,7 @@ JSON Schema (Draft 2020-12) files at `.lazykimi/schemas/` validate the runtime s
 Kimi Work (desktop agent, Beta 2026-06-03) is supported as a secondary host via skill import only. Limitations:
 
 - **No plugin manifest support**: `kimi.plugin.json` is ignored. No `/plugins install` route.
-- **No hooks**: The 16 hook scripts do not run on Kimi Work.
+- **No hooks**: The 19 hook scripts do not run on Kimi Work.
 - **No `sessionStart.skill`**: No automatic skill loading on session start.
 - **Manual MCP configuration**: Kimi Work does not auto-load `.kimi-code/mcp.json`. Add each of the 6 `lazykimi-*` MCP servers manually through Kimi Work's MCP configuration UI.
 

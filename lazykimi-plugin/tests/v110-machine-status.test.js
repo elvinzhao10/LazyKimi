@@ -56,7 +56,7 @@ test('installed-only package load check validates machine status without release
   assert.match(result.stdout, /machine status v2/i);
 });
 
-test('machine status publishes authoritative v1.3.5 Kimi route boundaries', () => {
+test('machine status publishes authoritative v1.4.0 Kimi route boundaries', () => {
   // Given: the checked-in v1.3.4 package and its marketplace route declarations.
   const expectedHosts = [
     ['kimi', 'kimi-plugin-manifest', 'invoke-documented', 'documented-tested'],
@@ -70,7 +70,7 @@ test('machine status publishes authoritative v1.3.5 Kimi route boundaries', () =
   const report = JSON.parse(result.stdout);
   assert.equal(report.schema_version, 2);
   assert.equal(report.contract_version, '2.0.0');
-  assert.equal(report.version, '1.3.5');
+  assert.equal(report.version, '1.4.0');
   assert.deepEqual(report.package_readiness, { status: 'ready', scope: 'package' });
   assert.deepEqual(report.host_readiness, { status: 'pending' });
   assert.deepEqual(report.hosts.map((row) => [row.host, row.route, row.native_mode, row.public_label]), expectedHosts);
@@ -111,7 +111,7 @@ test('authoritative versions advance while the initial public lifecycle example 
 
   // Then: current authorities advance independently of the immutable initial
   // public lifecycle example. The marketplace retains its v2 catalog identity.
-  assert.deepEqual(versions, Array(currentFiles.length).fill('1.3.5'));
+  assert.deepEqual(versions, Array(currentFiles.length).fill('1.4.0'));
   assert.equal(marketplace.version, '2');
   assert.equal(marketplace.plugins.length, 1);
   assert.equal(marketplace.plugins[0].id, 'lazykimi');

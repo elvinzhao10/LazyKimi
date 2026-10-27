@@ -6,6 +6,20 @@ execution of these packages. **HOST READINESS: PENDING** for every current
 surface below. Package checks, version probes, and historical observations do
 not establish current plugin loading, delegation, hooks, or MCP connections.
 
+> **2026-10-18 addendum (T8, LazyKimi rows only).** The five LazyKimi rows
+> below were re-reviewed against official Kimi docs/changelogs on 2026-10-18;
+> other families were not re-reviewed. Net changes recorded in
+> [kimi-product-surfaces.md](kimi-product-surfaces.md): the CLI hook surface is
+> now documented at 20 events (`TurnStarted`, `UserPromptQueued`,
+> `TaskStarted`, `SessionHeartbeat` shipped in CLI 0.32.0); LazyKimi adopted
+> the first three as advisory manifest-only hooks (19 inline) and deferred
+> `SessionHeartbeat` (60-second cadence). CLI is at 2.2.0 (2026-10-14:
+> `kimi app`, UserPromptSubmit injection fixes), Code Desktop at 1.1.0
+> (2026-10-14: Linux builds, Remote Control), and the plugin manager gained
+> `/plugins enable|disable`, `/plugins mcp enable|disable`, and
+> `/plugins reload`. HOST READINESS stays PENDING for every Kimi surface; no
+> authenticated session was observed.
+
 ## Native platform, adapter, and observed boundaries
 
 | Product / surface and version scope | Official native capability | Package adapter boundary | Current observation |

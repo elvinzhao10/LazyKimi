@@ -1,5 +1,5 @@
 #!/bin/bash
-# lazykimi-verify.sh — Master verification runner (v1.3.5)
+# lazykimi-verify.sh — Master verification runner (v1.4.0)
 #
 # Ported from lazyzcode v1.3.4 scripts/lazyzcode-verify.sh, Kimi-adapted.
 # Runs all health-check scripts in sequence and emits a compact JSON summary.
@@ -93,10 +93,22 @@ if [[ "$VERIFY_SUITE" != "all" && "$VERIFY_SUITE" != "core" && "$VERIFY_SUITE" !
 fi
 
 PYTHON_SHIM_DIR="$(mktemp -d "${TMPDIR:-/tmp}/lazykimi-python.XXXXXX")"
+# On-demand locked-tooling bootstrap root shared by the Node test phases
+# (contract_tests and node_tests); empty while an installed ajv candidate
+# exists. Populated only by ensure_node_tooling_manifest below.
+NODE_TOOLING_BOOTSTRAP_ROOT=""
 cleanup_python_shim() {
     rm -rf "$PYTHON_SHIM_DIR"
 }
-trap cleanup_python_shim EXIT
+cleanup_node_tooling_bootstrap() {
+    # The if-form (not a `[ -n ] && rm` guard) keeps the trap's status at 0
+    # when no bootstrap root exists: a failing guard inside an EXIT trap
+    # under `set -e` would override an `exit 0` and flip the suite verdict.
+    if [ -n "$NODE_TOOLING_BOOTSTRAP_ROOT" ]; then
+        rm -rf "$NODE_TOOLING_BOOTSTRAP_ROOT"
+    fi
+}
+trap 'cleanup_node_tooling_bootstrap; cleanup_python_shim' EXIT
 export LAZYKIMI_PYTHON="$PYTHON_BIN"
 printf '%s\n' \
     '#!/usr/bin/env bash' \
@@ -138,6 +150,69 @@ with open(sys.argv[1], encoding="utf-8") as handle:
 if result["tail"]:
     print(result["tail"], end="" if result["tail"].endswith("\n") else "\n")
 PY
+}
+
+# Both Node test phases (contract_tests and node_tests) resolve ajv from the
+# locked tooling manifest through the same NODE_PATH this script exports. A
+# fresh checkout has no tooling/node_modules: lazykimi-tooling.sh install only
+# npm-installs when host rg/sg providers are missing, so bare worktree runs
+# failed both phases while lazykimi-package-verify.sh (which npm ci's into a
+# temp root) passed — same commit, different verdict. Bootstrap the locked
+# manifest on demand, exactly like package-verify, once and shared by both
+# phases; a bootstrap failure fails each requesting phase with an explicit
+# reason instead of surfacing as per-test "AJV dependency is not installed"
+# errors.
+NODE_TOOLING_BOOTSTRAP_FAILED=false
+ensure_node_tooling_manifest() {
+    # Leaves NODE_TOOLING_BOOTSTRAP_ROOT pointing at a populated temp root on
+    # success (empty when an installed ajv candidate already exists) and
+    # returns non-zero when the manifest cannot be made available.
+    local ajv_entry result_file status bootstrap_timeout
+    if [ "$NODE_TOOLING_BOOTSTRAP_FAILED" = true ]; then
+        return 1
+    fi
+    if [ -n "$NODE_TOOLING_BOOTSTRAP_ROOT" ]; then
+        return 0
+    fi
+    for ajv_entry in \
+        "${LAZYKIMI_PARITY_NODE_MODULES:+${LAZYKIMI_PARITY_NODE_MODULES%/}/ajv/dist/2020.js}" \
+        "${PLUGIN_ROOT}/tooling/node_modules/ajv/dist/2020.js" \
+        "${PLUGIN_ROOT}/node_modules/ajv/dist/2020.js"; do
+        if [ -n "$ajv_entry" ] && [ -f "$ajv_entry" ]; then
+            return 0
+        fi
+    done
+    if ! command -v npm >/dev/null 2>&1; then
+        printf 'FAIL: Node test phases require ajv from the locked tooling manifest; no installed candidate exists and npm is unavailable to bootstrap it\n' >&2
+        NODE_TOOLING_BOOTSTRAP_FAILED=true
+        return 1
+    fi
+    NODE_TOOLING_BOOTSTRAP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/lazykimi-node-tooling.XXXXXX")"
+    cp "${PLUGIN_ROOT}/tooling/package.json" "${PLUGIN_ROOT}/tooling/package-lock.json" "${NODE_TOOLING_BOOTSTRAP_ROOT}/"
+    # The bounded runner's exit code is the sole bootstrap verdict: a
+    # post-install file guard would defeat policy regressions that substitute
+    # a stub runner inside a fixture copy — the phase must simply proceed as
+    # scheduled there. Bootstrap keeps the timeout contract: an explicit
+    # LAZYKIMI_NODE_TOOLING_BOOTSTRAP_TIMEOUT_SECONDS wins, else a 180s floor
+    # that a global user override can raise, so every scheduled label honors
+    # LAZYKIMI_VERIFY_TIMEOUT_SECONDS.
+    bootstrap_timeout="${LAZYKIMI_NODE_TOOLING_BOOTSTRAP_TIMEOUT_SECONDS:-$(( VERIFY_TIMEOUT > 180 ? VERIFY_TIMEOUT : 180 ))}"
+    result_file="$(mktemp "${TMPDIR:-/tmp}/lazykimi-node-bootstrap.XXXXXX")"
+    if "$PYTHON_BIN" "$RUNNER" --label "node_tests_tooling_bootstrap" \
+        --timeout "$bootstrap_timeout" \
+        --result-file "$result_file" -- \
+        bash -c 'cd "$1" && npm ci --ignore-scripts --no-audit --no-fund' _ "$NODE_TOOLING_BOOTSTRAP_ROOT" >&2; then
+        rm -f "$result_file"
+        return 0
+    fi
+    status=$?
+    print_failure_tail "$result_file"
+    rm -f "$result_file"
+    printf 'FAIL: Node test phases require the locked tooling manifest (ajv) and the on-demand npm ci bootstrap exited %s\n' "$status" >&2
+    rm -rf "$NODE_TOOLING_BOOTSTRAP_ROOT"
+    NODE_TOOLING_BOOTSTRAP_ROOT=""
+    NODE_TOOLING_BOOTSTRAP_FAILED=true
+    return 1
 }
 
 run_check() {
@@ -366,11 +441,26 @@ run_regression_inventory() {
 
 run_contract_tests() {
     local result_file
+    local node_phase_cmd
     if [ "$REGRESSION_DEPTH" -gt 0 ]; then CONTRACT_TESTS_RESULT="skipped-nested"; return; fi
     if [ "$VERIFY_SUITE" != "all" ]; then CONTRACT_TESTS_RESULT="skipped-suite"; return; fi
+    # The contract suite resolves ajv (locked tooling manifest) exactly like
+    # the node_tests phase; a missing manifest fails the phase explicitly
+    # rather than as per-test AJV resolution noise.
+    if ! ensure_node_tooling_manifest; then
+        CONTRACT_TESTS_RESULT="fail"
+        ALL_PASS=false
+        return
+    fi
+    if [ -n "$NODE_TOOLING_BOOTSTRAP_ROOT" ]; then
+        node_phase_cmd=(env "NODE_PATH=${NODE_TOOLING_BOOTSTRAP_ROOT}/node_modules" \
+            bash -c 'node --test "$1"/contracts/tests/*.test.js' _ "$PLUGIN_ROOT")
+    else
+        node_phase_cmd=(bash -c 'node --test "$1"/contracts/tests/*.test.js' _ "$PLUGIN_ROOT")
+    fi
     result_file="$(mktemp "${TMPDIR:-/tmp}/lazykimi-contract-tests.XXXXXX")"
     if "$PYTHON_BIN" "$RUNNER" --label "contract_tests" --timeout "$VERIFY_TIMEOUT" --result-file "$result_file" -- \
-        bash -c 'node --test "$1"/contracts/tests/*.test.js' _ "$PLUGIN_ROOT"; then
+        "${node_phase_cmd[@]}"; then
         CONTRACT_TESTS_RESULT="pass"
     else
         CONTRACT_TESTS_RESULT="fail"
@@ -409,15 +499,30 @@ run_language_tests() {
         # roots); give the phase its own bounded floor. An explicit user
         # override always wins when it exceeds the floor.
         NODE_PHASE_TIMEOUT="${LAZYKIMI_NODE_PHASE_TIMEOUT_SECONDS:-$(( VERIFY_TIMEOUT > 900 ? VERIFY_TIMEOUT : 900 ))}"
-        if "$PYTHON_BIN" "$RUNNER" --label "node_tests" --timeout "$NODE_PHASE_TIMEOUT" --result-file "$result_file" -- \
-            node --test --test-reporter=spec --test-concurrency="$NODE_TEST_CONCURRENCY" "${node_test_paths[@]}"; then
-            NODE_TESTS_RESULT="pass"
-        else
-            status=$?
+        # Same ajv contract as contract_tests above: the suite resolves the
+        # validator from the locked tooling manifest via NODE_PATH, so a bare
+        # checkout bootstraps it on demand (shared root) and a bootstrap
+        # failure fails this phase with an explicit reason.
+        local node_tests_ready=true
+        local node_phase_cmd=(node --test --test-reporter=spec --test-concurrency="$NODE_TEST_CONCURRENCY" "${node_test_paths[@]}")
+        if ! ensure_node_tooling_manifest; then
             NODE_TESTS_RESULT="fail"
             ALL_PASS=false
-            print_failure_tail "$result_file"
-            printf 'FAIL: Node tests exited %s\n' "$status" >&2
+            node_tests_ready=false
+        elif [ -n "$NODE_TOOLING_BOOTSTRAP_ROOT" ]; then
+            node_phase_cmd=(env "NODE_PATH=${NODE_TOOLING_BOOTSTRAP_ROOT}/node_modules" "${node_phase_cmd[@]}")
+        fi
+        if [ "$node_tests_ready" = true ]; then
+            if "$PYTHON_BIN" "$RUNNER" --label "node_tests" --timeout "$NODE_PHASE_TIMEOUT" --result-file "$result_file" -- \
+                "${node_phase_cmd[@]}"; then
+                NODE_TESTS_RESULT="pass"
+            else
+                status=$?
+                NODE_TESTS_RESULT="fail"
+                ALL_PASS=false
+                print_failure_tail "$result_file"
+                printf 'FAIL: Node tests exited %s\n' "$status" >&2
+            fi
         fi
         rm -f "$result_file"
     fi

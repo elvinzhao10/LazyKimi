@@ -10,9 +10,17 @@
 // exempt by content hash: a contract is exempt only while its bytes still
 // match its tracked .sha256 sidecar (the sidecars were copied from the
 // LazyZCode v1.3.4 release, so the exemption is hash-pinned, not
-// path-globbed). The scripts/hooks bridge symlink is skipped for the same
-// reason the family's v122 harness-semantic-parity work introduced it: it is
-// a bridge to the canonical hooks directory, not a second surface.
+// path-globbed). The generated vendored cores under
+// lazykimi-plugin/shared/dashboard/ and lazykimi-plugin/shared/project/ are
+// exempt the same hash-pinned way: a vendored file is exempt only while its
+// bytes still match the per-file sha256 recorded in its family's vendor
+// manifest (shared/dashboard.vendor.json / shared/project.vendor.json — the
+// vendored trees are read-only and regenerated, so any local edit immediately
+// resurfaces naming review instead of silently riding the exemption). The
+// scripts/hooks bridge
+// symlink is skipped for the same reason the family's v122
+// harness-semantic-parity work introduced it: it is a bridge to the canonical
+// hooks directory, not a second surface.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -135,6 +143,41 @@ function isHashExemptContract(relativePath) {
   return sha256(buffer) === pinned;
 }
 
+// A vendored generated file is hash-exempt while its bytes match the per-file
+// pin recorded in the tracked vendor manifest for its family (the dashboard
+// core under shared/dashboard/, the project platform under shared/project/).
+// The manifest is the regeneration provenance record, so an unpinned or
+// locally edited file never rides this exemption.
+const VENDOR_FAMILIES = [
+  { prefix: 'lazykimi-plugin/shared/dashboard/', manifest: 'lazykimi-plugin/shared/dashboard.vendor.json' },
+  { prefix: 'lazykimi-plugin/shared/project/', manifest: 'lazykimi-plugin/shared/project.vendor.json' },
+];
+const vendorPinsByFamily = new Map();
+function isHashExemptVendoredFile(relativePath) {
+  const family = VENDOR_FAMILIES.find(entry => relativePath.startsWith(entry.prefix));
+  if (!family) return false;
+  let vendorPins = vendorPinsByFamily.get(family.prefix);
+  if (vendorPins === undefined) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(path.join(root, family.manifest), 'utf8'));
+      vendorPins = new Map(manifest.files.map(entry => [`${family.prefix}${entry.path}`, entry.sha256]));
+    } catch {
+      vendorPins = null;
+    }
+    vendorPinsByFamily.set(family.prefix, vendorPins);
+  }
+  if (!vendorPins) return false;
+  const pinned = vendorPins.get(relativePath);
+  if (!pinned || !/^[0-9a-f]{64}$/.test(pinned)) return false;
+  let buffer;
+  try {
+    buffer = fs.readFileSync(path.join(root, relativePath));
+  } catch {
+    return false;
+  }
+  return sha256(buffer) === pinned;
+}
+
 function countExact(content, text) {
   return content.split(text).length - 1;
 }
@@ -152,6 +195,7 @@ if (allowlist) {
   for (const relativePath of files) {
     if (relativePath === '.product-naming-allowlist.json' || relativePath === 'scripts/check-product-naming.js') continue;
     if (isHashExemptContract(relativePath)) continue;
+    if (isHashExemptVendoredFile(relativePath)) continue;
     const content = readText(relativePath);
     if (content === null) continue;
     for (const [label, pattern] of patterns) {

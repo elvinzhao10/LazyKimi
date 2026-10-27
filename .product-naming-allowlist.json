@@ -295,13 +295,6 @@
       "reason": "Lineage text names the sibling packages this port derives from."
     },
     {
-      "path": "RELEASE_NOTES.md",
-      "text": "lazytrae",
-      "count": 2,
-      "classification": "source-identity",
-      "reason": "Current release notes describe the separate LazyTrae adapter and its runtime floor."
-    },
-    {
       "path": "lazykimi-evaluation.md",
       "text": "codebuddy",
       "count": 2,
@@ -2295,6 +2288,62 @@
       "count": 3,
       "classification": "source-identity",
       "reason": "Dated official-source platform comparison names actual sibling packages and native hosts; exact file and count scope."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard.vendor.json",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Vendored generated-dashboard provenance manifest naming its upstream source repository and path; the vendored files it pins stay hash-exempt only while their bytes match the pinned sha256 values."
+    },
+    {
+      "path": "lazykimi-plugin/shared/project.vendor.json",
+      "text": "lazybuddy",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Vendor provenance sidecar for the pinned shared/project family: names the LazyBuddy source repository and payload path exactly as the family vendor manifest records them (same source-identity basis as dashboard.vendor.json)."
+    },
+    {
+      "path": "lazykimi-plugin/scripts/state/project-dashboard-bridge.py",
+      "text": "zcode",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "Bridge source-path guard enumerates the family state-directory host ids (machine identifiers) its protected-path regex refuses to traverse."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/health-route.test.mjs",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "stable-machine-id",
+      "reason": "The health route test asserts the shared lazybuddy/plugin-health@1 wire schema identifier; it is not a product display name."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/project-adapter.test.mjs",
+      "text": "lazybuddy",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Vendor-provenance test asserts the canonical LazyBuddy source repository URL exactly as the pinned shared/project family vendor manifest records it."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/store-isolation.test.mjs",
+      "text": "lazyzcode",
+      "count": 4,
+      "classification": "source-identity",
+      "reason": "Foreign-runtime refusal matrix names the sibling runtime as adversarial test data; LazyZCode entries must be refused, never executed."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/store-isolation.test.mjs",
+      "text": "zcode",
+      "count": 2,
+      "classification": "source-identity",
+      "reason": "Foreign-runtime refusal matrix names the sibling runtime as adversarial test data; LazyZCode entries must be refused, never executed."
+    },
+    {
+      "path": "lazykimi-plugin/shared/dashboard-host/test/store-isolation.test.mjs",
+      "text": ".lazyzcode",
+      "count": 1,
+      "classification": "source-identity",
+      "reason": "Foreign-runtime refusal matrix names the sibling store namespace as adversarial test data; the owning .lazykimi store must never mutate."
     }
   ],
   "stableIdentityFiles": [

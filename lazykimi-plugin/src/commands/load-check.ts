@@ -3,10 +3,10 @@ import path from 'path';
 import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginRoot } from '../lib/paths';
 import { readJson, isObject } from '../lib/json';
 
-const PLUGIN_VERSION = '1.3.5';
+const PLUGIN_VERSION = '1.4.0';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
-const EXPECTED_HOOKS = 16;
+const EXPECTED_HOOKS = 19;
 const EXPECTED_MCP = 6;
 
 function countPluginSkills(): number {

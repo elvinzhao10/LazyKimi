@@ -1,6 +1,6 @@
 # AGENTS.md — LazyKimi local onboarding
 
-This is the reusable `v1.3.5` consumer template, not a claim that a host loaded
+This is the reusable `v1.4.0` consumer template, not a claim that a host loaded
 the plugin. Explicit user instructions and nearer project instructions take
 precedence.
 
@@ -48,7 +48,7 @@ and may double-fire hook events:
 - **`kimi-plugin-manifest` (default full route):** add the repository through
   `/plugins marketplace` using `lazykimi-plugin/marketplace.json` (v2), then
   install the `lazykimi` plugin as a separate approved action. Delivers
-  skills, commands, agents, the 16 inline hooks, and the 6 inline
+  skills, commands, agents, the 19 inline hooks, and the 6 inline
   `mcpServers`.
 - **`project-init-route` (manual project route):** from the target project,
   run `lazykimi init` (copies `.kimi-code/` and `.lazykimi/`; rewrites the

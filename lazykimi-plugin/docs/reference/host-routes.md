@@ -1,16 +1,16 @@
 # Host routes reference
 
-Status: v1.3.5. LazyKimi reaches its hosts through three routes. The
-authoritative machine-readable definition is
+Status: v1.4.0 (T8 rescan 2026-10-18). LazyKimi reaches its hosts through
+three routes. The authoritative machine-readable definition is
 `contracts/marketplace-route-contract.v1.json` (inventory: 19 skills, 20
-commands, 13 agents, 16 hook events, 6 MCP servers, 32 MCP tools); this page
-explains each route and the manual connector spec for Kimi Work.
+commands, 13 agents, 19 adopted hook events, 6 MCP servers, 35 MCP tools);
+this page explains each route and the manual connector spec for Kimi Work.
 
 ## Route 1 — `kimi-plugin-manifest` (default full route)
 
 - **Registration**: `/plugins marketplace <absolute-path-to-marketplace.json>` using `lazykimi-plugin/marketplace.json`
   (v2 shape), then install the `lazykimi` plugin.
-- **Delivers**: skills, commands, agents, 16 inline hook events
+- **Delivers**: skills, commands, agents, 19 inline hook events
   (`./hooks/<script>.sh`), 6 inline `mcpServers`
   (`node ./scripts/kimi-project-mcp.js <server>`), and `sessionStart.skill:
   lazy-init-deep`.
@@ -39,7 +39,7 @@ explains each route and the manual connector spec for Kimi Work.
 - **Mode persistence**: the selected mode is recorded in
   `.lazykimi/config.json` (`"mcpMode"`); `lazykimi doctor` and load-check
   report it.
-- **Boundary**: the remaining 8 advisory hook events activate only through
+- **Boundary**: the remaining 11 advisory hook events activate only through
   route 1; this route installs exactly the critical 8.
 
 ## Route 3 — `kimi-work-skills-fallback` (recovery/secondary)
@@ -64,7 +64,7 @@ launcher; run from a checkout, `<root>` is the absolute path to the
 | --- | --- | --- |
 | `lazykimi-run-ledger` | `node <root>/scripts/kimi-project-mcp.js run-ledger --project <project>` | Durable run records (9 tools) |
 | `lazykimi-verification` | `node <root>/scripts/kimi-project-mcp.js verification --project <project>` | Verification store and gates (7 tools) |
-| `lazykimi-status-dashboard` | `node <root>/scripts/kimi-project-mcp.js status-dashboard --project <project>` | Run status views (4 tools) |
+| `lazykimi-status-dashboard` | `node <root>/scripts/kimi-project-mcp.js status-dashboard --project <project>` | Run status views plus the local dashboard service and producer-context copy (6 tools) |
 | `lazykimi-context-graph` | `node <root>/scripts/kimi-project-mcp.js context-graph --project <project>` | Local relationship queries (5 tools) |
 | `lazykimi-code-intel` | `node <root>/scripts/kimi-project-mcp.js code-intel --project <project>` | Diagnostics/navigation helpers (5 tools) |
 | `lazykimi-docs` | `node <root>/scripts/kimi-project-mcp.js docs --project <project>` | Fixed-registry docs lookup (2 tools) |
@@ -93,4 +93,4 @@ Rules that travel with the spec:
 
 ## Current client and removal boundary
 
-See [the dated platform audit](platform-status-2026-10-02.md) for current CLI, VS Code, ACP, Code Desktop and Work distinctions. Direct installation uses `/plugins install <path-or-url>`; pin a release/commit URL when required. `/plugins remove <id>` removes the installation record, retaining the managed copy and original source; package removal must not guess or delete host-managed caches. Plugins are user-scoped. Reload or start a new session before observing the result.
+See [the dated platform audit](platform-status-2026-10-27.md) for current CLI, VS Code, ACP, Code Desktop and Work distinctions. Direct installation uses `/plugins install <path-or-url>`; pin a release/commit URL when required. `/plugins remove <id>` removes the installation record, retaining the managed copy and original source; package removal must not guess or delete host-managed caches. Plugins are user-scoped. Reload or start a new session before observing the result. The 2026-10-18 rescan additionally documented `/plugins enable|disable <id>`, `/plugins mcp enable|disable <id> <server>` (per-server MCP toggling for an installed plugin), `/plugins reload` (re-reads `installed.json` and manifests without a session restart), and the `KIMI_CODE_PLUGIN_MARKETPLACE_URL` custom-catalog variable ([plugins reference](https://www.kimi.com/code/docs/en/kimi-code-cli/customization/plugins.html)); none of these change the routes above, but a user can now disable individual plugin MCP servers host-side, which route observations must record.

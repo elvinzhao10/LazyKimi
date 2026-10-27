@@ -20,8 +20,7 @@ host observations separate from package evidence.
 | You need to reconstruct a prior session | `lazy-coding-agent-sessions` | Session history and transcript reconstruction. |
 | You need to report a LazyKimi bug | `lazy-report-bug` | Structured bug report. |
 
-Kimi Code CLI exposes skills via `/skill:lazy-<name>` or `/<name>` shorthand
-after the host has loaded `.kimi-code/`. In Kimi Work, use a verified Skills
+Kimi Code CLI 2.3.0 invokes a manifest plugin skill as `/skill:lazykimi:lazy-<name>` and a plugin command as `/lazykimi:lazy-<name>`. Project-installed skills use `/skill:lazy-<name>` after the host has loaded `.kimi-code/`. In Kimi Work, use a verified Skills
 session or the equivalent natural-language/imported-skill workflow. The
 [installation and host verification guide](03-install-and-host-verification.md)
 explains the initial route.

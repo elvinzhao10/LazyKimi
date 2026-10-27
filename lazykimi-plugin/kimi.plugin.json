@@ -1,6 +1,6 @@
 {
   "name": "lazykimi",
-  "version": "1.3.5",
+  "version": "1.4.0",
   "description": "LazyKimi evidence-gated planning, execution, and review workflows for Kimi hosts.",
   "author": "LazyKimi contributors",
   "homepage": "https://github.com/elvinzhao10/LazyKimi",
@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "LazyKimi",
     "shortDescription": "Evidence-gated planning, execution, and review workflows for Kimi hosts",
-    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.3.5. Primary host: Kimi Code CLI (plugin manifest and project init routes). Kimi Work supports full plugins; this package route remains experimental pending live proof. Manifest MCP servers require explicit project binding through the project init route.",
+    "longDescription": "LazyKimi ports the LazySeries evidence-gated planning, execution, and review workflow design to Kimi as a Kimi-native package at family parity with LazyZCode v1.4.0. Primary host: Kimi Code CLI (plugin manifest and project init routes). Kimi Work supports full plugins; this package route remains experimental pending live proof. Manifest MCP servers require explicit project binding through the project init route.",
     "developerName": "LazyKimi contributors",
     "websiteURL": "https://github.com/elvinzhao10/LazyKimi"
   },
@@ -23,7 +23,7 @@
   "sessionStart": {
     "skill": "lazy-init-deep"
   },
-  "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /lazy-init-deep on first use.",
+  "skillInstructions": "LazyKimi skills use the lazy-* namespace and the .lazykimi/ state directory. Run /skill:lazykimi:lazy-init-deep on first use (qualified skill name; Kimi Code CLI 2.3.0+ dropped bare-name skill invocation).",
   "mcpServers": {
     "lazykimi-run-ledger": {
       "command": "node",
@@ -148,6 +148,21 @@
     {
       "event": "Notification",
       "command": "bash ./hooks/notification.sh",
+      "timeout": 5
+    },
+    {
+      "event": "TurnStarted",
+      "command": "bash ./hooks/turn-started.sh",
+      "timeout": 5
+    },
+    {
+      "event": "UserPromptQueued",
+      "command": "bash ./hooks/user-prompt-queued.sh",
+      "timeout": 5
+    },
+    {
+      "event": "TaskStarted",
+      "command": "bash ./hooks/task-started.sh",
       "timeout": 5
     }
   ],

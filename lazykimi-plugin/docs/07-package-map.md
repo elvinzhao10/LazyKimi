@@ -10,8 +10,8 @@ flowchart TB
     subgraph Assets["plugin assets"]
       Skills[".kimi-code/skills/ (19)"]
       Agents["agents/ (13 roles)"]
-      HookScripts["hooks/*.sh (16)"]
-      MCP["mcp/*/server.* (6 servers, 32 tools)"]
+      HookScripts["hooks/*.sh (19)"]
+      MCP["mcp/*/server.* (6 servers, 35 tools)"]
       CLI["src/ (TypeScript CLI)"]
       Scripts["scripts/"]
     end
@@ -31,9 +31,10 @@ declared as named native profiles with tool and delegation restrictions. These f
 process authority by themselves; they are loaded only if the host accepts the
 package.
 
-`hooks/` ships 16 hook scripts. Eight critical hooks are installed into
-`~/.kimi-code/config.toml` by `scripts/install-hooks.sh`; the remaining eight
-advisory hooks activate only through the plugin manifest. The scripts read
+`hooks/` ships 19 hook scripts (19 of the 20 host-documented events;
+`SessionHeartbeat` deliberately not adopted). Eight critical hooks are installed
+into `~/.kimi-code/config.toml` by `scripts/install-hooks.sh`; the remaining
+eleven advisory hooks activate only through the plugin manifest. The scripts read
 structured input, apply narrow local policy, and avoid treating untrusted text
 as a shell command. Their output is host advice or local evidence, not proof
 that the host enforced the result.

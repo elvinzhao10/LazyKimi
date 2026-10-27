@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # notification.sh — Kimi Notification hook (advisory, no-op logger).
-# v1.3.5 mapped semantics: Kimi-only event with no family gating analogue —
+# v1.4.0 mapped semantics: Kimi-only event with no family gating analogue —
 # log a bounded, redaction-safe trace to stderr only. Never writes state.
 #
 # Kimi output contract: print NOTHING on stdout; diagnostics to stderr.

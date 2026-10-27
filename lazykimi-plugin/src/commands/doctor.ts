@@ -5,10 +5,10 @@ import { readJson, isObject } from '../lib/json';
 import { isPluginSourceRoot } from '../lib/paths';
 import { validateMcpServers, REQUIRED_MCP_SERVERS, EXPECTED_MCP_TOOLS } from '../lib/mcp-validation';
 
-const PLUGIN_VERSION = '1.3.5';
+const PLUGIN_VERSION = '1.4.0';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
-const EXPECTED_HOOKS = 16;
+const EXPECTED_HOOKS = 19;
 const EXPECTED_MCP_TOOL_COUNT = EXPECTED_MCP_TOOLS;
 
 export type CheckStatus = 'PASS' | 'FAIL' | 'WARN';
