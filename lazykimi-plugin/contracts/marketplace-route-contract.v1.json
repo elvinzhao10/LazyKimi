@@ -92,7 +92,7 @@
       "mcp_servers": 6
     },
     "file_count": 113,
-    "inventory_sha256": "89c9026379550451f5dbd28975e455eda1283b448b734339ad400bf3b9351ac7"
+    "inventory_sha256": "ca203c8b802c829ae99712045f3f0ed83f8b6dac096e4a72a431038e5c0e6fc3"
   },
   "default_routes": {
     "kimi": "kimi-plugin-manifest",

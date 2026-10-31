@@ -12,7 +12,7 @@ distinct products. See the [surface guide](docs/reference/kimi-product-surfaces.
 Current-client acceptance is pending for each surface; record its build before
 using legacy-client evidence.
 
-See [the current platform audit](docs/reference/platform-status-2026-10-27.md)
+See [the current platform audit](docs/reference/platform-status-2026-10-30.md)
 for version-specific native features and legacy route limits.
 
 ## Current documentation release: v1.4.0

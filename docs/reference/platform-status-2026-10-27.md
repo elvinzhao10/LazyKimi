@@ -1,5 +1,7 @@
 # LazyKimi platform status — 2026-10-27
 
+Historical snapshot: see [the 2026-10-30 audit](platform-status-2026-10-30.md) for current documentation and compatibility changes.
+
 Package **1.4.0**. This is a documentation and package audit, not a host acceptance report. The latest CLI release in the official changelog on this date is **2.3.0 (2026-10-21)**; the local `kimi --version` probe returned **0.27.0**. No current authenticated session, plugin installation, settings change, or credential operation was performed. **HOST READINESS: PENDING** for each client and route.
 
 ## Product and route boundaries
