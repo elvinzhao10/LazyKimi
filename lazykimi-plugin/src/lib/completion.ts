@@ -126,6 +126,14 @@ export function runRegressionTests(target: string): TestResult {
     else {
       failed++;
       failedScripts.push(script);
+      console.error('REGRESSION_FAILURE', JSON.stringify({
+        script,
+        status: result.status,
+        signal: result.signal,
+        error: result.error?.message ?? null,
+        stdoutTail: (result.stdout ?? '').slice(-4096),
+        stderrTail: (result.stderr ?? '').slice(-4096),
+      }));
     }
   }
   return {
