@@ -78,19 +78,54 @@ import signal
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
+from typing import Iterator
 
 lifecycle, target, tooling_root, fake_bin, tmp = sys.argv[1:]
 
 def staging_paths() -> list[str]:
     return [name for name in os.listdir(tmp) if name.startswith(".lazykimi-codegraph-install.")]
 
-def wait_for(path: str) -> None:
-    deadline = time.monotonic() + 2
-    while time.monotonic() < deadline:
-        if os.path.exists(path):
-            return
-        time.sleep(0.02)
-    raise SystemExit(f"fake npm did not reach staging point: {path}")
+@contextmanager
+def install_process(root: str, environment: dict[str, str], cwd: str | None = None) -> Iterator[tuple[subprocess.Popen[str], float]]:
+    deadline = time.monotonic() + 5
+    process = subprocess.Popen(
+        ["bash", lifecycle, "codegraph-install", "--target", target,
+         "--tooling-root", root],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+        start_new_session=True, env=environment, cwd=cwd,
+    )
+    try:
+        yield process, deadline
+    except subprocess.TimeoutExpired:
+        raise SystemExit("codegraph-install did not return before the outer watchdog")
+    finally:
+        # Release a staged fake npm before reaping, including failed readiness.
+        continuation = environment.get("LAZYKIMI_CODEGRAPH_STAGE_CONTINUE_PATH")
+        if continuation:
+            with open(continuation, "w", encoding="utf-8") as destination:
+                destination.write("continue\n")
+        if process.poll() is None:
+            try:
+                process.communicate(timeout=1)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
+
+
+def wait_for(path: str, process: subprocess.Popen[str], deadline: float) -> None:
+    while not os.path.exists(path):
+        if process.poll() is not None:
+            stdout, stderr = process.communicate(timeout=max(0, deadline - time.monotonic()))
+            raise SystemExit(f"install exited before staging ({process.returncode}): {stdout}{stderr}")
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise SystemExit(f"fake npm did not reach staging point before the outer watchdog: {path}")
+        time.sleep(min(0.02, remaining))
 
 def invoke(root: str, mode: str, add_unknown: bool = False) -> tuple[str, str]:
     pid_path = f"{tmp}/child-{os.path.basename(root)}.pid"
@@ -111,8 +146,9 @@ def invoke(root: str, mode: str, add_unknown: bool = False) -> tuple[str, str]:
         start_new_session=True,
         env=environment,
     )
+    deadline = time.monotonic() + 5
     if add_unknown:
-        wait_for(stage_ready)
+        wait_for(stage_ready, process, deadline)
         os.mkdir(f"{root}/user-owned")
         with open(f"{root}/user-owned/keep.txt", "w", encoding="utf-8") as destination:
             destination.write("preserve me\n")
@@ -165,25 +201,18 @@ def invoke_with_replaced_root(replacement: str) -> None:
         "LAZYKIMI_CODEGRAPH_STAGE_READY_PATH": stage_ready,
         "LAZYKIMI_CODEGRAPH_STAGE_CONTINUE_PATH": stage_continue,
     }
-    process = subprocess.Popen(
-        ["bash", lifecycle, "codegraph-install", "--target", target, "--tooling-root", root],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        start_new_session=True,
-        env=environment,
-    )
-    wait_for(stage_ready)
-    if replacement == "directory":
-        os.mkdir(root)
-        caller_directory_identity = os.lstat(root).st_dev, os.lstat(root).st_ino
-    else:
-        with open(external, "w", encoding="utf-8") as destination:
-            destination.write("preserve me\\n")
-        os.symlink(external, root)
-    with open(stage_continue, "w", encoding="utf-8") as destination:
-        destination.write("continue\\n")
-    stdout, stderr = process.communicate(timeout=5)
+    with install_process(root, environment) as (process, deadline):
+        wait_for(stage_ready, process, deadline)
+        if replacement == "directory":
+            os.mkdir(root)
+            caller_directory_identity = os.lstat(root).st_dev, os.lstat(root).st_ino
+        else:
+            with open(external, "w", encoding="utf-8") as destination:
+                destination.write("preserve me\\n")
+            os.symlink(external, root)
+        with open(stage_continue, "w", encoding="utf-8") as destination:
+            destination.write("continue\\n")
+        stdout, stderr = process.communicate(timeout=max(0, deadline - time.monotonic()))
     if process.returncode == 0:
         raise SystemExit(f"promotion replaced concurrent {replacement}: {stdout}{stderr}")
     if "CODEGRAPH_INSTALL_ROOT_COLLISION" not in stderr:
@@ -233,19 +262,11 @@ def get_errno():
         "LAZYKIMI_CODEGRAPH_STAGE_READY_PATH": stage_ready,
         "LAZYKIMI_CODEGRAPH_STAGE_CONTINUE_PATH": stage_continue,
     }
-    process = subprocess.Popen(
-        ["bash", lifecycle, "codegraph-install", "--target", target, "--tooling-root", root],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        start_new_session=True,
-        cwd=import_root,
-        env=environment,
-    )
-    wait_for(stage_ready)
-    with open(stage_continue, "w", encoding="utf-8") as destination:
-        destination.write("continue\\n")
-    stdout, stderr = process.communicate(timeout=5)
+    with install_process(root, environment, cwd=import_root) as (process, deadline):
+        wait_for(stage_ready, process, deadline)
+        with open(stage_continue, "w", encoding="utf-8") as destination:
+            destination.write("continue\\n")
+        stdout, stderr = process.communicate(timeout=max(0, deadline - time.monotonic()))
     if process.returncode == 0:
         raise SystemExit(f"forced primitive failure unexpectedly promoted: {stdout}{stderr}")
     if "CODEGRAPH_INSTALL_NO_CLOBBER_UNAVAILABLE" not in stderr:
@@ -256,6 +277,25 @@ def get_errno():
         raise SystemExit("forced primitive failure created a tooling-root pathname")
     if staging_paths():
         raise SystemExit(f"forced primitive failure retained private staging entries: {staging_paths()}")
+
+# A real readiness event after the former two-second cutoff still fits the
+# operation budget, without delaying the production lifecycle fixtures.
+slow_ready = f"{tmp}/slow-stage-ready"
+deadline = time.monotonic() + 5
+slow_child = subprocess.Popen([
+    sys.executable, "-c",
+    "import pathlib, sys, time; time.sleep(2.2); pathlib.Path(sys.argv[1]).touch()",
+    slow_ready,
+])
+try:
+    wait_for(slow_ready, slow_child, deadline)
+    if slow_child.wait(timeout=max(0, deadline - time.monotonic())) != 0:
+        raise SystemExit("delayed readiness child failed")
+finally:
+    if slow_child.poll() is None:
+        slow_child.kill()
+    slow_child.wait()
+print("PASS: delayed readiness shares the operation watchdog")
 
 for replacement in ("directory", "symlink"):
     invoke_with_replaced_root(replacement)
