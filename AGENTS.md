@@ -15,10 +15,10 @@ using legacy-client evidence.
 See [the current platform audit](docs/reference/platform-status-2026-10-30.md)
 for version-specific native features and legacy route limits.
 
-## Current documentation release: v1.4.0
+## Current documentation release: v1.4.1 (release candidate)
 
-The package version is v1.4.0, aligned at family contract
-parity with LazyZCode v1.4.0. Fresh Kimi host readiness requires direct observation. This
+The package version is v1.4.1 (unreleased), aligned at family contract
+parity with LazyZCode v1.4.1. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
 (the default full-plugin route), `project-init-route` (the manual project
@@ -32,7 +32,7 @@ choose the smallest sufficient workflow. Until the host is observed, that
 result is selection-only: it does not claim native workflow loading or
 dispatch, and **HOST READINESS: PENDING** remains authoritative.
 
-The v1.4.0 project platform adds a persistent project record
+The v1.4.1 project platform adds a persistent project record
 (`lazykimi-plugin/shared/project/` vendored hash-pinned from the family
 source, the Kimi bridge `scripts/state/project-dashboard-bridge.py` over
 `.lazykimi/project/` plus the neutral `.lazyseries/project.json` registry,
@@ -50,7 +50,7 @@ Optional TypeScript LSP requires Node.js **22.22.2+**; core lifecycle compatibil
 with Node.js 20 does not imply compatibility with that optional provider.
 
 For new installations use **Node.js 20 or later** plus **Git** and
-**Python 3.10+** for the MCP servers. The v1.3.5 family port added the
+**Python 3.11+** for the MCP servers. The v1.3.5 family port added the
 durable lifecycle (`lazykimi lifecycle onboard|update|status|offboard|
 recover-bootstrap-lock`) under `~/Library/Application Support/LazySeries/
 LazyKimi/` on macOS, mirroring the LazyZCode pattern. The public source is

@@ -4,7 +4,7 @@ Verification and bounded execution require **Python 3.11 or newer**.
 
 ![LazyKimi](lazykimi-banner.png)
 
-[![Package 1.4.0](https://img.shields.io/badge/package-1.4.0-7ce8d1)](RELEASE_NOTES.md)
+[![Package 1.4.1](https://img.shields.io/badge/package-1.4.1-7ce8d1)](RELEASE_NOTES.md)
 [![MIT License](https://img.shields.io/badge/license-MIT-silver)](LICENSE)
 [![LazySeries family](https://img.shields.io/badge/LazySeries-6_siblings-7ce8d1)](#lazyseries-family)
 
@@ -16,16 +16,16 @@ Kimi Code for VS Code, IDE integration through ACP, and **Kimi Code Desktop**
 are separate acceptance targets. Kimi Code Desktop and Kimi Work are distinct
 products; see the [surface guide](docs/reference/kimi-product-surfaces.md).
 
-[Platform status](docs/reference/platform-status-2026-10-30.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
-[1.4.0 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
+[1.4.1 native integration](docs/reference/native-integration-1.4.1.md) · [Platform status](docs/reference/platform-status-2026-10-30.md) · [Get started](#recommended-install-with-ai-help) · [Host routes](#choose-one-route) ·
+[1.4.1 notes](RELEASE_NOTES.md) · [Family](#lazyseries-family) · [Docs](docs/)
 
-> **Current package version: v1.4.0. HOST READINESS: PENDING.** Local checks and release
+> **Current package version: v1.4.1 (release candidate). HOST READINESS: PENDING.** Local checks and release
 > archives prove package behavior; a fresh host session must prove loading,
 > command/skill execution and MCP connections.
 
-## Unreleased 1.4.1 — verification, history and scale
+## 1.4.1 release candidate — verification, history and scale
 
-The combined former 1.4.1 and 1.4.2 scope is implemented in this development branch. Package metadata and the published baseline remain **1.4.0**; this PR does not publish a release. Live-host acceptance is **deferred by the maintainer as of 2026-10-30**, and remains pending.
+The combined former 1.4.1 and 1.4.2 scope is implemented in this development branch. Package metadata is prepared as **1.4.1**; the published baseline remains 1.4.0. This PR does not publish a release. Live-host acceptance is **deferred by the maintainer as of 2026-10-30**, and remains pending.
 
 - Retain versioned verification scenarios, compare attempts by their source/criterion/plan subject, and promote an observed failure into an unverified regression scenario.
 - Bind rerun review to the exact plan, criterion and captured source. Pending, rejected, stale and used approvals cannot authorize another native attempt; independent verification remains required.
@@ -35,7 +35,7 @@ The combined former 1.4.1 and 1.4.2 scope is implemented in this development bra
 
 See the [1.4.1 completion and validation record](docs/verification/1.4.1-completion.md) and [usage/contracts](docs/verification/1.4.1-verification-history.md).
 
-## What's in 1.4.0
+## Included capabilities
 
 - An authenticated local dashboard with eight destinations: **Overview, Project,
   Plans, Health, Execution, Git, Evidence and Research**.
@@ -56,7 +56,7 @@ workflows described below. No speed, token-saving or cost improvement is
 claimed. See the [release notes](RELEASE_NOTES.md) for compatibility and upgrade
 boundaries; historical changes remain in `CHANGELOG.md`.
 
-## Browser dashboard (v1.4.0)
+## Browser dashboard
 
 After explicit project initialization, the dashboard provides **Overview,
 Project, Plans, Health, Execution, Git, Evidence and Research** in a collapsible
@@ -152,7 +152,7 @@ Open an AI coding assistant in your project and paste this:
 
 > Help me install LazyKimi from https://github.com/elvinzhao10/LazyKimi for
 > this project. Read AGENTS.md and the current install guide. Use the
-> versioned v1.4.0 source and run safe
+> versioned v1.4.1 source and run safe
 > package checks first, choose one explicitly project-bound route, and ask me
 > before changing plugins, global hooks, MCP, credentials or trust settings.
 
@@ -160,16 +160,16 @@ The assistant can guide onboarding; approve each host-managed change.
 
 ## Manual setup
 
-Use **Node.js LTS 24 (recommended) or 22**, **Git**, and **Python 3.10+**
+Use **Node.js LTS 24 (recommended) or 22**, **Git**, and **Python 3.11+**
 for the MCP servers. The lifecycle also accepts Node.js 20 for compatibility.
 Follow [AGENTS.md](AGENTS.md) and the
 [installation guide](docs/03-install-and-host-verification.md).
 
-Use the published `v1.4.0` release for the current package and build instructions.
+Use the prepared `v1.4.1` candidate for the current package and build instructions.
 Clone the versioned source:
 
 ```bash
-git clone --branch v1.4.0 https://github.com/elvinzhao10/LazyKimi.git
+git clone --branch v1.4.1 https://github.com/elvinzhao10/LazyKimi.git
 cd LazyKimi
 ```
 
@@ -291,7 +291,7 @@ acceptance evidence. These packages run independently.
 | [LazyDeepSeek](https://github.com/elvinzhao10/LazyDeepSeek) | DeepSeek Harness 0.2.1-rc.3 |
 
 The family shares planning, evidence, decision-memory and completion contracts.
-The first shared verification core is vendored in every package, and since v1.4.0 the shared dashboard core is vendored the same hash-pinned way; product adapters keep host setup and permissions explicit. Matching contracts do not make host capabilities interchangeable. In particular,
+The first shared verification core is vendored in every package, and since v1.4.1 the shared dashboard core is vendored the same hash-pinned way; product adapters keep host setup and permissions explicit. Matching contracts do not make host capabilities interchangeable. In particular,
 Kimi Work remains experimental for LazyKimi, and DeepSeek's synthesized events
 are not native hooks. Use each sibling's host guide before installation.
 

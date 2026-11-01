@@ -1,8 +1,8 @@
 # LazyKimi Plugin
 
-## Unreleased 1.4.1 — verification, history and scale
+## 1.4.1 release candidate — verification, history and scale
 
-The combined former 1.4.1 and 1.4.2 scope is implemented in this development branch. Package metadata and the published baseline remain **1.4.0**; this PR does not publish a release. Live-host acceptance is **deferred by the maintainer as of 2026-10-30**, and remains pending.
+The combined former 1.4.1 and 1.4.2 scope is implemented in this development branch. Package metadata is prepared as **1.4.1**; the published baseline remains 1.4.0. This PR does not publish a release. Live-host acceptance is **deferred by the maintainer as of 2026-10-30**, and remains pending.
 
 - Retain versioned verification scenarios, compare attempts by their source/criterion/plan subject, and promote an observed failure into an unverified regression scenario.
 - Bind rerun review to the exact plan, criterion and captured source. Pending, rejected, stale and used approvals cannot authorize another native attempt; independent verification remains required.
@@ -15,7 +15,7 @@ See the [1.4.1 completion and validation record](docs/verification/1.4.1-complet
 > Self-contained evidence-led agent workflow harness for Kimi Code CLI and Kimi Work.
 
 This package belongs to the LazyKimi project, the Kimi-native family port of
-the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.4.0.
+the LazyBuddy and LazyTrae harness designs, at parity with LazyZCode v1.4.1.
 Its design lineage and upstream attribution are recorded in
 [NOTICE](NOTICE). It is an independent implementation and does not require
 any upstream project at runtime.
@@ -84,7 +84,7 @@ be verified in a live session:
 | `mcp/` | 6 local MCP servers (bash + Python stdio) with 35 tools | Host starts each over stdio; declarations are recipes, not running services |
 | `shared/` | Hash-pinned vendored dashboard core (`dashboard/` + `dashboard.vendor.json`) plus the Kimi-native `dashboard-host/` adapter | Local browser surface: transactional edits, queue planning (edits never start work), context copy; host readiness pending |
 | `src/` | TypeScript CLI (`lazykimi` command) | Builds to `dist/`; init, doctor, load-check, verify, mcp, tooling, lifecycle, sync, handoff, completion-status, uninstall |
-| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.4.0 |
+| `contracts/` | Family-shared byte-identical contracts + per-host Kimi set | Parity-gated against lazyzcode v1.4.1 |
 | `tooling/` | Adaptive tooling layer, locked node dependencies | Selection-only until host observed |
 | `scripts/` | State scripts, loop orchestration, lifecycle, verification utilities | Used by package readiness and workflow checks |
 
