@@ -120,7 +120,7 @@ def install_process(root: str, environment: dict[str, str], cwd: str | None = No
 def wait_for(path: str, process: subprocess.Popen[str], deadline: float) -> None:
     while not os.path.exists(path):
         if process.poll() is not None:
-            stdout, stderr = process.communicate()
+            stdout, stderr = process.communicate(timeout=max(0, deadline - time.monotonic()))
             raise SystemExit(f"install exited before staging ({process.returncode}): {stdout}{stderr}")
         remaining = deadline - time.monotonic()
         if remaining <= 0:
