@@ -15,6 +15,10 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Keep the inventory independent of fixtures owned by concurrent invocations.
+mkdir "$TMP/children"
+export TMPDIR="$TMP/children"
+
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 
 snapshot() {

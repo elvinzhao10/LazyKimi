@@ -20,7 +20,7 @@ Use the existing receipt-aware update route with the reviewed 1.4.1 artifact or 
 
 ## Known risks
 
-Model-driven live acceptance remains deferred by the maintainer. Unsupported host control, embedding and wake are not silently enabled. Native component loading is distinct from tool execution and provider success.
+Model-driven live acceptance remains pending, deferred by the maintainer. Unsupported host control, embedding and wake are not silently enabled. Native component loading is distinct from tool execution and provider success.
 
 ## Rollback
 
