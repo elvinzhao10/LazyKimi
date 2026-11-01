@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.1] — 2026-11-01
+
+Prepare the combined verification/history/scale release, align package/runtime versions, document current native app routes and preserve deferred live acceptance. Kimi Code CLI uses kimi.plugin.json and the native plugin manager. Code Desktop, VS Code/ACP and Kimi Work are distinct surfaces. Manifest MCP requires explicit project binding; the project route supplies bound MCP. Native Plan approval stays host-owned.
+
+### Verification, history and scale
+
+Release **1.4.1** combines the former 1.4.1 and 1.4.2 verification, history and scale scope. Live-host acceptance is **deferred by the maintainer as of 2026-10-30**, and remains pending.
+
+- Retain versioned verification scenarios, compare attempts by their source/criterion/plan subject, and promote an observed failure into an unverified regression scenario.
+- Bind rerun review to the exact plan, criterion and captured source. Pending, rejected, stale and used approvals cannot authorize another native attempt; independent verification remains required.
+- Inspect checkpoint/decision history through authenticated, paginated reads. Deduplicate identical runtime events with transactional recovery while retaining the original ledger and failed attempts.
+- Preserve first-review plan bytes, correct legacy review-state updates, and harden owned-process cleanup against PID reuse and exit races.
+- Reduce repeated replay and unnecessary review-source capture in measured local cases. These measurements do not establish whole-task latency, token or cost savings.
+
+Kimi Code CLI, Code Desktop, VS Code/ACP and Kimi Work are distinct surfaces. Native Plan mode requires user review; package review cannot bypass it. MCP project binding remains explicit. Partial skill discovery/MCP handshake is not complete host acceptance.
+
+See the [1.4.1 completion record](docs/verification/1.4.1-completion.md).
+
 ## Platform audit (2026-10-27)
 
 Document CLI 2.3.0 qualified plugin skill and command names, route-specific host acceptance, the hook cwd documentation conflict, and current dashboard features. Local MCP integration verifies six servers and 35 tools; no live current-client acceptance or new efficiency claim. See the [platform audit](docs/reference/platform-status-2026-10-27.md).
@@ -8,7 +26,7 @@ Root release history for LazyKimi. Detailed plugin-level history (including the 
 
 ## [1.4.0] - 2026-10-19 — completion pass (isolation, hook adoption, repin)
 
-Complete the 1.4.0 surfaces on the Kimi side: the family-wide per-repo store isolation and foreign-runtime refusal matrix (d2f9651); the reconciled served-project truth stating the live git view explicitly (`/api/project/git`, 200 behind the session, vendored local collector; run-side links stay `repo_head`/`content_revision`) (b767b59); the Kimi rescan adoption of the TurnStarted, UserPromptQueued and TaskStarted native hook events as advisory manifest-only ledger consumers (16 → 19 inline hook events; SessionHeartbeat deliberately not adopted) with the per-surface rescan table (8b3a782); and the family repin at source revision `bb696092` — dashboard tree `e55a9c00…`, project tree `16561f3…` — carrying the family's completed project-dashboard UI (dark-first tokens v2, de-tabbed sidebar shell with in-place navigation, six redesigned views, navigation guards, held performance budgets) into this package byte-identically (be663b4). At the 2026-10-27 audit, the manifests pinned dashboard revision `7124d4ee` (tree `9aa188df…`) and project revision `9b8aa938` (tree `16561f3…`). The current release pins are recorded in [lazykimi-plugin/shared/dashboard.vendor.json](lazykimi-plugin/shared/dashboard.vendor.json) and [lazykimi-plugin/shared/project.vendor.json](lazykimi-plugin/shared/project.vendor.json). Dashboard embedding, chat handoff and wake stay unobserved; each surface still requires its own current-client acceptance; the known wall-clock telemetry flake is pre-existing. See RELEASE_NOTES.md "Completion pass (2026-10-19)".
+Complete the 1.4.0 surfaces on the Kimi side: the family-wide per-repo store isolation and foreign-runtime refusal matrix (d2f9651); the reconciled served-project truth stating the live git view explicitly (`/api/project/git`, 200 behind the session, vendored local collector; run-side links stay `repo_head`/`content_revision`) (b767b59); the Kimi rescan adoption of the TurnStarted, UserPromptQueued and TaskStarted native hook events as advisory manifest-only ledger consumers (16 → 19 inline hook events; SessionHeartbeat deliberately not adopted) with the per-surface rescan table (8b3a782); and the family repin at source revision `bb696092` — dashboard tree `e55a9c00…`, project tree `16561f3…` — carrying the family's completed project-dashboard UI (dark-first tokens v2, de-tabbed sidebar shell with in-place navigation, six redesigned views, navigation guards, held performance budgets) into this package byte-identically (be663b4). At the 2026-10-27 audit, the manifests pinned dashboard revision `7124d4ee` (tree `9aa188df…`) and project revision `9b8aa938` (tree `16561f3…`). The maintained artifact pins are recorded in [lazykimi-plugin/shared/dashboard.vendor.json](lazykimi-plugin/shared/dashboard.vendor.json) and [lazykimi-plugin/shared/project.vendor.json](lazykimi-plugin/shared/project.vendor.json). Dashboard embedding, chat handoff and wake stay unobserved; each surface still requires its own fresh-client acceptance; the known wall-clock telemetry flake is pre-existing. See RELEASE_NOTES.md "Completion pass (2026-10-19)".
 
 ## [1.4.0] - 2026-10-07 — project platform
 

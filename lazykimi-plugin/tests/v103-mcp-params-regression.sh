@@ -214,16 +214,34 @@ python3 - "$PLUGIN" "$PROJECT" <<'PYEOF'
 import json
 import os
 import select
+import shutil
 import subprocess
 import sys
 
 plugin, project = sys.argv[1:]
+# Hide rg without switching to the platform's system Python.
+fallback_bin = os.path.join(os.path.dirname(project), "fallback-bin")
+os.mkdir(fallback_bin)
+for name, executable in (
+    ("python3", sys.executable),
+    ("dirname", shutil.which("dirname")),
+    ("grep", shutil.which("grep")),
+):
+    assert executable, f"missing fallback fixture executable: {name}"
+    os.symlink(executable, os.path.join(fallback_bin, name))
 environment = {
     **os.environ,
     "CWD": project,
     "LAZYKIMI_MCP_MODE": "orchestrated",
-    "PATH": "/usr/bin:/bin",
+    "PATH": fallback_bin,
 }
+
+fallback_python = shutil.which("python3", path=environment["PATH"])
+assert fallback_python and os.path.samefile(fallback_python, sys.executable), (
+    "grep fallback must preserve the configured Python", fallback_python, sys.executable
+)
+assert shutil.which("rg", path=environment["PATH"]) is None
+assert shutil.which("grep", path=environment["PATH"]) is not None
 process = subprocess.Popen(
     ["/bin/bash", f"{plugin}/mcp/context-graph/server.sh"],
     stdin=subprocess.PIPE,

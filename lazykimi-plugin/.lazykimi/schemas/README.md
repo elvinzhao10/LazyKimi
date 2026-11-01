@@ -1,12 +1,12 @@
-# .lazykimi/ state schemas — v0.x → v1.4.0 mapping
+# .lazykimi/ state schemas — v0.x → v1.4.1 mapping
 
 This directory ships the v0.x state schemas that `lazykimi sync` and the
-legacy loop bridge still read. The v1.4.0 family run-state model does not
+legacy loop bridge still read. The v1.4.1 family run-state model does not
 introduce new JSON-Schema files here (the family enforces run-state shape in
-`scripts/state/validate-state.sh`, mirroring LazyZCode v1.4.0); this note is
+`scripts/state/validate-state.sh`, mirroring LazyZCode v1.4.1); this note is
 the old→new mapping.
 
-## v1.4.0 state tree
+## v1.4.1 state tree
 
     .lazykimi/
       plans/            family work plans (TL;DR + ## TODOs + ## Final Verification Wave)
@@ -27,7 +27,7 @@ server's `create_run` tool); the top-level directories are bootstrapped by the
 
 ## Old → new mapping
 
-| v0.x artifact | v1.4.0 successor |
+| v0.x artifact | v1.4.1 successor |
 | --- | --- |
 | `.lazykimi/state/boulder.json` (`boulder.schema.json`) | `.lazykimi/runs/<id>/state.json` (task/progress state; validated by `scripts/state/validate-state.sh`) |
 | `.lazykimi/state/sessions.json` (`sessions.schema.json`) | run `session_ids` + `scripts/state/bind-session.py` |

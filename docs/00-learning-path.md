@@ -77,3 +77,7 @@ in [07 — Package map](07-package-map.md). The reference set
 [model routing](reference/model-routing.md)) holds the per-surface details.
 Finish with [09 — Test and release verification](09-test-and-release-verification.md)
 to see how the repository tests each boundary.
+
+## Development milestone
+
+[Combined verification, history and scale work](verification/1.4.1-verification-history.md) describes the local 1.4.1 development scope and acceptance boundaries.

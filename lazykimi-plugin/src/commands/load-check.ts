@@ -3,7 +3,7 @@ import path from 'path';
 import { getPluginKimiCodeDir, getPluginAgentsDir, getPluginHooksDir, getPluginRoot } from '../lib/paths';
 import { readJson, isObject } from '../lib/json';
 
-const PLUGIN_VERSION = '1.4.0';
+const PLUGIN_VERSION = '1.4.1';
 const EXPECTED_SKILLS = 19;
 const EXPECTED_AGENTS = 13;
 const EXPECTED_HOOKS = 19;

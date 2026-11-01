@@ -26,7 +26,7 @@ function serverNameForCapability(capability: string): string {
 
 export const OPTIONAL_MCP_SERVERS: readonly string[] = OPTIONAL_CAPABILITY_NAMES.map(serverNameForCapability);
 
-// Family tool surface, updated in v1.4.0 from the v1.3.4 LazyZCode port:
+// Family tool surface, updated in v1.4.1 from the v1.3.4 LazyZCode port:
 // the exact tool-name sets of the six declared servers, split 9/7/7/5/5/2
 // (35 tools total); status-dashboard gained `dashboard_service` and
 // `copy_task_context`, then the typed `project` tool over the vendored

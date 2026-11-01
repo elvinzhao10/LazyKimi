@@ -8,9 +8,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const RELEASE_VERSION = '1.4.0';
+const RELEASE_VERSION = '1.4.1';
 const PREVIOUS_VERSIONS = ['0.2.0', '0.3.0', '1.3.4', '1.3.5'];
 const VERSION_JSON_PATHS = [
+  ["lazykimi-plugin/contracts/lazykimi-machine-status.v2.schema.json", ["properties", "version", "const"]],
   ['lazykimi-plugin/kimi.plugin.json', ['version']],
   ['lazykimi-plugin/package.json', ['version']],
   // marketplace.json keeps the Kimi v2 marketplace shape, which carries the
@@ -95,7 +96,7 @@ function classify(root) {
   else {
     const notes = fs.readFileSync(notesPath, 'utf8');
     if (!notes.startsWith(`# ${'LazyKimi'} v${RELEASE_VERSION}`)) failures.push('CURRENT_VERSION_DRIFT_TEXT RELEASE_NOTES.md:1');
-    const currentNotes = notes.split('## Prior release notes')[0];
+    const currentNotes = notes.split(/^## (?:Prior|Previous)\b.*$/m)[0].split(/\n# /)[0];
     for (const section of REQUIRED_RELEASE_NOTE_SECTIONS) {
       if (!currentNotes.includes(`## ${section}`)) failures.push(`MISSING_RELEASE_NOTE_SECTION ${section}`);
     }

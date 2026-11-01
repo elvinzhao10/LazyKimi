@@ -339,7 +339,8 @@ test('pre-initialization project surfaces stay inert with typed hints (IO-1/IO-3
     }
     await writeFile(join(root, '.gitignore'), 'x\n');
     await processCall(['git', '-C', root, 'add', '.gitignore'], '', gitEnv);
-    await processCall(['git', '-C', root, 'commit', '-qm', 'fixture'], '', gitEnv);
+    // Detached maintenance must not change the fixture after its baseline is captured.
+    await processCall(['git', '-C', root, '-c', 'maintenance.auto=false', 'commit', '-qm', 'fixture'], '', gitEnv);
     const before = await tree(root);
     const read = await processCall([process.execPath, vendoredCLI, 'read',
       '--project-root', root, '--project-id', PROJECT_ID, '--actor', ACTOR], '', environment);

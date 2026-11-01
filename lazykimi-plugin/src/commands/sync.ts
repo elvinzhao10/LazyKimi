@@ -13,7 +13,7 @@ import {
 import { rewriteMcpPaths } from './init';
 import { readReceipt, sha256OfFile, writeReceipt, safeProjectPath } from '../lib/receipt';
 
-const PLUGIN_VERSION = '1.4.0';
+const PLUGIN_VERSION = '1.4.1';
 
 interface SyncOptions {
   readonly dryRun: boolean;

@@ -76,6 +76,8 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --fund=false && npm run build
       - name: Run package verification
         run: bash lazykimi-plugin/scripts/lazykimi-verify.sh
+      - name: Shared dashboard and project adapter regressions
+        run: node --test --test-concurrency=2 lazykimi-plugin/shared/dashboard-host/test/*.test.mjs
       - name: Run product-naming guard
         run: node scripts/check-product-naming.js
       - name: Run publication verification

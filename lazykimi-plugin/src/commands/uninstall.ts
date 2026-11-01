@@ -5,7 +5,7 @@ import { removeHooksFromConfig } from '../lib/hooks-config';
 import { isFileModified, listInstalledFiles, readReceipt, safeProjectPath, serverDigest } from '../lib/receipt';
 import { readJson, writeJson, isObject } from '../lib/json';
 
-const PLUGIN_VERSION = '1.4.0';
+const PLUGIN_VERSION = '1.4.1';
 
 interface UninstallOptions {
   readonly soft: boolean;
