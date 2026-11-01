@@ -435,27 +435,6 @@
       "reason": "Legal attribution keeps the upstream product lineage verbatim."
     },
     {
-      "path": "lazykimi-plugin/README.md",
-      "text": "lazybuddy",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
-      "path": "lazykimi-plugin/README.md",
-      "text": "lazytrae",
-      "count": 1,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
-      "path": "lazykimi-plugin/README.md",
-      "text": "lazyzcode",
-      "count": 2,
-      "classification": "source-identity",
-      "reason": "Lineage text names the sibling packages this port derives from."
-    },
-    {
       "path": "lazykimi-plugin/agents/lazykimi-context-indexer.md",
       "text": ".lazyzcode",
       "count": 1,
