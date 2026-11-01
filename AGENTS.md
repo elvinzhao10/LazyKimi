@@ -15,9 +15,9 @@ using legacy-client evidence.
 See [the current platform audit](docs/reference/platform-status-2026-10-30.md)
 for version-specific native features and legacy route limits.
 
-## Current documentation release: v1.4.1 (release candidate)
+## Current documentation release: v1.4.1
 
-The package version is v1.4.1 (unreleased), aligned at family contract
+The package version is v1.4.1, aligned at family contract
 parity with LazyZCode v1.4.1. Fresh Kimi host readiness requires direct observation. This
 guide names current human-facing boundaries only and does not promote
 package evidence to host proof. The route IDs are `kimi-plugin-manifest`
